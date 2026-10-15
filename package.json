@@ -57,8 +57,8 @@
     "framer-motion": "^10.16.9",
     "html2canvas": "^1.4.1",
     "js-yaml": "4.1.1",
-    "jspdf": "^3.0.2",
-    "jspdf-autotable": "^5.0.2",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.8",
     "lodash": "^4.17.21",
     "lucide-react": "^0.559.0",
     "next": "^16.0.9",
@@ -89,6 +89,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.4.5",
     "write-excel-file": "^2.3.10",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76",
     "zustand": "^5.0.8"
   },

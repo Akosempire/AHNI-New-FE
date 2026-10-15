@@ -25,57 +25,7 @@ ArrowLeft,
   Edit
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/Loading";
-
-// Mock data - replace with actual API call
-const getSubmissionDetails = (id: string) => {
-  return {
-    id: id,
-    rfq_title: "IT Infrastructure Modernization Project",
-    rfq_reference: "RFQ-2024-001",
-    submission_reference: "SUB-2024-001-0123",
-    submitted_date: "2024-01-15T10:30:00Z",
-    status: "UNDER_REVIEW",
-    bid_amount: 125000,
-    evaluation_score: 78.5,
-    rank: 2,
-    total_bidders: 8,
-
-    // Bid details
-    technical_proposal: "Our comprehensive approach includes modern cloud infrastructure, automated deployment pipelines, and robust security measures...",
-    financial_proposal: "Detailed cost breakdown: Infrastructure setup ($50,000), Development ($45,000), Testing & QA ($15,000), Project Management ($15,000)...",
-    implementation_timeline: "Phase 1: Planning & Setup (4 weeks), Phase 2: Development (8 weeks), Phase 3: Testing & Deployment (4 weeks)...",
-    team_composition: "Project Manager: John Smith (10 years experience), Lead Developer: Jane Doe (8 years), DevOps Engineer: Bob Wilson (6 years)...",
-    project_approach: "Agile methodology with 2-week sprints, continuous integration/deployment, and regular stakeholder reviews...",
-
-    // Evaluation details
-    evaluation_criteria: [
-      { name: "Technical Capability", score: 85, weight: 40, weighted_score: 34 },
-      { name: "Financial Proposal", score: 72, weight: 30, weighted_score: 21.6 },
-      { name: "Implementation Timeline", score: 80, weight: 20, weighted_score: 16 },
-      { name: "Team Experience", score: 75, weight: 10, weighted_score: 7.5 }
-    ],
-
-    // Feedback
-    feedback: "Strong technical proposal with innovative solutions. Timeline is realistic. Consider optimizing costs for better competitiveness.",
-
-    // Documents
-    documents: [
-      { name: "Technical Proposal.pdf", size: "2.4 MB", uploaded_date: "2024-01-15T10:30:00Z" },
-      { name: "Financial Breakdown.xlsx", size: "856 KB", uploaded_date: "2024-01-15T10:30:00Z" },
-      { name: "Team CVs.pdf", size: "1.2 MB", uploaded_date: "2024-01-15T10:30:00Z" },
-      { name: "Company Certificates.pdf", size: "945 KB", uploaded_date: "2024-01-15T10:30:00Z" }
-    ],
-
-    // Timeline
-    timeline: [
-      { date: "2024-01-15T10:30:00Z", event: "Bid submitted", status: "completed" },
-      { date: "2024-01-16T09:00:00Z", event: "Initial review started", status: "completed" },
-      { date: "2024-01-20T14:30:00Z", event: "Technical evaluation", status: "completed" },
-      { date: "2024-01-25T11:00:00Z", event: "Financial evaluation", status: "in_progress" },
-      { date: null, event: "Final decision", status: "pending" }
-    ]
-  };
-};
+import { useVendorSubmissionDetails } from "@/features/vendor-portal/controllers/vendorDashboardController";
 
 export default function VendorSubmissionDetailsPage() {
   const params = useParams();
@@ -83,15 +33,34 @@ export default function VendorSubmissionDetailsPage() {
   const submissionId = Array.isArray(params?.id) ? params?.id[0] : params?.id;
   const [activeTab, setActiveTab] = useState("overview");
 
-  // In a real app, this would be an API call
-  const [isLoading, setIsLoading] = useState(false);
-  const submissionDetails = getSubmissionDetails(submissionId as string);
+  // Fetch submission details from API
+  const { data: submissionDetails, isLoading, error } = useVendorSubmissionDetails(submissionId as string);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <LoadingSpinner />
         <span className="ml-2">Loading submission details...</span>
+      </div>
+    );
+  }
+
+  if (error || !submissionDetails) {
+    return (
+      <div className="space-y-6">
+        <Button
+          variant="outline"
+          onClick={() => router.push('/vendor-portal/submissions')}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Submissions
+        </Button>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Failed to load submission details. The submission may not exist or you may not have access to it.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }

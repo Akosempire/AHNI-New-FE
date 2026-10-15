@@ -54,6 +54,16 @@ export default function VendorRFQsPage() {
       isLoading,
       error
     });
+
+    // Check if RFQs have proper UUIDs
+    if (availableRFQs && availableRFQs.length > 0) {
+      console.log('✅ First RFQ ID check:', {
+        id: availableRFQs[0].id,
+        rfq_id: availableRFQs[0].rfq_id,
+        id_is_uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(availableRFQs[0].id),
+        title: availableRFQs[0].title
+      });
+    }
   }
 
   if (isLoading) {
@@ -324,9 +334,15 @@ export default function VendorRFQsPage() {
                           )}
 
                           <Button
-                            onClick={() => router.push(`/vendor-portal/rfqs/${rfq.id || rfq.rfq_id}`)}
+                            onClick={() => {
+                              if (!rfq.id) {
+                                console.error('❌ RFQ missing UUID, skipping navigation', rfq);
+                                return;
+                              }
+                              router.push(`/vendor-portal/rfqs/${rfq.id}`);
+                            }}
                             variant={(rfq.vendor_eligible || rfq.eligibility_status === 'ELIGIBLE') && !isClosed ? "default" : "outline"}
-                            disabled={isClosed || (!rfq.vendor_eligible && rfq.eligibility_status === 'NOT_ELIGIBLE')}
+                            disabled={isClosed || (!rfq.vendor_eligible && rfq.eligibility_status === 'NOT_ELIGIBLE') || !rfq.id}
                             className="whitespace-nowrap"
                           >
                             {rfq.has_submitted_bid || rfq.submission_status === 'SUBMITTED' ? 'View Submission' :

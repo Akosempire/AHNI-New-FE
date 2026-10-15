@@ -747,10 +747,20 @@ export const departmentalLinks: SidebarItem[] = [
         permissions: [
           {
             module: "hr",
-            codenames: ["view_jobadvertisement", "view_jobapplication"]
+            codenames: ["view_jobadvertisement", "view_jobapplication", "view_recruitmentrequisition"]
           }
         ],
         children: [
+          {
+            name: "Recruitment Requisitions",
+            path: "/dashboard/hr/recruitment-requisitions",
+            permissions: [
+              {
+                module: "hr",
+                codenames: ["view_recruitmentrequisition"]
+              }
+            ]
+          },
           {
             name: "Advertisement",
             path: "/dashboard/hr/advertisement",

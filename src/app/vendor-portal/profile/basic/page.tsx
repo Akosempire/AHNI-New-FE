@@ -23,6 +23,8 @@ import {
   X
 } from "lucide-react";
 import { useVendorProfile, VendorAuthUtils } from "@/features/vendor-portal/controllers/vendorAuthController";
+import { useUpdateVendorProfile } from "@/features/vendor-portal/controllers/vendorDashboardController";
+import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/Loading";
 
 export default function VendorBasicProfilePage() {
@@ -30,6 +32,8 @@ export default function VendorBasicProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<any>({});
   const { data: vendorProfile, isLoading, error } = useVendorProfile();
+  const { mutate: updateProfile, isPending: isUpdating } = useUpdateVendorProfile();
+  const { toast } = useToast();
 
   if (isLoading) {
     return (
@@ -65,9 +69,22 @@ export default function VendorBasicProfilePage() {
   };
 
   const handleSave = () => {
-    // TODO: Implement profile update API call
-    console.log('Saving profile data:', formData);
-    setIsEditing(false);
+    updateProfile(formData, {
+      onSuccess: (data: any) => {
+        toast({
+          title: "Success!",
+          description: data.message || "Profile updated successfully",
+        });
+        setIsEditing(false);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Error",
+          description: error.response?.data?.error || error.response?.data?.message || "Failed to update profile",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   const handleCancel = () => {
@@ -120,11 +137,20 @@ export default function VendorBasicProfilePage() {
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              <Button onClick={handleSave} className="flex items-center gap-2">
+              <Button
+                onClick={handleSave}
+                disabled={isUpdating}
+                className="flex items-center gap-2"
+              >
                 <Save className="h-4 w-4" />
-                Save Changes
+                {isUpdating ? "Saving..." : "Save Changes"}
               </Button>
-              <Button variant="outline" onClick={handleCancel} className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isUpdating}
+                className="flex items-center gap-2"
+              >
                 <X className="h-4 w-4" />
                 Cancel
               </Button>

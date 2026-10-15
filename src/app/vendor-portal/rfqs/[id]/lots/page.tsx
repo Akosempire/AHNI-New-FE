@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,48 +17,15 @@ import {
   ArrowRight
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/Loading";
-import { toast } from "sonner";
+import { useVendorEligibleLots } from "@/features/vendor-portal/controllers/vendorDashboardController";
 
 export default function VendorRFQLotsPage() {
   const params = useParams();
   const router = useRouter();
   const rfqId = Array.isArray(params?.id) ? params?.id[0] : params?.id;
 
-  const [lotsData, setLotsData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchEligibleLots() {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          `/api/vendor-portal/rfqs/eligible_lots/?solicitation_id=${rfqId}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch eligible lots');
-        }
-
-        const data = await response.json();
-        setLotsData(data);
-      } catch (err: any) {
-        setError(err.message);
-        toast.error('Failed to load lots');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (rfqId) {
-      fetchEligibleLots();
-    }
-  }, [rfqId]);
+  // Use the vendor dashboard controller hook
+  const { data: lotsData, isLoading, error } = useVendorEligibleLots(rfqId || '');
 
   if (isLoading) {
     return (
@@ -75,7 +41,7 @@ export default function VendorRFQLotsPage() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {error}
+          {error instanceof Error ? error.message : 'Failed to load eligible lots'}
         </AlertDescription>
       </Alert>
     );

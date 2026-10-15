@@ -23,7 +23,9 @@ import {
   Lock
 } from "lucide-react";
 import { useVendorProfile } from "@/features/vendor-portal/controllers/vendorAuthController";
+import { useUpdateVendorProfile } from "@/features/vendor-portal/controllers/vendorDashboardController";
 import { LoadingSpinner } from "@/components/Loading";
+import { useToast } from "@/hooks/use-toast";
 
 export default function VendorBankingPage() {
   const router = useRouter();
@@ -31,6 +33,8 @@ export default function VendorBankingPage() {
   const [showAccountNumber, setShowAccountNumber] = useState(false);
   const [formData, setFormData] = useState<any>({});
   const { data: vendorProfile, isLoading, error } = useVendorProfile();
+  const { mutate: updateProfile, isPending: isUpdating } = useUpdateVendorProfile();
+  const { toast } = useToast();
 
   if (isLoading) {
     return (
@@ -52,17 +56,12 @@ export default function VendorBankingPage() {
     );
   }
 
-  // Mock banking data - replace with real data when available
+  // Get banking data from vendor profile
   const bankingData = {
-    bank_name: vendorProfile.bank_name || 'First Bank Nigeria',
-    account_name: vendorProfile.account_name || vendorProfile.company_name,
-    account_number: vendorProfile.account_number || '0123456789',
-    routing_number: vendorProfile.routing_number || '011000015',
-    swift_code: vendorProfile.swift_code || 'FIRSTNGLXXX',
-    tax_id: vendorProfile.tax_id || '12-3456789',
-    payment_terms: vendorProfile.payment_terms || '30',
-    currency: vendorProfile.currency || 'NGN',
-    is_verified: vendorProfile.banking_verified || false
+    bank_name: vendorProfile?.bank_name || '',
+    account_name: vendorProfile?.account_name || vendorProfile?.company_name || '',
+    account_number: vendorProfile?.account_number || '',
+    bank_address: vendorProfile?.bank_address || '',
   };
 
   const handleEdit = () => {
@@ -71,9 +70,22 @@ export default function VendorBankingPage() {
   };
 
   const handleSave = () => {
-    // TODO: Implement banking update API call
-    console.log('Saving banking data:', formData);
-    setIsEditing(false);
+    updateProfile(formData, {
+      onSuccess: (data: any) => {
+        toast({
+          title: "Success!",
+          description: data.message || "Banking details updated successfully",
+        });
+        setIsEditing(false);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Error",
+          description: error.response?.data?.error || "Failed to update banking details",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   const handleCancel = () => {

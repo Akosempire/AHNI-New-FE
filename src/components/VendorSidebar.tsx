@@ -59,9 +59,7 @@ const vendorMenuItems: VendorSidebarItem[] = [
     icon: <ClipboardList className="w-5 h-5" />,
     subItems: [
       { name: "All Submissions", href: "/vendor-portal/submissions", description: "View all bid submissions" },
-      { name: "Draft Bids", href: "/vendor-portal/submissions/drafts", description: "Continue incomplete bids" },
-      { name: "Submitted Bids", href: "/vendor-portal/submissions/submitted", description: "Track submitted proposals" },
-      { name: "Evaluation Results", href: "/vendor-portal/submissions/results", description: "View bid evaluations" },
+      { name: "Available RFQs", href: "/vendor-portal/submissions/drafts", description: "New opportunities to bid on" },
     ],
   },
   {

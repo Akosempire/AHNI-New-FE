@@ -203,7 +203,8 @@ export const useVendorProfile = () => {
 
         // Handle new API response format
         const responseData = response.data;
-        const vendorUser = responseData.status === 'success' ? responseData.data.vendor : responseData.data || responseData;
+        // Backend returns vendor data directly in data, not nested under data.vendor
+        const vendorUser = responseData.status === 'success' ? responseData.data : responseData.data || responseData;
 
         if (!vendorUser) {
           throw new Error('No vendor data found in response');

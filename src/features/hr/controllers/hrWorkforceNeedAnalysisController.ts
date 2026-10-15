@@ -114,6 +114,54 @@ export const useCreateWorkforceNeedAnalysis = () => {
   return { createWorkforceNeedAnalysis, data, isLoading, isSuccess, error };
 };
 
+// Update Workforce Need Analysis
+export const useUpdateWorkforceNeedAnalysis = () => {
+  const { callApi, isLoading, isSuccess, error, data } = useApiManager<
+    WorkforceNeedAnalysis,
+    Error,
+    { id: string; data: Partial<WorkforceNeedAnalysis> }
+  >({
+    endpoint: BASE_URL,
+    queryKey: ["workforce-need-analysis"],
+    isAuth: true,
+    method: "PUT",
+  });
+
+  const updateWorkforceNeedAnalysis = async (id: string, details: Partial<WorkforceNeedAnalysis>) => {
+    try {
+      await callApi({ id, data: details });
+    } catch (error) {
+      console.error("Workforce need analysis update error:", error);
+    }
+  };
+
+  return { updateWorkforceNeedAnalysis, data, isLoading, isSuccess, error };
+};
+
+// Delete Workforce Need Analysis
+export const useDeleteWorkforceNeedAnalysis = () => {
+  const { callApi, isLoading, isSuccess, error, data } = useApiManager<
+    void,
+    Error,
+    { id: string }
+  >({
+    endpoint: BASE_URL,
+    queryKey: ["workforce-need-analysis"],
+    isAuth: true,
+    method: "DELETE",
+  });
+
+  const deleteWorkforceNeedAnalysis = async (id: string) => {
+    try {
+      await callApi({ id });
+    } catch (error) {
+      console.error("Workforce need analysis delete error:", error);
+    }
+  };
+
+  return { deleteWorkforceNeedAnalysis, data, isLoading, isSuccess, error };
+};
+
 // Legacy exports for backward compatibility
 export const useCreateWorkforceNeedAnalysisMutation = useCreateWorkforceNeedAnalysis;
 export const useGetWorkforceNeedAnalysisIdQuery = useGetWorkforceNeedAnalysisId;

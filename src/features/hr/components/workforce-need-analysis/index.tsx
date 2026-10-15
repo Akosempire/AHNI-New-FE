@@ -7,7 +7,11 @@ import AddSquareIcon from "@/components/icons/AddSquareIcon";
 import DataTable from "@/components/Table/DataTable";
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Filter } from 'lucide-react';import { Icon } from "@iconify/react";
+import { Filter, XCircle, FileSpreadsheet, FileText, TrendingDown, TrendingUp, Users, AlertTriangle, Search, Trash2 } from 'lucide-react';
+import { Icon } from "@iconify/react";
+import { exportToExcel, exportToPDF } from "@/features/hr/utils/workforceNeedAnalysisExport";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link"; import { useRouter } from "next/navigation";
@@ -17,7 +21,7 @@ import PencilIcon from "@/components/icons/PencilIcon";
 import EyeIcon from "@/components/icons/EyeIcon";
 import IconButton from "@/components/IconButton";
 import FilterIcon from "@/components/icons/FilterIcon";
-import { useGetWorkforceNeedAnalysis } from "@/features/hr/controllers/hrWorkforceNeedAnalysisController";
+import { useGetWorkforceNeedAnalysis, useDeleteWorkforceNeedAnalysis } from "@/features/hr/controllers/hrWorkforceNeedAnalysisController";
 import { useGetWorkforces } from "@/features/hr/controllers/workforceController";
 
 import Card from "@/components/Card";
@@ -49,7 +53,9 @@ export type TFormValues = z.infer<typeof filterSchema>;
 const WFNA: React.FC = () => {
   const [isDialogOpen, setDialogOpen] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<string>("");
+  const [deleteItemName, setDeleteItemName] = React.useState<string>("");
   const router = useRouter();
+  const { deleteWorkforceNeedAnalysis, isLoading: isDeleting } = useDeleteWorkforceNeedAnalysis();
   const form = useForm<TFormValues>({
     resolver: zodResolver(filterSchema),
     defaultValues: {
@@ -60,7 +66,7 @@ const WFNA: React.FC = () => {
       // workforce_problem: "",
       // workload_problem: "",
       position: "",
-      location: "",
+      location: "all",
     },
   });
 
@@ -69,6 +75,9 @@ const WFNA: React.FC = () => {
   // Watch form values for reactive filtering
   const selectedLocation = watch("location");
   const selectedPosition = watch("position");
+
+  // Search state
+  const [searchTerm, setSearchTerm] = React.useState("");
 
   // Get all locations (increased page size to fetch all locations)
   const { data: locations, isLoading: locationIsLoading } =
@@ -90,9 +99,47 @@ const WFNA: React.FC = () => {
 
   const { data, isLoading: loadingWorkforce, error } =
     useGetWorkforceNeedAnalysis({
-      ...(selectedLocation && { location: selectedLocation }),
-      ...(selectedPosition && { position: selectedPosition }),
+      ...(selectedLocation && selectedLocation !== "all" && { location: selectedLocation }),
+      ...(selectedPosition && selectedPosition !== "all" && { position: selectedPosition }),
     });
+
+  // Filter data by search term (client-side)
+  const filteredData = React.useMemo(() => {
+    const results = data?.data?.results || [];
+    if (!searchTerm) return results;
+
+    const lowerSearch = searchTerm.toLowerCase();
+    return results.filter((item: any) => {
+      const position = typeof item.position === 'object' ? item.position?.name : item.position;
+      const location = typeof item.location === 'object' ? item.location?.name : item.location;
+
+      return (
+        position?.toLowerCase().includes(lowerSearch) ||
+        location?.toLowerCase().includes(lowerSearch) ||
+        (!location && "organization-wide".includes(lowerSearch))
+      );
+    });
+  }, [data, searchTerm]);
+
+  // Calculate summary statistics
+  const statistics = React.useMemo(() => {
+    const results = filteredData;
+    return {
+      totalPositions: results.length,
+      shortageCount: results.filter((item: any) => item.shortage_excess_count < 0).length,
+      surplusCount: results.filter((item: any) => item.shortage_excess_count > 0).length,
+      optimalCount: results.filter((item: any) => item.shortage_excess_count === 0).length,
+      totalShortage: results.reduce((sum: number, item: any) =>
+        item.shortage_excess_count < 0 ? sum + Math.abs(item.shortage_excess_count) : sum, 0
+      ),
+      totalSurplus: results.reduce((sum: number, item: any) =>
+        item.shortage_excess_count > 0 ? sum + item.shortage_excess_count : sum, 0
+      ),
+      criticalShortages: results.filter((item: any) =>
+        item.shortage_excess_count < 0 && item.workload_problem === "HIGH"
+      ).length,
+    };
+  }, [data]);
 
   // Debug: Get actual employee data to see how MD user is stored
   const { data: employeeData, isLoading: employeeLoading } = useGetWorkforces({
@@ -172,6 +219,77 @@ const WFNA: React.FC = () => {
     console.log("filter; ", values);
   };
 
+  const handleDelete = async () => {
+    try {
+      await deleteWorkforceNeedAnalysis(selectedId);
+      toast.success("Workforce requirement deleted successfully");
+      setDialogOpen(false);
+      setSelectedId("");
+      setDeleteItemName("");
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete workforce requirement");
+    }
+  };
+
+  const openDeleteDialog = (id: string, position: string, location: string) => {
+    setSelectedId(id);
+    setDeleteItemName(`${position} - ${location || "Organization-Wide"}`);
+    setDialogOpen(true);
+  };
+
+  const handleExportExcel = () => {
+    try {
+      const analysisData = data?.data?.results || [];
+      if (analysisData.length === 0) {
+        toast.error("No data to export");
+        return;
+      }
+
+      const filters: any = {};
+      if (selectedPosition && selectedPosition !== "all") {
+        const pos = positions?.data?.results?.find((p: PositionsResultsData) => String(p.id) === selectedPosition);
+        filters.position = pos?.name;
+      }
+      if (selectedLocation && selectedLocation !== "all") {
+        const loc = locations?.data?.results?.find((l: LocationResultsData) => String(l.id) === selectedLocation);
+        filters.location = loc?.name;
+      }
+
+      const filename = exportToExcel(analysisData, filters);
+      toast.success(`Excel file exported: ${filename}`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export Excel file");
+    }
+  };
+
+  const handleExportPDF = () => {
+    try {
+      const analysisData = data?.data?.results || [];
+      if (analysisData.length === 0) {
+        toast.error("No data to export");
+        return;
+      }
+
+      const filters: any = {};
+      if (selectedPosition && selectedPosition !== "all") {
+        const pos = positions?.data?.results?.find((p: PositionsResultsData) => String(p.id) === selectedPosition);
+        filters.position = pos?.name;
+      }
+      if (selectedLocation && selectedLocation !== "all") {
+        const loc = locations?.data?.results?.find((l: LocationResultsData) => String(l.id) === selectedLocation);
+        filters.location = loc?.name;
+      }
+
+      const filename = exportToPDF(analysisData, filters);
+      toast.success(`PDF file exported: ${filename}`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export PDF file");
+    }
+  };
+
   // const onDelete = async () => {
   //   await deleteWorkforceNeedAnalysis({
   //     id: selectedId as string,
@@ -226,10 +344,18 @@ const WFNA: React.FC = () => {
         const location = getValue();
         console.log('Location cell data:', location, 'Row:', row.original);
 
+        if (!location) {
+          return (
+            <span className="text-blue-600 font-medium">
+              Organization-Wide
+            </span>
+          );
+        }
+
         if (typeof location === 'object' && location !== null) {
           return String((location as any).name || (location as any).state || (location as any).city || 'Unknown Location');
         }
-        return String(location || 'N/A');
+        return String(location);
       },
     },
     {
@@ -313,6 +439,13 @@ const WFNA: React.FC = () => {
   ];
 
   const ActionListAction = ({ data }: any) => {
+    const position = typeof data.original.position === 'object'
+      ? data.original.position?.name
+      : data.original.position;
+    const location = typeof data.original.location === 'object'
+      ? data.original.location?.name
+      : data.original.location;
+
     return (
       <div className='flex center gap-1'>
         <Link
@@ -337,11 +470,20 @@ const WFNA: React.FC = () => {
             className='flex items-center justify-center gap-2'
             variant='ghost'
             size='sm'
-            title='Edit Analysis'
+            title='Edit Requirement'
           >
             <PencilIcon />
           </Button>
         </Link>
+        <Button
+          className='flex items-center justify-center gap-2'
+          variant='ghost'
+          size='sm'
+          title='Delete Requirement'
+          onClick={() => openDeleteDialog(data.original.id, position, location)}
+        >
+          <Trash2 className="text-red-600" size={18} />
+        </Button>
       </div>
     );
   };
@@ -349,6 +491,42 @@ const WFNA: React.FC = () => {
 
   return (
     <div className='flex flex-col justify-center items-center gap-y-[1rem]'>
+      {/** ============================================= HEADER ============================================= */}
+      <div className='w-full flex justify-between items-center mb-4'>
+        <div>
+          <h1 className='text-2xl font-bold'>Workforce Need Analysis</h1>
+          <p className='text-gray-600 mt-1'>
+            Manage staffing requirements and analyze workforce gaps
+          </p>
+        </div>
+        <div className='flex items-center gap-3'>
+          <Button
+            variant="outline"
+            onClick={handleExportExcel}
+            disabled={loadingWorkforce || !data?.data?.results?.length}
+            className='flex items-center gap-2'
+          >
+            <FileSpreadsheet size={16} />
+            Export Excel
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleExportPDF}
+            disabled={loadingWorkforce || !data?.data?.results?.length}
+            className='flex items-center gap-2'
+          >
+            <FileText size={16} />
+            Export PDF
+          </Button>
+          <Link href={HrRoutes.WORKFORCE_NEED_ANALYSIS_CREATE}>
+            <FormButton className='flex items-center gap-2'>
+              <AddSquareIcon />
+              Set New Requirement
+            </FormButton>
+          </Link>
+        </div>
+      </div>
+
       {/** ============================================= FILTER ============================================= */}
       <Card className='w-full px-6'>
         <Accordion
@@ -366,8 +544,21 @@ const WFNA: React.FC = () => {
               <Form {...form}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
-                  className='grid grid-cols-2 gap-6 mt-6 mx-4'
+                  className='grid grid-cols-3 gap-6 mt-6 mx-4'
                 >
+                  <div className='col-span-1'>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      <Input
+                        type="text"
+                        placeholder="Search by position or location..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
                   <div className='col-span-1'>
                     <FormSelect
                       // label='location'
@@ -381,20 +572,17 @@ const WFNA: React.FC = () => {
                               Loading...
                             </p>
                           </div>
-                        ) : (locations?.data?.results || []).length > 0 ? (
-                          (locations?.data?.results || []).map(
-                            (location: LocationResultsData) => (
-                              <SelectItem key={location.id} value={String(location.id)}>
-                                {String(location.name || 'Unknown Location')}
-                              </SelectItem>
-                            )
-                          )
                         ) : (
-                          <div className='flex justify-center items-center p-4'>
-                            <p className='text-sm text-muted-foreground'>
-                              No locations found
-                            </p>
-                          </div>
+                          <>
+                            <SelectItem value="all">All Locations</SelectItem>
+                            {(locations?.data?.results || []).map(
+                              (location: LocationResultsData) => (
+                                <SelectItem key={location.id} value={String(location.id)}>
+                                  {String(location.name || 'Unknown Location')}
+                                </SelectItem>
+                              )
+                            )}
+                          </>
                         )}
                       </SelectContent>
                     </FormSelect>
@@ -432,13 +620,16 @@ const WFNA: React.FC = () => {
                     </FormSelect>
                   </div>
 
-                  <div className='col-span-2 flex justify-end'>
+                  <div className='col-span-3 flex justify-end'>
                     <div className='flex center gap-4'>
                       <FormButton
-                        onClick={() => reset()}
+                        onClick={() => {
+                          reset();
+                          setSearchTerm("");
+                        }}
                         className='flex items-center justify-center gap-2'
                       >
-                        Reset
+                        Reset All Filters
                       </FormButton>
                     </div>
                   </div>
@@ -449,20 +640,85 @@ const WFNA: React.FC = () => {
         </Accordion>
       </Card>
 
+      {/* Summary Statistics Cards */}
+      {!loadingWorkforce && statistics.totalPositions > 0 && (
+        <div className='w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          <Card className='p-4'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-sm text-gray-600 mb-1'>Total Positions</p>
+                <p className='text-2xl font-bold'>{statistics.totalPositions}</p>
+              </div>
+              <div className='p-3 rounded-full bg-blue-100'>
+                <Users size={24} className='text-blue-600' />
+              </div>
+            </div>
+            <p className='text-xs text-gray-500 mt-2'>
+              {statistics.shortageCount} shortage • {statistics.surplusCount} surplus • {statistics.optimalCount} optimal
+            </p>
+          </Card>
+
+          <Card className='p-4'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-sm text-gray-600 mb-1'>Total Staff Shortage</p>
+                <p className='text-2xl font-bold text-red-600'>{statistics.totalShortage}</p>
+              </div>
+              <div className='p-3 rounded-full bg-red-100'>
+                <TrendingDown size={24} className='text-red-600' />
+              </div>
+            </div>
+            <p className='text-xs text-gray-500 mt-2'>
+              Across {statistics.shortageCount} position{statistics.shortageCount !== 1 ? 's' : ''}
+            </p>
+          </Card>
+
+          <Card className='p-4'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-sm text-gray-600 mb-1'>Total Staff Surplus</p>
+                <p className='text-2xl font-bold text-green-600'>{statistics.totalSurplus}</p>
+              </div>
+              <div className='p-3 rounded-full bg-green-100'>
+                <TrendingUp size={24} className='text-green-600' />
+              </div>
+            </div>
+            <p className='text-xs text-gray-500 mt-2'>
+              Across {statistics.surplusCount} position{statistics.surplusCount !== 1 ? 's' : ''}
+            </p>
+          </Card>
+
+          <Card className='p-4'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-sm text-gray-600 mb-1'>Critical Shortages</p>
+                <p className='text-2xl font-bold text-orange-600'>{statistics.criticalShortages}</p>
+              </div>
+              <div className='p-3 rounded-full bg-orange-100'>
+                <AlertTriangle size={24} className='text-orange-600' />
+              </div>
+            </div>
+            <p className='text-xs text-gray-500 mt-2'>
+              High workload pressure
+            </p>
+          </Card>
+        </div>
+      )}
+
       {/* Filter Status Info */}
-      {(selectedLocation || selectedPosition) && (
+      {((selectedLocation && selectedLocation !== "all") || (selectedPosition && selectedPosition !== "all")) && (
         <Card className='w-full px-6 py-4'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <Filter size={16} />
               <p className='text-sm font-medium'>
                 Showing results for:
-                {selectedPosition && (
+                {selectedPosition && selectedPosition !== "all" && (
                   <span className='ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded'>
                     Position: {positions?.data?.results?.find((p: PositionsResultsData) => String(p.id) === selectedPosition)?.name || 'Loading...'}
                   </span>
                 )}
-                {selectedLocation && (
+                {selectedLocation && selectedLocation !== "all" && (
                   <span className='ml-2 px-2 py-1 bg-green-100 text-green-800 rounded'>
                     Location: {locations?.data?.results?.find((l: LocationResultsData) => String(l.id) === selectedLocation)?.name || 'Loading...'}
                   </span>
@@ -488,23 +744,28 @@ const WFNA: React.FC = () => {
       <div className='w-full'>
         <DataTable
           columns={columns}
-          data={data?.data?.results ?? []}
+          data={filteredData}
           isLoading={loadingWorkforce}
           pagination={{
-            total: data?.data?.pagination?.count || 0,
+            total: filteredData.length,
             pageSize: data?.data?.pagination?.page_size || 20,
             onChange: (page: number) => {},
           }}
         />
       </div>
 
-      {/* <ConfirmationDialog
+      <ConfirmationDialog
         open={isDialogOpen}
-        title='Are you sure you want to delete this complaint?'
-        onCancel={() => setDialogOpen(false)}
-        onOk={onDelete}
-        loading={deleting}
-      /> */}
+        title={`Delete Workforce Requirement: ${deleteItemName}?`}
+        description="This action cannot be undone. This will permanently delete this workforce requirement and all associated analysis data."
+        onCancel={() => {
+          setDialogOpen(false);
+          setSelectedId("");
+          setDeleteItemName("");
+        }}
+        onOk={handleDelete}
+        loading={isDeleting}
+      />
     </div>
   );
 };

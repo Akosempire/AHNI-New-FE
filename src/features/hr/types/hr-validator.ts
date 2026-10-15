@@ -146,16 +146,12 @@ export const jobApplicationSchema = z.object({
 });
 
 export const workforceNeedAnalysisSchema = z.object({
-  current_staff_count: z.string().min(1, "Current Staff Count is required"),
-  wisn_required_staff_count: z.string().min(1, "WISN STAFF COUNT is required"),
-  shortage_excess_count: z
-    .string()
-    .min(1, "Shortage or excess count is required"),
-  workforce_problem: z.string().min(1, "Workforce Problem is required"),
-  wisn_ratio: z.string().min(1, "WISN Ratio is required"),
-  workload_problem: z.string().min(1, "Workload Problem is required"),
   position: z.string().min(1, "Position is required"),
-  location: z.string().min(1, "Location is required"),
+  location: z.string().optional().or(z.literal("")),
+  wisn_required_staff_count: z.preprocess(
+    (val) => Number(val),
+    z.number().positive("Required staff count must be a positive number")
+  ),
 });
 
 export const hrSystemAuthorizationSchema = z.object({
@@ -166,6 +162,86 @@ export const hrSystemAuthorizationSchema = z.object({
   authorization_officer_name: z.string().min(1, "Name is required"),
   authorization_date: z.string().min(1, "Date Completed is required"),
   employee: z.string(),
+});
+
+// Recruitment Requisition Schemas
+export const recruitmentRequisitionMemoSchema = z.object({
+  memo_document: z.any(), // File upload
+  memo_reference: z.string().min(1, "Memo reference number is required"),
+  memo_approved_by_name: z.string().min(1, "Memo approver name is required"),
+  memo_approval_date: z.string().min(1, "Memo approval date is required"),
+});
+
+export const recruitmentRequisitionPositionSchema = z.object({
+  position: z.string().min(1, "Position is required"),
+  requesting_department: z.string().min(1, "Department is required"),
+  number_of_positions: z.preprocess(
+    (val) => Number(val),
+    z.number().positive("Number of positions must be at least 1")
+  ),
+  grade_level: z.string().min(1, "Grade level is required"),
+  fco_number: z.string().optional(),
+  employment_type: z.enum(["PERMANENT", "CONTRACT", "TEMPORARY"]),
+  job_type: z.enum(["Internal", "External", "Both"]),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
+});
+
+export const recruitmentRequisitionJustificationSchema = z.object({
+  vacancy_reason: z.enum(["NEW_POSITION", "REPLACEMENT", "EXPANSION", "SUCCESSION", "TEMPORARY"]),
+  business_justification: z.string().min(10, "Business justification is required (min 10 characters)"),
+  impact_if_not_filled: z.string().min(10, "Impact description is required (min 10 characters)"),
+});
+
+export const recruitmentRequisitionRequirementsSchema = z.object({
+  qualifications: z.string().min(10, "Qualifications are required"),
+  key_responsibilities: z.string().min(10, "Key responsibilities are required"),
+  experience_years: z.preprocess(
+    (val) => Number(val),
+    z.number().nonnegative("Experience years cannot be negative")
+  ),
+  skills_required: z.string().optional(),
+  language_requirements: z.string().optional(),
+});
+
+export const recruitmentRequisitionDetailsSchema = z.object({
+  reporting_to: z.string().optional(),
+  location: z.string().optional(),
+  working_tools_available: z.boolean().default(false),
+  required_start_date: z.string().min(1, "Required start date is required"),
+  estimated_salary_range: z.string().min(1, "Estimated salary range is required"),
+  budget_line: z.string().optional(),
+  total_budget_estimate: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().positive("Budget estimate must be positive").optional()
+  ),
+  additional_notes: z.string().optional(),
+});
+
+export const recruitmentRequisitionApproversSchema = z.object({
+  reviewer_id: z.string().uuid("Invalid reviewer ID"),
+  authorizer_id: z.string().uuid("Invalid authorizer ID"),
+  approver_id: z.string().uuid("Invalid approver ID"),
+});
+
+// Complete recruitment requisition schema (combines all steps)
+export const recruitmentRequisitionSchema = recruitmentRequisitionMemoSchema
+  .merge(recruitmentRequisitionPositionSchema)
+  .merge(recruitmentRequisitionJustificationSchema)
+  .merge(recruitmentRequisitionRequirementsSchema)
+  .merge(recruitmentRequisitionDetailsSchema)
+  .merge(recruitmentRequisitionApproversSchema);
+
+// Approval action schema
+export const recruitmentRequisitionApprovalSchema = z.object({
+  action: z.enum(["review", "authorize", "approve", "reject"]),
+  comments: z.string().optional(),
+});
+
+// Convert to advertisement schema
+export const convertToAdvertisementSchema = z.object({
+  application_deadline: z.string().min(1, "Application deadline is required"),
+  interview_date: z.string().optional(),
+  additional_requirements: z.string().optional(),
 });
 
 export type HrContingentBeneficiaryFormValues = z.infer<
@@ -191,3 +267,14 @@ export type WorkforceQualificationFormValues = z.infer<
 export type hrSystemAuthorizationFormValues = z.infer<
   typeof hrSystemAuthorizationSchema
 >;
+
+// Recruitment Requisition Type Exports
+export type RecruitmentRequisitionMemoFormValues = z.infer<typeof recruitmentRequisitionMemoSchema>;
+export type RecruitmentRequisitionPositionFormValues = z.infer<typeof recruitmentRequisitionPositionSchema>;
+export type RecruitmentRequisitionJustificationFormValues = z.infer<typeof recruitmentRequisitionJustificationSchema>;
+export type RecruitmentRequisitionRequirementsFormValues = z.infer<typeof recruitmentRequisitionRequirementsSchema>;
+export type RecruitmentRequisitionDetailsFormValues = z.infer<typeof recruitmentRequisitionDetailsSchema>;
+export type RecruitmentRequisitionApproversFormValues = z.infer<typeof recruitmentRequisitionApproversSchema>;
+export type RecruitmentRequisitionFormValues = z.infer<typeof recruitmentRequisitionSchema>;
+export type RecruitmentRequisitionApprovalFormValues = z.infer<typeof recruitmentRequisitionApprovalSchema>;
+export type ConvertToAdvertisementFormValues = z.infer<typeof convertToAdvertisementSchema>;

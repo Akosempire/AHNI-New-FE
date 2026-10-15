@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,137 +29,87 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LoadingSpinner } from "@/components/Loading";
+import { useToast } from "@/hooks/use-toast";
+import {
+  useVendorMessages,
+  useReplyToMessage,
+  useMarkMessageRead,
+  useArchiveMessage,
+  useSendVendorMessage,
+} from "@/features/vendor-portal/controllers/vendorDashboardController";
 
 interface Message {
   id: string;
   subject: string;
   sender: {
-    name: string;
+    name?: string;
     email: string;
-    role: string;
+    role?: string;
   };
-  recipients: string[];
-  content: string;
-  sent_date: string;
-  read_date?: string;
-  status: 'unread' | 'read' | 'archived' | 'starred';
-  priority: 'low' | 'normal' | 'high' | 'urgent';
-  type: 'inquiry' | 'rfq_clarification' | 'system' | 'procurement_update' | 'contract';
-  rfq_reference?: string;
+  recipient: {
+    name?: string;
+    email: string;
+  };
+  message: string;
+  created_datetime: string;
+  read_at?: string;
+  status: 'UNREAD' | 'READ' | 'ARCHIVED';
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  related_solicitation?: {
+    id: string;
+    rfq_id: string;
+    title: string;
+  };
+  related_purchase_order?: {
+    id: string;
+    purchase_order_number: string;
+  };
   attachments?: Array<{
     id: string;
-    name: string;
-    size: number;
-    type: string;
+    file_name: string;
+    file_size: number;
+    file_type: string;
+    file_url: string;
   }>;
-  thread_count: number;
-  is_reply: boolean;
+  replies?: Message[];
+  thread_id?: string;
+  parent_message?: string;
+  is_from_vendor: boolean;
 }
 
 export default function VendorMessagesPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showCompose, setShowCompose] = useState(false);
   const [replyContent, setReplyContent] = useState("");
 
-  // Mock messages data - this would come from API
-  const [messages] = useState<Message[]>([
-    {
-      id: "1",
-      subject: "RFQ Clarification - Medical Equipment Tender",
-      sender: {
-        name: "Sarah Johnson",
-        email: "procurement@ahnigeria.org",
-        role: "Procurement Officer"
-      },
-      recipients: ["vendor@testcompany.com"],
-      content: `Dear Vendor,
+  // Compose form state
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeMessage, setComposeMessage] = useState("");
+  const [composePriority, setComposePriority] = useState("NORMAL");
 
-Thank you for your interest in RFQ-2024-001 for medical equipment procurement.
+  // Fetch messages from API
+  const { data: messagesData, isLoading, error, refetch } = useVendorMessages({
+    status: statusFilter === "all" ? undefined : statusFilter,
+  });
 
-We need clarification on the following items in your submission:
+  // Mutations
+  const { mutate: sendMessage, isPending: isSending } = useSendVendorMessage();
+  const { mutate: replyToMessage, isPending: isReplying } = useReplyToMessage();
+  const { mutate: markAsRead } = useMarkMessageRead();
+  const { mutate: archiveMessage } = useArchiveMessage();
 
-1. Warranty period for the diagnostic equipment
-2. Installation timeline and requirements
-3. Training provision for our staff
+  const messages: Message[] = Array.isArray(messagesData) ? messagesData : messagesData?.results || [];
 
-Please provide these details by December 10th, 2024.
-
-Best regards,
-Sarah Johnson
-Procurement Officer
-AHNI`,
-      sent_date: "2024-12-05T10:30:00Z",
-      read_date: "2024-12-05T14:45:00Z",
-      status: "read",
-      priority: "high",
-      type: "rfq_clarification",
-      rfq_reference: "RFQ-2024-001",
-      thread_count: 3,
-      is_reply: false
-    },
-    {
-      id: "2",
-      subject: "Contract Award Notification - Office Supplies",
-      sender: {
-        name: "Michael Chen",
-        email: "contracts@ahnigeria.org",
-        role: "Contract Manager"
-      },
-      recipients: ["vendor@testcompany.com"],
-      content: `Congratulations! Your bid for RFQ-2024-002 has been successful.
-
-Contract Details:
-- Contract Value: $45,000
-- Duration: 12 months
-- Start Date: January 1, 2025
-
-Please review the attached contract documents and return signed copies within 5 business days.
-
-Best regards,
-Michael Chen`,
-      sent_date: "2024-12-04T16:20:00Z",
-      status: "unread",
-      priority: "urgent",
-      type: "contract",
-      rfq_reference: "RFQ-2024-002",
-      attachments: [
-        {
-          id: "1",
-          name: "Contract_Agreement_RFQ-2024-002.pdf",
-          size: 1024000,
-          type: "application/pdf"
-        }
-      ],
-      thread_count: 1,
-      is_reply: false
-    },
-    {
-      id: "3",
-      subject: "System Maintenance Notification",
-      sender: {
-        name: "AHNI System",
-        email: "noreply@ahnigeria.org",
-        role: "System"
-      },
-      recipients: ["all_vendors"],
-      content: `The vendor portal will undergo scheduled maintenance on December 8th, 2024 from 2:00 AM to 6:00 AM WAT.
-
-During this time, the portal will be temporarily unavailable. We apologize for any inconvenience.
-
-AHNI IT Team`,
-      sent_date: "2024-12-03T08:00:00Z",
-      read_date: "2024-12-03T09:15:00Z",
-      status: "read",
-      priority: "normal",
-      type: "system",
-      thread_count: 1,
-      is_reply: false
+  // Mark message as read when selected
+  useEffect(() => {
+    if (selectedMessage && selectedMessage.status === 'UNREAD') {
+      markAsRead(selectedMessage.id);
     }
-  ]);
+  }, [selectedMessage]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -181,13 +131,11 @@ AHNI IT Team`,
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'unread':
+      case 'UNREAD':
         return 'default';
-      case 'read':
+      case 'READ':
         return 'secondary';
-      case 'starred':
-        return 'destructive';
-      case 'archived':
+      case 'ARCHIVED':
         return 'outline';
       default:
         return 'secondary';
@@ -196,29 +144,32 @@ AHNI IT Team`,
 
   const getPriorityBadgeVariant = (priority: string) => {
     switch (priority) {
-      case 'urgent':
+      case 'URGENT':
         return 'destructive';
-      case 'high':
+      case 'HIGH':
         return 'default';
-      case 'normal':
+      case 'NORMAL':
         return 'secondary';
-      case 'low':
+      case 'LOW':
         return 'outline';
       default:
         return 'secondary';
     }
   };
 
-  const getTypeIcon = (type: string) => {
+  const getMessageType = (message: Message) => {
+    if (message.related_solicitation) return 'rfq_clarification';
+    if (message.related_purchase_order) return 'contract';
+    return 'inquiry';
+  };
+
+  const getTypeIcon = (message: Message) => {
+    const type = getMessageType(message);
     switch (type) {
       case 'rfq_clarification':
         return <FileText className="h-4 w-4" />;
       case 'contract':
         return <FileText className="h-4 w-4" />;
-      case 'system':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'procurement_update':
-        return <Mail className="h-4 w-4" />;
       default:
         return <MessageCircle className="h-4 w-4" />;
     }
@@ -226,15 +177,128 @@ AHNI IT Team`,
 
   const filteredMessages = messages.filter((message) => {
     const matchesSearch = message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.sender.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || message.status === statusFilter;
-    const matchesType = typeFilter === "all" || message.type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
+                         message.sender.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         message.message.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || message.status === statusFilter.toUpperCase();
+    return matchesSearch && matchesStatus;
   });
 
-  const unreadCount = messages.filter((m: any) => m.status === 'unread').length;
-  const starredCount = messages.filter((m: any) => m.status === 'starred').length;
+  const unreadCount = messages.filter((m: any) => m.status === 'UNREAD').length;
+
+  const handleSendReply = () => {
+    if (!selectedMessage || !replyContent.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    replyToMessage(
+      {
+        messageId: selectedMessage.id,
+        message: replyContent,
+        priority: selectedMessage.priority,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success",
+            description: "Reply sent successfully",
+          });
+          setReplyContent("");
+          refetch();
+        },
+        onError: (error: any) => {
+          toast({
+            title: "Error",
+            description: error.message || "Failed to send reply",
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
+
+  const handleSendNewMessage = () => {
+    if (!composeSubject.trim() || !composeMessage.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in subject and message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    sendMessage(
+      {
+        subject: composeSubject,
+        message: composeMessage,
+        priority: composePriority,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success",
+            description: "Message sent successfully",
+          });
+          setShowCompose(false);
+          setComposeSubject("");
+          setComposeMessage("");
+          setComposePriority("NORMAL");
+          refetch();
+        },
+        onError: (error: any) => {
+          toast({
+            title: "Error",
+            description: error.message || "Failed to send message",
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
+
+  const handleArchive = (messageId: string) => {
+    archiveMessage(messageId, {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Message archived",
+        });
+        setSelectedMessage(null);
+        refetch();
+      },
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to archive message",
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <LoadingSpinner />
+        <span className="ml-2">Loading messages...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Failed to load messages. Please try refreshing the page.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -260,6 +324,60 @@ AHNI IT Team`,
         </Button>
       </div>
 
+      {/* Compose Modal */}
+      {showCompose && (
+        <Card>
+          <CardHeader>
+            <CardTitle>New Message</CardTitle>
+            <CardDescription>Send a message to AHNI procurement team</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                placeholder="Enter message subject"
+                value={composeSubject}
+                onChange={(e) => setComposeSubject(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="priority">Priority</Label>
+              <Select value={composePriority} onValueChange={setComposePriority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="LOW">Low</SelectItem>
+                  <SelectItem value="NORMAL">Normal</SelectItem>
+                  <SelectItem value="HIGH">High</SelectItem>
+                  <SelectItem value="URGENT">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="compose-message">Message</Label>
+              <Textarea
+                id="compose-message"
+                placeholder="Type your message here..."
+                value={composeMessage}
+                onChange={(e) => setComposeMessage(e.target.value)}
+                rows={6}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSendNewMessage} disabled={isSending}>
+                <Send className="h-4 w-4 mr-1" />
+                {isSending ? "Sending..." : "Send Message"}
+              </Button>
+              <Button variant="outline" onClick={() => setShowCompose(false)}>
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Search and Filters */}
       <Card>
         <CardContent className="pt-6">
@@ -282,23 +400,9 @@ AHNI IT Team`,
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="unread">Unread</SelectItem>
-                  <SelectItem value="read">Read</SelectItem>
-                  <SelectItem value="starred">Starred</SelectItem>
-                  <SelectItem value="archived">Archived</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Message Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="rfq_clarification">RFQ Clarifications</SelectItem>
-                  <SelectItem value="contract">Contracts</SelectItem>
-                  <SelectItem value="procurement_update">Procurement Updates</SelectItem>
-                  <SelectItem value="system">System Messages</SelectItem>
-                  <SelectItem value="inquiry">General Inquiries</SelectItem>
+                  <SelectItem value="UNREAD">Unread</SelectItem>
+                  <SelectItem value="READ">Read</SelectItem>
+                  <SelectItem value="ARCHIVED">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -331,51 +435,48 @@ AHNI IT Team`,
                   className={`cursor-pointer transition-all hover:shadow-md ${
                     selectedMessage?.id === message.id ? 'ring-2 ring-blue-500' : ''
                   } ${
-                    message.status === 'unread' ? 'border-l-4 border-l-blue-500 bg-blue-50' : ''
+                    message.status === 'UNREAD' ? 'border-l-4 border-l-blue-500 bg-blue-50' : ''
                   }`}
                   onClick={() => setSelectedMessage(message)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        {getTypeIcon(message.type)}
-                        {message.status === 'unread' ? (
+                        {getTypeIcon(message)}
+                        {message.status === 'UNREAD' ? (
                           <Mail className="h-4 w-4 text-blue-600" />
                         ) : (
                           <MailOpen className="h-4 w-4 text-gray-400" />
                         )}
-                        {message.status === 'starred' && (
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        )}
                       </div>
                       <Badge variant={getPriorityBadgeVariant(message.priority)} className="text-xs">
-                        {message.priority}
+                        {message.priority.toLowerCase()}
                       </Badge>
                     </div>
 
                     <h3 className={`font-semibold text-sm mb-1 line-clamp-2 ${
-                      message.status === 'unread' ? 'text-gray-900' : 'text-gray-700'
+                      message.status === 'UNREAD' ? 'text-gray-900' : 'text-gray-700'
                     }`}>
                       {message.subject}
                     </h3>
 
                     <p className="text-xs text-gray-600 mb-2">
-                      From: {message.sender.name}
+                      From: {message.sender.name || message.sender.email}
                     </p>
 
                     <p className="text-xs text-gray-500 line-clamp-2 mb-2">
-                      {message.content}
+                      {message.message}
                     </p>
 
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {formatDate(message.sent_date)}
+                        {formatDate(message.created_datetime)}
                       </span>
-                      {message.thread_count > 1 && (
+                      {message.replies && message.replies.length > 0 && (
                         <span className="flex items-center gap-1">
                           <MessageCircle className="h-3 w-3" />
-                          {message.thread_count}
+                          {message.replies.length + 1}
                         </span>
                       )}
                       {message.attachments && message.attachments.length > 0 && (
@@ -386,10 +487,10 @@ AHNI IT Team`,
                       )}
                     </div>
 
-                    {message.rfq_reference && (
+                    {message.related_solicitation && (
                       <div className="mt-2">
                         <Badge variant="outline" className="text-xs">
-                          {message.rfq_reference}
+                          {message.related_solicitation.rfq_id}
                         </Badge>
                       </div>
                     )}
@@ -403,17 +504,16 @@ AHNI IT Team`,
                 <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Messages Found</h3>
                 <p className="text-gray-500 mb-4">
-                  {searchTerm || statusFilter !== "all" || typeFilter !== "all"
+                  {searchTerm || statusFilter !== "all"
                     ? "Try adjusting your search criteria or filters"
                     : "You don't have any messages yet"}
                 </p>
-                {(searchTerm || statusFilter !== "all" || typeFilter !== "all") && (
+                {(searchTerm || statusFilter !== "all") && (
                   <Button
                     variant="outline"
                     onClick={() => {
                       setSearchTerm("");
                       setStatusFilter("all");
-                      setTypeFilter("all");
                     }}
                   >
                     Clear Filters
@@ -432,52 +532,50 @@ AHNI IT Team`,
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">
-                      {getTypeIcon(selectedMessage.type)}
+                      {getTypeIcon(selectedMessage)}
                       {selectedMessage.subject}
-                      {selectedMessage.status === 'unread' && (
+                      {selectedMessage.status === 'UNREAD' && (
                         <Badge variant="destructive" className="text-xs">New</Badge>
                       )}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-4 mt-2">
                       <span className="flex items-center gap-1">
                         <User className="h-3 w-3" />
-                        {selectedMessage.sender.name} ({selectedMessage.sender.role})
+                        {selectedMessage.sender.name || selectedMessage.sender.email}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {formatDate(selectedMessage.sent_date)}
+                        {formatDate(selectedMessage.created_datetime)}
                       </span>
                       <Badge variant={getPriorityBadgeVariant(selectedMessage.priority)} className="text-xs">
-                        {selectedMessage.priority} priority
+                        {selectedMessage.priority.toLowerCase()} priority
                       </Badge>
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">
-                      <Star className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleArchive(selectedMessage.id)}
+                    >
                       <Archive className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                {selectedMessage.rfq_reference && (
+                {selectedMessage.related_solicitation && (
                   <Alert className="mb-4">
                     <FileText className="h-4 w-4" />
                     <AlertDescription>
-                      This message relates to <strong>{selectedMessage.rfq_reference}</strong>
+                      This message relates to <strong>{selectedMessage.related_solicitation.rfq_id}</strong> - {selectedMessage.related_solicitation.title}
                     </AlertDescription>
                   </Alert>
                 )}
 
                 <div className="prose max-w-none mb-6">
                   <div className="whitespace-pre-wrap text-gray-900">
-                    {selectedMessage.content}
+                    {selectedMessage.message}
                   </div>
                 </div>
 
@@ -489,10 +587,14 @@ AHNI IT Team`,
                         <div key={attachment.id} className="flex items-center gap-3 p-2 border rounded-lg">
                           <Paperclip className="h-4 w-4 text-gray-500" />
                           <div className="flex-1">
-                            <p className="font-medium text-sm">{attachment.name}</p>
-                            <p className="text-xs text-gray-500">{formatFileSize(attachment.size)}</p>
+                            <p className="font-medium text-sm">{attachment.file_name}</p>
+                            <p className="text-xs text-gray-500">{formatFileSize(attachment.file_size)}</p>
                           </div>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(attachment.file_url, '_blank')}
+                          >
                             Download
                           </Button>
                         </div>
@@ -515,13 +617,9 @@ AHNI IT Team`,
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button>
+                      <Button onClick={handleSendReply} disabled={isReplying}>
                         <Send className="h-4 w-4 mr-1" />
-                        Send Reply
-                      </Button>
-                      <Button variant="outline">
-                        <Paperclip className="h-4 w-4 mr-1" />
-                        Attach File
+                        {isReplying ? "Sending..." : "Send Reply"}
                       </Button>
                     </div>
                   </div>
@@ -559,13 +657,13 @@ AHNI IT Team`,
             </div>
             <div>
               <p className="text-2xl font-bold text-green-600">
-                {messages.filter((m: any) => m.type === 'rfq_clarification').length}
+                {messages.filter((m: any) => m.related_solicitation).length}
               </p>
               <p className="text-sm text-green-800">RFQ Related</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-purple-600">
-                {messages.filter((m: any) => m.priority === 'urgent' || m.priority === 'high').length}
+                {messages.filter((m: any) => m.priority === 'URGENT' || m.priority === 'HIGH').length}
               </p>
               <p className="text-sm text-purple-800">High Priority</p>
             </div>

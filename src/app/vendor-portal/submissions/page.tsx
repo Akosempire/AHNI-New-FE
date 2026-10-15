@@ -252,7 +252,7 @@ export default function VendorSubmissionsPage() {
                         {submission.status === 'DRAFT' && (
                           <Button
                             size="sm"
-                            onClick={() => router.push(`/vendor-portal/rfqs/${submission.rfq_id}/submit`)}
+                            onClick={() => router.push(`/vendor-portal/rfqs/${submission.solicitation || submission.solicitation_id}/submit`)}
                           >
                             Continue Bid
                           </Button>
