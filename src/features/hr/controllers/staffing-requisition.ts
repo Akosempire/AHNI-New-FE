@@ -88,10 +88,13 @@ export const useGetStaffingRequisition = (id: string | undefined) => {
     queryKey: ["staffing-requisition", id],
     queryFn: async () => {
       if (!id) throw new Error("ID is required");
-      const response = await AxiosWithToken.get<StaffingRequisition>(
+      const response = await AxiosWithToken.get<{
+        status: boolean;
+        data: StaffingRequisition;
+      }>(
         `${BASE_URL}/${id}/`
       );
-      return response.data;
+      return response.data.data;
     },
     enabled: !!id,
   });

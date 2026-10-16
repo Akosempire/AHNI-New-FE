@@ -268,7 +268,7 @@ export default function StaffingRequisitionDetailView({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label className="text-xs text-gray-500">Position</Label>
-            <p className="font-medium">{requisition.position.name}</p>
+            <p className="font-medium">{requisition.position.title}</p>
           </div>
           <div>
             <Label className="text-xs text-gray-500">Grade Level</Label>
