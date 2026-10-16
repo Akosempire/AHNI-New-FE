@@ -33,10 +33,13 @@ export const useGetStaffingRequisitions = (filters?: {
           if (value) params.append(key, value);
         });
       }
-      const response = await AxiosWithToken.get<StaffingRequisitionListItem[]>(
+      const response = await AxiosWithToken.get<{
+        status: boolean;
+        data: { results: StaffingRequisitionListItem[] };
+      }>(
         `${BASE_URL}/?${params.toString()}`
       );
-      return response.data;
+      return response.data.data.results;
     },
   });
 };
@@ -48,10 +51,13 @@ export const useGetMyRequisitions = () => {
   return useQuery({
     queryKey: ["staffing-requisitions", "my-requisitions"],
     queryFn: async () => {
-      const response = await AxiosWithToken.get<StaffingRequisitionListItem[]>(
+      const response = await AxiosWithToken.get<{
+        status: boolean;
+        data: { results: StaffingRequisitionListItem[] };
+      }>(
         `${BASE_URL}/my-requisitions/`
       );
-      return response.data;
+      return response.data.data.results;
     },
   });
 };
@@ -63,10 +69,13 @@ export const useGetPendingApprovals = () => {
   return useQuery({
     queryKey: ["staffing-requisitions", "pending-approvals"],
     queryFn: async () => {
-      const response = await AxiosWithToken.get<StaffingRequisitionListItem[]>(
+      const response = await AxiosWithToken.get<{
+        status: boolean;
+        data: { results: StaffingRequisitionListItem[] };
+      }>(
         `${BASE_URL}/pending-approvals/`
       );
-      return response.data;
+      return response.data.data.results;
     },
   });
 };
