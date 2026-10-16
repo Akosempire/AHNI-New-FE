@@ -202,13 +202,6 @@ const JobDetail = (props: JobAdvertisement) => {
           )}
         </div>
 
-        {background && (
-          <div className='mb-6'>
-            <h4 className='font-semibold mb-2 text-blue-900'>Background</h4>
-            <p className='text-sm whitespace-pre-line'>{background}</p>
-          </div>
-        )}
-
         {role_description && (
           <div className='mb-6'>
             <h4 className='font-semibold mb-2 text-blue-900'>Key Responsibilities</h4>
