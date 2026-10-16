@@ -110,7 +110,6 @@ const JobDetail = (props: JobAdvertisement) => {
   const application_method = (props as any).application_method;
   const application_instructions = (props as any).application_instructions;
   const subject_line_format = (props as any).subject_line_format;
-  const salary_range = (props as any).salary_range;
   const equal_opportunity_statement = (props as any).equal_opportunity_statement;
   const disclaimer = (props as any).disclaimer;
 
@@ -266,13 +265,6 @@ const JobDetail = (props: JobAdvertisement) => {
           <div className='mt-6'>
             <h4 className='font-semibold mb-2 text-blue-900'>Additional Information</h4>
             <p className='text-sm whitespace-pre-line'>{any_other_info}</p>
-          </div>
-        )}
-
-        {salary_range && (
-          <div className='mt-6'>
-            <h4 className='font-semibold mb-2'>Compensation</h4>
-            <p className='text-sm'>{salary_range}</p>
           </div>
         )}
       </Card>
