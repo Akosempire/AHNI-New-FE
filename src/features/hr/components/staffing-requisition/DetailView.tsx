@@ -48,7 +48,7 @@ import {
   useApproveAllLevels,
 } from "../../controllers/staffing-requisition";
 import { useFileAttachments } from "@/controllers/fileAttachmentController";
-import { useGetUserProfile } from "@/controllers/userController";
+import { useGetUserProfile } from "@/features/auth/controllers/userController";
 
 interface DetailViewProps {
   requisitionId: string;
