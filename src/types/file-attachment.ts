@@ -18,6 +18,7 @@ export type FileCategory =
   | 'AGREEMENT'
   | 'ID_DOCUMENT'
   | 'CERTIFICATE'
+  | 'MEMO'
   | 'OTHER';
 
 export interface FileAttachment {

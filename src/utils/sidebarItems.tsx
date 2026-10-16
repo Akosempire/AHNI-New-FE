@@ -752,8 +752,8 @@ export const departmentalLinks: SidebarItem[] = [
         ],
         children: [
           {
-            name: "Recruitment Requisitions",
-            path: "/dashboard/hr/recruitment-requisitions",
+            name: "Staffing Requisitions",
+            path: "/dashboard/hr/staffing-requisitions",
             permissions: [
               {
                 module: "hr",

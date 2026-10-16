@@ -232,6 +232,7 @@ export const recruitmentRequisitionMemoSchema = z.object({
   memo_approval_date: z.string().min(1, "Memo approval date is required"),
 });
 
+// AHNi Standard Recruitment Requisition Schemas
 export const recruitmentRequisitionPositionSchema = z.object({
   position: z.string().min(1, "Position is required"),
   requesting_department: z.string().min(1, "Department is required"),
@@ -241,39 +242,23 @@ export const recruitmentRequisitionPositionSchema = z.object({
   ),
   grade_level: z.string().min(1, "Grade level is required"),
   fco_number: z.string().optional(),
-  employment_type: z.enum(["PERMANENT", "CONTRACT", "TEMPORARY"]),
-  job_type: z.enum(["Internal", "External", "Both"]),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
-});
 
-export const recruitmentRequisitionJustificationSchema = z.object({
-  vacancy_reason: z.enum(["NEW_POSITION", "REPLACEMENT", "EXPANSION", "SUCCESSION", "TEMPORARY"]),
-  business_justification: z.string().min(10, "Business justification is required (min 10 characters)"),
-  impact_if_not_filled: z.string().min(10, "Impact description is required (min 10 characters)"),
-});
+  // AHNi Standard Fields
+  nature_of_hire: z.enum(["EXTERNAL_ADVERT", "INTERNAL_ADVERT"]),
+  position_type: z.enum(["FIXED_TERM", "PERMANENT", "TEMPORARY", "CONSULTANCY"]),
+  employment_status: z.enum(["FULL_TIME", "REDUCED_SCHEDULE", "TEMPORARY", "INTERN"]),
+  supervisor: z.string().min(1, "Supervisor is required"),
 
-export const recruitmentRequisitionRequirementsSchema = z.object({
-  qualifications: z.string().min(10, "Qualifications are required"),
-  key_responsibilities: z.string().min(10, "Key responsibilities are required"),
-  experience_years: z.preprocess(
-    (val) => Number(val),
-    z.number().nonnegative("Experience years cannot be negative")
-  ),
-  skills_required: z.string().optional(),
-  language_requirements: z.string().optional(),
-});
-
-export const recruitmentRequisitionDetailsSchema = z.object({
-  reporting_to: z.string().optional(),
+  // Location & Timeline
   location: z.string().optional(),
-  working_tools_available: z.boolean().default(false),
   required_start_date: z.string().min(1, "Required start date is required"),
-  estimated_salary_range: z.string().min(1, "Estimated salary range is required"),
-  budget_line: z.string().optional(),
-  total_budget_estimate: z.preprocess(
-    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
-    z.number().positive("Budget estimate must be positive").optional()
-  ),
+  working_tools_available: z.boolean().default(false),
+});
+
+export const recruitmentRequisitionDutiesAndJustificationSchema = z.object({
+  major_duties_responsibilities: z.string().min(10, "Major duties and responsibilities are required (min 10 characters)"),
+  language_requirements: z.string().default("English"),
+  justification: z.string().min(10, "Justification is required (min 10 characters)"),
   additional_notes: z.string().optional(),
 });
 
@@ -286,9 +271,7 @@ export const recruitmentRequisitionApproversSchema = z.object({
 // Complete recruitment requisition schema (combines all steps)
 export const recruitmentRequisitionSchema = recruitmentRequisitionMemoSchema
   .merge(recruitmentRequisitionPositionSchema)
-  .merge(recruitmentRequisitionJustificationSchema)
-  .merge(recruitmentRequisitionRequirementsSchema)
-  .merge(recruitmentRequisitionDetailsSchema)
+  .merge(recruitmentRequisitionDutiesAndJustificationSchema)
   .merge(recruitmentRequisitionApproversSchema);
 
 // Approval action schema
@@ -331,9 +314,7 @@ export type hrSystemAuthorizationFormValues = z.infer<
 // Recruitment Requisition Type Exports
 export type RecruitmentRequisitionMemoFormValues = z.infer<typeof recruitmentRequisitionMemoSchema>;
 export type RecruitmentRequisitionPositionFormValues = z.infer<typeof recruitmentRequisitionPositionSchema>;
-export type RecruitmentRequisitionJustificationFormValues = z.infer<typeof recruitmentRequisitionJustificationSchema>;
-export type RecruitmentRequisitionRequirementsFormValues = z.infer<typeof recruitmentRequisitionRequirementsSchema>;
-export type RecruitmentRequisitionDetailsFormValues = z.infer<typeof recruitmentRequisitionDetailsSchema>;
+export type RecruitmentRequisitionDutiesAndJustificationFormValues = z.infer<typeof recruitmentRequisitionDutiesAndJustificationSchema>;
 export type RecruitmentRequisitionApproversFormValues = z.infer<typeof recruitmentRequisitionApproversSchema>;
 export type RecruitmentRequisitionFormValues = z.infer<typeof recruitmentRequisitionSchema>;
 export type RecruitmentRequisitionApprovalFormValues = z.infer<typeof recruitmentRequisitionApprovalSchema>;

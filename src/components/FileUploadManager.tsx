@@ -44,6 +44,7 @@ const FILE_CATEGORIES = [
   { value: 'AGREEMENT', label: 'Agreement' },
   { value: 'ID_DOCUMENT', label: 'ID Document' },
   { value: 'CERTIFICATE', label: 'Certificate' },
+  { value: 'MEMO', label: 'Memo' },
   { value: 'OTHER', label: 'Other' },
 ];
 

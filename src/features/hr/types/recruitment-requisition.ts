@@ -24,19 +24,6 @@ export interface Location {
   state?: string;
 }
 
-export interface Employee {
-  id: string;
-  first_name: string;
-  last_name: string;
-  employee_number: string;
-}
-
-export interface BudgetLine {
-  id: string;
-  name: string;
-  code: string;
-}
-
 export interface JobAdvertisementMinimal {
   id: string;
   position_title: string;
@@ -52,31 +39,24 @@ export enum RequisitionStatus {
   CONVERTED_TO_AD = "CONVERTED_TO_AD",
 }
 
-export enum RequisitionPriority {
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
-  URGENT = "URGENT",
+// AHNi Standard Form Enums
+export enum NatureOfHire {
+  EXTERNAL_ADVERT = "EXTERNAL_ADVERT",
+  INTERNAL_ADVERT = "INTERNAL_ADVERT",
 }
 
-export enum VacancyReason {
-  NEW_POSITION = "NEW_POSITION",
-  REPLACEMENT = "REPLACEMENT",
-  EXPANSION = "EXPANSION",
-  SUCCESSION = "SUCCESSION",
-  TEMPORARY = "TEMPORARY",
-}
-
-export enum EmploymentType {
+export enum PositionType {
+  FIXED_TERM = "FIXED_TERM",
   PERMANENT = "PERMANENT",
-  CONTRACT = "CONTRACT",
   TEMPORARY = "TEMPORARY",
+  CONSULTANCY = "CONSULTANCY",
 }
 
-export enum JobType {
-  INTERNAL = "Internal",
-  EXTERNAL = "External",
-  BOTH = "Both",
+export enum EmploymentStatus {
+  FULL_TIME = "FULL_TIME",
+  REDUCED_SCHEDULE = "REDUCED_SCHEDULE",
+  TEMPORARY = "TEMPORARY",
+  INTERN = "INTERN",
 }
 
 // List view model (optimized)
@@ -88,11 +68,13 @@ export interface RecruitmentRequisitionList {
   location?: Location;
   number_of_positions: number;
   grade_level: string;
-  employment_type: EmploymentType;
-  employment_type_display: string;
-  job_type: JobType;
-  priority: RequisitionPriority;
-  priority_display: string;
+  nature_of_hire: NatureOfHire;
+  nature_of_hire_display: string;
+  position_type: PositionType;
+  position_type_display: string;
+  employment_status: EmploymentStatus;
+  employment_status_display: string;
+  supervisor: string;
   required_start_date: string;
   status: RequisitionStatus;
   status_display: string;
@@ -124,34 +106,30 @@ export interface RecruitmentRequisition {
   requesting_department: Department;
   number_of_positions: number;
   grade_level: string;
-  employment_type: EmploymentType;
-  employment_type_display: string;
-  job_type: JobType;
-  job_type_display: string;
-  priority: RequisitionPriority;
-  priority_display: string;
+  fco_number?: string;
 
-  // Vacancy justification
-  vacancy_reason: VacancyReason;
-  vacancy_reason_display: string;
-  business_justification: string;
-  impact_if_not_filled: string;
+  // AHNi Standard Fields
+  nature_of_hire: NatureOfHire;
+  nature_of_hire_display: string;
+  position_type: PositionType;
+  position_type_display: string;
+  employment_status: EmploymentStatus;
+  employment_status_display: string;
+  supervisor: string;
 
-  // Requirements
-  qualifications: string;
-  key_responsibilities: string;
-  experience_years: number;
-  skills_required?: string;
+  // Major Duties and Responsibilities
+  major_duties_responsibilities: string;
 
-  // Reporting & Location
-  reporting_to?: Employee;
+  // Language Requirements
+  language_requirements: string;
+
+  // Justification
+  justification: string;
+
+  // Location & Timeline
   location?: Location;
-
-  // Timeline & Budget
   required_start_date: string;
-  estimated_salary_range: string;
-  budget_line?: BudgetLine;
-  total_budget_estimate?: number;
+  working_tools_available: boolean;
 
   // Additional
   additional_notes?: string;
@@ -224,30 +202,27 @@ export interface RecruitmentRequisitionCreateRequest {
   requesting_department: string; // UUID
   number_of_positions: number;
   grade_level: string;
-  employment_type: EmploymentType;
-  job_type: JobType;
-  priority: RequisitionPriority;
+  fco_number?: string;
 
-  // Vacancy justification
-  vacancy_reason: VacancyReason;
-  business_justification: string;
-  impact_if_not_filled: string;
+  // AHNi Standard Fields
+  nature_of_hire: NatureOfHire;
+  position_type: PositionType;
+  employment_status: EmploymentStatus;
+  supervisor: string;
 
-  // Requirements
-  qualifications: string;
-  key_responsibilities: string;
-  experience_years: number;
-  skills_required?: string;
+  // Major Duties and Responsibilities
+  major_duties_responsibilities: string;
 
-  // Reporting & Location
-  reporting_to?: string; // UUID
+  // Language Requirements
+  language_requirements: string;
+
+  // Justification
+  justification: string;
+
+  // Location & Timeline
   location?: string; // UUID
-
-  // Timeline & Budget
   required_start_date: string;
-  estimated_salary_range: string;
-  budget_line?: string; // UUID
-  total_budget_estimate?: number;
+  working_tools_available: boolean;
 
   // Additional
   additional_notes?: string;
