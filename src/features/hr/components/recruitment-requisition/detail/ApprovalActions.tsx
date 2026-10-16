@@ -118,8 +118,9 @@ export default function ApprovalActions({
   };
 
   const handleConvertToAdvertisement = () => {
+    // Navigate to advertisement form with requisition ID to pre-populate
     router.push(
-      `/dashboard/hr/recruitment-requisitions/${requisition.id}/convert-to-advertisement`
+      `/dashboard/hr/advertisement/add-advertisement?from_requisition=${requisition.id}`
     );
   };
 

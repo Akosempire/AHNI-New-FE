@@ -29,10 +29,12 @@ export type TFormValues = z.infer<typeof jobAdvertismentSchema>;
 const AddEditAdvertisement = () => {
   const router = useRouter();
 
-  // Get URL params to check if we're in edit mode
+  // Get URL params to check if we're in edit mode or converting from requisition
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const editId = searchParams?.get('edit');
+  const requisitionId = searchParams?.get('from_requisition');
   const isEditing = !!editId;
+  const isConvertingFromRequisition = !!requisitionId;
 
   // Collapsible sections state
   const [showOrgProject, setShowOrgProject] = useState(false);
@@ -79,6 +81,20 @@ const AddEditAdvertisement = () => {
     editId || "",
     isEditing
   );
+
+  // Fetch requisition data if converting from requisition
+  const { callApi: fetchRequisition, data: requisitionData, isLoading: requisitionLoading } = useApiManager<any, Error>({
+    endpoint: `hr/jobs/recruitment-requisitions/${requisitionId}/`,
+    isAuth: true,
+    method: "GET",
+  });
+
+  // Fetch requisition when component mounts in conversion mode
+  React.useEffect(() => {
+    if (isConvertingFromRequisition && requisitionId) {
+      fetchRequisition();
+    }
+  }, [isConvertingFromRequisition, requisitionId]);
 
   const form = useForm<TFormValues>({
     resolver: zodResolver(jobAdvertismentSchema),
@@ -235,6 +251,94 @@ const AddEditAdvertisement = () => {
     }
   }, [isEditing, editData, editLoading, form]);
 
+  // Map requisition data to advertisement form when converting
+  React.useEffect(() => {
+    if (isConvertingFromRequisition && requisitionData?.data && !requisitionLoading) {
+      const req = requisitionData.data;
+
+      console.log("=== CONVERSION MODE: Loading Requisition Data ===");
+      console.log("Full requisition data:", req);
+
+      // Helper to safely extract ID from objects
+      const getIdValue = (value: any): string => {
+        if (!value) return "";
+        if (typeof value === "string") return value;
+        if (typeof value === "object" && value.id) return String(value.id);
+        return "";
+      };
+
+      const positionId = getIdValue(req.position);
+      const gradeId = getIdValue(req.grade_level);
+      const locationId = getIdValue(req.location);
+
+      // Map requisition fields to advertisement fields (only public-facing data)
+      const formValues = {
+        // Basic Position Information
+        position: positionId,
+        grade_level: gradeId,
+        locations: locationId,
+        job_type: req.job_type || "Internal",
+        duration: req.employment_type || "",
+        commencement_date: req.required_start_date || "",
+        number_of_positions: req.number_of_positions || 1,
+        background: "", // Intentionally empty - internal business justification excluded
+
+        // Organization & Project (all empty by default, HR manager fills these)
+        organization_name: "Achieving Health Nigeria Initiative (AHNi)",
+        organization_background: "Achieving Health Nigeria Initiative (AHNi) is an indigenous non-governmental organization that promotes socio-economic development by supporting a broad range of global health interventions, education, and economic initiatives in Nigeria. AHNi is an organization with robust interest in advancing the collective goals of the people and communities served. AHNi currently has its headquarters in Abuja, Nigeria.",
+        project_name: "",
+        project_duration: "",
+        project_location: "",
+        project_objectives: "",
+        project_scope: "",
+        donor_name: "",
+
+        // Role Description
+        role_description: req.key_responsibilities || "",
+        supervisor: req.reporting_to || "",
+
+        // Requirements (map from requisition)
+        education_requirements: req.qualifications || "",
+        experience_years_min: req.experience_years || 0,
+        experience_requirements: req.experience_years > 0 ? `Minimum ${req.experience_years} years of relevant experience required.` : "",
+        technical_skills: req.skills_required || "",
+        soft_skills: "",
+        location_context_requirement: req.language_requirements || "",
+
+        // Application Details (HR manager must fill these)
+        application_deadline: "",
+        application_email: "careers@ahnigeria.org.ng",
+        application_method: "Email",
+        application_instructions: "Interested and qualified candidates should forward a suitability statement (application) and resume (CV) as a single MS Word document.",
+        subject_line_format: "JOB TITLE and LOCATION clearly indicated as subject",
+        salary_range: req.estimated_salary_range || "",
+
+        // Additional
+        equal_opportunity_statement: "AHNi is an Equal Opportunity Employer.",
+        disclaimer: "AHNi does not charge Candidates a fee for a test or interview",
+        any_other_info: req.additional_notes || "",
+        advert_document: null,
+      };
+
+      console.log("Mapping requisition to advertisement form:");
+      console.log("- Position ID:", positionId);
+      console.log("- Grade ID:", gradeId);
+      console.log("- Location ID:", locationId);
+      console.log("- Number of positions:", req.number_of_positions);
+      console.log("Resetting form with mapped values");
+
+      form.reset(formValues);
+
+      // Auto-expand Requirements section since it has data
+      setShowRequirements(true);
+      // Keep Organization & Project and Application sections open for HR manager to fill
+      setShowOrgProject(true);
+      setShowApplication(true);
+
+      console.log("=== Requisition mapping complete - ready for HR manager review ===");
+    }
+  }, [isConvertingFromRequisition, requisitionData, requisitionLoading, form]);
+
   const { handleSubmit } = form;
 
   const onSubmit: SubmitHandler<TFormValues> = async (data: TFormValues) => {
@@ -293,15 +397,27 @@ const AddEditAdvertisement = () => {
         formData.append("advert_document", data.advert_document[0]);
       }
 
+      // Include requisition ID if converting from requisition
+      if (isConvertingFromRequisition && requisitionId) {
+        formData.append("from_requisition_id", requisitionId);
+      }
+
       console.log(`${isEditing ? 'Updating' : 'Creating'} advertisement with FormData`);
+      if (isConvertingFromRequisition) {
+        console.log(`Converting from requisition ID: ${requisitionId}`);
+      }
 
       // Use appropriate API based on edit mode
       if (isEditing) {
         await updateAdvertisement(formData);
         toast.success("Job advertisement updated successfully");
       } else {
-        await createAdvertisement(formData);
-        toast.success("Job advertisement created successfully");
+        const response = await createAdvertisement(formData);
+        if (isConvertingFromRequisition) {
+          toast.success("Advertisement created successfully from requisition!");
+        } else {
+          toast.success("Job advertisement created successfully");
+        }
       }
 
       router.push(HrRoutes.ADVERTISEMENT);
