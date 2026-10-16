@@ -96,14 +96,31 @@ export const hrSignatoriesBeneficiarySchema = object({
 });
 
 export const jobAdvertismentSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters"),
-  grade_level: z.string().min(1, "Grade Level is required"),
-  locations: z.string().min(1, "Locations is required"),
-  // interviewers: z
-  //   .array(z.string().uuid())
-  //   .min(1, "At least one interviewer is required"),
+  // Organization & Advertisement Header
+  advertisement_title: z.string().optional(),
+  organization_name: z.string().optional(),
+  organization_background: z.string().optional(),
+  organization_location: z.string().optional(),
 
-  interviewers: z.array(z.string().uuid()).optional(),
+  // Project Context (for project-based positions)
+  project_name: z.string().optional(),
+  project_duration: z.string().optional(),
+  project_location: z.string().optional(),
+  project_objectives: z.string().optional(),
+  project_scope: z.string().optional(),
+  donor_name: z.string().optional(),
+
+  // Position Details (REQUIRED fields)
+  title: z.string().optional(), // Legacy field for direct title input
+  position: z.string().optional(), // UUID of Position
+  grade: z.string().optional(), // UUID of Grade (renamed from grade_level for backend consistency)
+  grade_level: z.string().optional(), // Keep for backward compatibility
+  level: z.string().optional(), // UUID of Level
+  contract_type: z.enum(["FIXED_TERM", "PERMANENT", "TEMPORARY", "CONSULTANCY"]).optional(),
+  position_type: z.enum(["PROGRAMS", "TECHNICAL", "OPERATIONS", "FINANCE", "ADMIN"]).optional(),
+  position_category: z.string().optional(),
+  project_tag: z.string().optional(),
+  locations: z.string().min(1, "Location is required"),
   job_type: z.enum(["Internal", "External", "Both"]),
   duration: z.string().min(1, "Duration is required"),
   commencement_date: z.string().min(1, "Commencement Date is required"),
@@ -112,10 +129,53 @@ export const jobAdvertismentSchema = z.object({
     z.number().positive("Must be a positive number")
   ),
   supervisor: z.string().optional(),
-  // supervisor: z.string().min(1, "Supervisor is required"),
-  any_other_info: z.string().optional(),
+
+  // Role Description & Responsibilities
+  role_description: z.string().optional(),
   background: z.string().min(1, "Background is required"),
+
+  // Requirements & Qualifications
+  education_requirements: z.string().optional(),
+  professional_certifications: z.string().optional(),
+  experience_years_min: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().nonnegative("Experience years cannot be negative").optional()
+  ),
+  experience_years_max: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().nonnegative("Experience years cannot be negative").optional()
+  ),
+  experience_requirements: z.string().optional(),
+  donor_experience: z.string().optional(),
+  technical_skills: z.string().optional(),
+  soft_skills: z.string().optional(),
+  location_context_requirement: z.string().optional(),
+  any_other_info: z.string().optional(),
+
+  // Application Details
+  application_deadline: z.string().optional(),
+  application_email: z.string().email("Valid email required").optional().or(z.literal("")),
+  application_method: z.string().optional(),
+  application_instructions: z.string().optional(),
+  application_format: z.string().optional(),
+  subject_line_format: z.string().optional(),
+  rolling_basis: z.boolean().optional(),
+  interview_date: z.string().optional(),
+  salary_range: z.string().optional(),
+
+  // Status & Publication
+  status: z.enum(["DRAFT", "PUBLISHED", "CLOSED", "CANCELLED"]).optional(),
+  is_published: z.boolean().optional(),
+
+  // Additional Statements
+  equal_opportunity_statement: z.string().optional(),
+  disclaimer: z.string().optional(),
+  shortlist_notification: z.string().optional(),
+  contact_only_shortlisted: z.boolean().optional(),
+
+  // Documents & Resources
   advert_document: z.any().optional(),
+  interviewers: z.array(z.string().uuid()).optional(),
 });
 
 export const jobApplicationSchema = z.object({
