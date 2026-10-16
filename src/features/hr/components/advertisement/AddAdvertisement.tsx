@@ -14,6 +14,7 @@ import { jobAdvertismentSchema } from "@/features/hr/types/hr-validator";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useGetJobAdvertisement } from "@/features/hr/controllers/jobAdvertisementController";
+import { useGetRecruitmentRequisition } from "@/features/hr/controllers/recruitmentRequisitionController";
 import useApiManager from "@/constants/mainController";
 import { useGetPositionPaginate } from "@/features/modules/controllers/config/positionController";
 import { useGetAllGrades } from "@/features/modules/controllers/config/gradeController";
@@ -83,18 +84,10 @@ const AddEditAdvertisement = () => {
   );
 
   // Fetch requisition data if converting from requisition
-  const { callApi: fetchRequisition, data: requisitionData, isLoading: requisitionLoading } = useApiManager<any, Error>({
-    endpoint: `hr/jobs/recruitment-requisitions/${requisitionId}/`,
-    isAuth: true,
-    method: "GET",
-  });
-
-  // Fetch requisition when component mounts in conversion mode
-  React.useEffect(() => {
-    if (isConvertingFromRequisition && requisitionId) {
-      fetchRequisition();
-    }
-  }, [isConvertingFromRequisition, requisitionId]);
+  const { data: requisitionData, isLoading: requisitionLoading } = useGetRecruitmentRequisition(
+    requisitionId || "",
+    isConvertingFromRequisition
+  );
 
   const form = useForm<TFormValues>({
     resolver: zodResolver(jobAdvertismentSchema),
