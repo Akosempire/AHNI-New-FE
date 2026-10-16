@@ -1,13 +1,14 @@
 import ConvertToAdvertisement from "@/features/hr/components/recruitment-requisition/convert-to-advertisement";
 
 interface ConvertToAdvertisementPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function ConvertToAdvertisementPage({
+export default async function ConvertToAdvertisementPage({
   params,
 }: ConvertToAdvertisementPageProps) {
-  return <ConvertToAdvertisement requisitionId={params.id} />;
+  const { id } = await params;
+  return <ConvertToAdvertisement requisitionId={id} />;
 }

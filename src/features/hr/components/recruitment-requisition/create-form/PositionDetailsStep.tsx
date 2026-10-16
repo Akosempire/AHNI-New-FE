@@ -32,19 +32,15 @@ export default function PositionDetailsStep({ form }: PositionDetailsStepProps) 
         form={form}
         name="position"
         label="Position"
-        placeholder="Select position"
+        placeholder={loadingPositions ? "Loading positions..." : "Select position"}
         required
         helpText="Select the position being recruited for"
       >
-        {loadingPositions ? (
-          <FormSelectItem value="">Loading positions...</FormSelectItem>
-        ) : (
-          positions.map((position: any) => (
-            <FormSelectItem key={position.id} value={position.id}>
-              {position.name}
-            </FormSelectItem>
-          ))
-        )}
+        {!loadingPositions && positions.map((position: any) => (
+          <FormSelectItem key={position.id} value={position.id}>
+            {position.name}
+          </FormSelectItem>
+        ))}
       </FormSelect>
 
       {/* Requesting Department */}
@@ -52,19 +48,15 @@ export default function PositionDetailsStep({ form }: PositionDetailsStepProps) 
         form={form}
         name="requesting_department"
         label="Requesting Department"
-        placeholder="Select department"
+        placeholder={loadingDepartments ? "Loading departments..." : "Select department"}
         required
         helpText="Department requesting the recruitment"
       >
-        {loadingDepartments ? (
-          <FormSelectItem value="">Loading departments...</FormSelectItem>
-        ) : (
-          departments.map((dept: any) => (
-            <FormSelectItem key={dept.id} value={dept.id}>
-              {dept.name}
-            </FormSelectItem>
-          ))
-        )}
+        {!loadingDepartments && departments.map((dept: any) => (
+          <FormSelectItem key={dept.id} value={dept.id}>
+            {dept.name}
+          </FormSelectItem>
+        ))}
       </FormSelect>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

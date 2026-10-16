@@ -39,19 +39,15 @@ export default function ApproversStep({ form }: ApproversStepProps) {
           form={form}
           name="reviewer_id"
           label="Reviewer (1st Approval)"
-          placeholder="Select reviewer"
+          placeholder={loadingUsers ? "Loading users..." : "Select reviewer"}
           required
           helpText="User assigned to review the requisition"
         >
-          {loadingUsers ? (
-            <FormSelectItem value="">Loading users...</FormSelectItem>
-          ) : (
-            users.map((user: any) => (
-              <FormSelectItem key={user.id} value={user.id}>
-                {user.first_name} {user.last_name} - {user.email}
-              </FormSelectItem>
-            ))
-          )}
+          {!loadingUsers && users.map((user: any) => (
+            <FormSelectItem key={user.id} value={user.id}>
+              {user.first_name} {user.last_name} - {user.email}
+            </FormSelectItem>
+          ))}
         </FormSelect>
       </div>
 
@@ -61,19 +57,15 @@ export default function ApproversStep({ form }: ApproversStepProps) {
           form={form}
           name="authorizer_id"
           label="Authorizer (2nd Approval)"
-          placeholder="Select authorizer"
+          placeholder={loadingUsers ? "Loading users..." : "Select authorizer"}
           required
           helpText="User assigned to authorize the requisition"
         >
-          {loadingUsers ? (
-            <FormSelectItem value="">Loading users...</FormSelectItem>
-          ) : (
-            users.map((user: any) => (
-              <FormSelectItem key={user.id} value={user.id}>
-                {user.first_name} {user.last_name} - {user.email}
-              </FormSelectItem>
-            ))
-          )}
+          {!loadingUsers && users.map((user: any) => (
+            <FormSelectItem key={user.id} value={user.id}>
+              {user.first_name} {user.last_name} - {user.email}
+            </FormSelectItem>
+          ))}
         </FormSelect>
       </div>
 
@@ -83,19 +75,15 @@ export default function ApproversStep({ form }: ApproversStepProps) {
           form={form}
           name="approver_id"
           label="Approver (Final Approval)"
-          placeholder="Select approver"
+          placeholder={loadingUsers ? "Loading users..." : "Select approver"}
           required
           helpText="User assigned to give final approval"
         >
-          {loadingUsers ? (
-            <FormSelectItem value="">Loading users...</FormSelectItem>
-          ) : (
-            users.map((user: any) => (
-              <FormSelectItem key={user.id} value={user.id}>
-                {user.first_name} {user.last_name} - {user.email}
-              </FormSelectItem>
-            ))
-          )}
+          {!loadingUsers && users.map((user: any) => (
+            <FormSelectItem key={user.id} value={user.id}>
+              {user.first_name} {user.last_name} - {user.email}
+            </FormSelectItem>
+          ))}
         </FormSelect>
       </div>
 

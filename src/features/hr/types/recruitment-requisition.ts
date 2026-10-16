@@ -266,10 +266,19 @@ export interface ApprovalActionRequest {
 
 // Convert to advertisement request
 export interface ConvertToAdvertisementRequest {
+  // Application details
   application_deadline: string;
   application_email: string;
   interview_date?: string;
   additional_requirements?: string;
+
+  // Project information (optional)
+  project_name?: string;
+  project_duration?: string;
+  project_location?: string;
+  project_objectives?: string;
+  project_scope?: string;
+  donor_name?: string;
 }
 
 // API Response wrapper

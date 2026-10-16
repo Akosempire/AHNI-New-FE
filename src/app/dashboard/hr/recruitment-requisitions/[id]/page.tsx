@@ -1,13 +1,14 @@
 import RecruitmentRequisitionDetail from "@/features/hr/components/recruitment-requisition/detail";
 
 interface RecruitmentRequisitionDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function RecruitmentRequisitionDetailPage({
+export default async function RecruitmentRequisitionDetailPage({
   params,
 }: RecruitmentRequisitionDetailPageProps) {
-  return <RecruitmentRequisitionDetail requisitionId={params.id} />;
+  const { id } = await params;
+  return <RecruitmentRequisitionDetail id={id} />;
 }

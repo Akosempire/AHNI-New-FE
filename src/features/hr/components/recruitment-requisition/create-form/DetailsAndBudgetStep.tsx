@@ -40,19 +40,14 @@ export default function DetailsAndBudgetStep({ form }: DetailsAndBudgetStepProps
           form={form}
           name="reporting_to"
           label="Reporting To (Optional)"
-          placeholder="Select supervisor"
+          placeholder={loadingEmployees ? "Loading employees..." : "Select supervisor (optional)"}
           helpText="Person/position this role will report to"
         >
-          <FormSelectItem value="">None</FormSelectItem>
-          {loadingEmployees ? (
-            <FormSelectItem value="">Loading employees...</FormSelectItem>
-          ) : (
-            employees.map((employee: any) => (
-              <FormSelectItem key={employee.id} value={employee.id}>
-                {employee.legal_firstname} {employee.legal_lastname} - {employee.employee_number}
-              </FormSelectItem>
-            ))
-          )}
+          {!loadingEmployees && employees.map((employee: any) => (
+            <FormSelectItem key={employee.id} value={employee.id}>
+              {employee.legal_firstname} {employee.legal_lastname} - {employee.employee_number}
+            </FormSelectItem>
+          ))}
         </FormSelect>
 
         {/* Location */}
@@ -60,19 +55,14 @@ export default function DetailsAndBudgetStep({ form }: DetailsAndBudgetStepProps
           form={form}
           name="location"
           label="Work Location (Optional)"
-          placeholder="Select location"
+          placeholder={loadingLocations ? "Loading locations..." : "Select location (optional)"}
           helpText="Primary work location for this position"
         >
-          <FormSelectItem value="">Not specified</FormSelectItem>
-          {loadingLocations ? (
-            <FormSelectItem value="">Loading locations...</FormSelectItem>
-          ) : (
-            locations.map((location: any) => (
-              <FormSelectItem key={location.id} value={location.id}>
-                {location.name} {location.state ? `- ${location.state}` : ""}
-              </FormSelectItem>
-            ))
-          )}
+          {!loadingLocations && locations.map((location: any) => (
+            <FormSelectItem key={location.id} value={location.id}>
+              {location.name} {location.state ? `- ${location.state}` : ""}
+            </FormSelectItem>
+          ))}
         </FormSelect>
       </div>
 
@@ -109,19 +99,14 @@ export default function DetailsAndBudgetStep({ form }: DetailsAndBudgetStepProps
           form={form}
           name="budget_line"
           label="Budget Line (Optional)"
-          placeholder="Select budget line"
+          placeholder={loadingBudgetLines ? "Loading budget lines..." : "Select budget line (optional)"}
           helpText="Budget line for this recruitment"
         >
-          <FormSelectItem value="">None</FormSelectItem>
-          {loadingBudgetLines ? (
-            <FormSelectItem value="">Loading budget lines...</FormSelectItem>
-          ) : (
-            budgetLines.map((budgetLine: any) => (
-              <FormSelectItem key={budgetLine.id} value={budgetLine.id}>
-                {budgetLine.name} - {budgetLine.code}
-              </FormSelectItem>
-            ))
-          )}
+          {!loadingBudgetLines && budgetLines.map((budgetLine: any) => (
+            <FormSelectItem key={budgetLine.id} value={budgetLine.id}>
+              {budgetLine.name} - {budgetLine.code}
+            </FormSelectItem>
+          ))}
         </FormSelect>
 
         {/* Total Budget Estimate */}
