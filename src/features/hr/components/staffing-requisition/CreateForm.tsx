@@ -145,6 +145,12 @@ export default function CreateStaffingRequisitionForm() {
 
   // Form submission
   const onSubmit = async (data: StaffingRequisitionFormData) => {
+    // Validate that approved memo is uploaded
+    if (!selectedFile) {
+      toast.error("Please upload an approved memo before submitting");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -785,7 +791,7 @@ export default function CreateStaffingRequisitionForm() {
           {/* SECTION 5: MEMO UPLOAD */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Approved Memo
+              Approved Memo <span className="text-red-500">*</span>
             </h2>
 
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
@@ -807,7 +813,7 @@ export default function CreateStaffingRequisitionForm() {
                   </label>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  PDF, DOC, DOCX, JPG, PNG up to 10MB
+                  PDF, DOC, DOCX, JPG, PNG up to 10MB (Required)
                 </p>
                 {selectedFile && (
                   <div className="mt-4 p-3 bg-green-50 rounded-md">
