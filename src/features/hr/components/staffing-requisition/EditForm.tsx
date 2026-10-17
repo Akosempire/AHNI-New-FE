@@ -66,6 +66,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<StaffingRequisitionFormData>({
     defaultValues: {
@@ -140,36 +141,42 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
   // Pre-populate form with existing data
   useEffect(() => {
     if (requisition) {
-      setValue("position", requisition.position.id);
-      setValue("grade_level", requisition.grade_level);
-      setValue("department", requisition.department.id);
-      setValue("location", requisition.location?.id || "");
-      setValue("nature_of_hire", requisition.nature_of_hire);
-      setValue("position_type", requisition.position_type);
-      setValue("employment_status", requisition.employment_status);
-      setValue("number_of_staff", requisition.number_of_staff);
-      setValue("supervisor", requisition.supervisor);
-      setValue("fco_number", requisition.fco_number || "");
-      setValue("working_tools_available", requisition.working_tools_available);
-      setValue("office_type", requisition.office_type);
-      setValue("position_nature", requisition.position_nature);
-      setValue("major_duties_responsibilities", requisition.major_duties_responsibilities);
-      setValue("language_requirements", requisition.language_requirements);
-      setValue("justification", requisition.justification);
-      setValue("hiring_manager", requisition.hiring_manager?.id || "");
-      setValue("hr_reviewer", requisition.hr_reviewer?.id || "");
-      setValue("dof", requisition.dof?.id || "");
-      setValue("director_of_operations", requisition.director_of_operations?.id || "");
-      setValue("managing_director", requisition.managing_director?.id || "");
-      setValue("spm_stl", requisition.spm_stl?.id || "");
-
+      // Set the expected resumption date state
       if (requisition.expected_date_of_resumption) {
         const resumptionDate = new Date(requisition.expected_date_of_resumption);
         setExpectedResumptionDate(resumptionDate);
-        setValue("expected_date_of_resumption", format(resumptionDate, "yyyy-MM-dd"));
       }
+
+      // Reset form with all values from the loaded requisition
+      reset({
+        position: requisition.position.id,
+        grade_level: requisition.grade_level,
+        department: requisition.department.id,
+        location: requisition.location?.id || "",
+        nature_of_hire: requisition.nature_of_hire,
+        position_type: requisition.position_type,
+        employment_status: requisition.employment_status,
+        number_of_staff: requisition.number_of_staff,
+        supervisor: requisition.supervisor,
+        fco_number: requisition.fco_number || "",
+        working_tools_available: requisition.working_tools_available,
+        office_type: requisition.office_type,
+        position_nature: requisition.position_nature,
+        major_duties_responsibilities: requisition.major_duties_responsibilities,
+        language_requirements: requisition.language_requirements,
+        justification: requisition.justification,
+        hiring_manager: requisition.hiring_manager?.id || "",
+        hr_reviewer: requisition.hr_reviewer?.id || "",
+        dof: requisition.dof?.id || "",
+        director_of_operations: requisition.director_of_operations?.id || "",
+        managing_director: requisition.managing_director?.id || "",
+        spm_stl: requisition.spm_stl?.id || "",
+        expected_date_of_resumption: requisition.expected_date_of_resumption
+          ? format(new Date(requisition.expected_date_of_resumption), "yyyy-MM-dd")
+          : "",
+      });
     }
-  }, [requisition, setValue]);
+  }, [requisition, reset]);
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
