@@ -26,8 +26,6 @@ import {
   XCircle,
   FileText,
   Shield,
-  Edit,
-  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -48,7 +46,6 @@ import {
   useSubmitForReview,
   useDownloadRequisitionPDF,
   useApproveAllLevels,
-  useDeleteStaffingRequisition,
 } from "../../controllers/staffing-requisition";
 import { useFileAttachments } from "@/controllers/fileAttachmentController";
 import { useGetUserProfile } from "@/features/auth/controllers/userController";
@@ -64,7 +61,6 @@ export default function StaffingRequisitionDetailView({
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [superAdminDialog, setSuperAdminDialog] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState(false);
   const [comments, setComments] = useState("");
   const [superAdminComments, setSuperAdminComments] = useState("");
 
@@ -77,7 +73,6 @@ export default function StaffingRequisitionDetailView({
   const submitMutation = useSubmitForReview(requisitionId);
   const downloadMutation = useDownloadRequisitionPDF();
   const approveAllLevelsMutation = useApproveAllLevels(requisitionId);
-  const deleteMutation = useDeleteStaffingRequisition();
 
   // File attachments
   const { data: attachmentsData } = useFileAttachments(
@@ -91,11 +86,6 @@ export default function StaffingRequisitionDetailView({
   const memoAttachments = attachmentsData?.data?.attachments?.filter(
     (att) => att.category === "MEMO"
   ) || [];
-
-  // Permission checks
-  const isRequester = requisition?.created_by?.id === currentUser?.data?.id;
-  const canEdit = isSuperUser || (isRequester && requisition?.status !== 'APPROVED' && requisition?.status !== 'REJECTED');
-  const canDelete = isSuperUser || (isRequester && requisition?.status !== 'APPROVED' && requisition?.status !== 'REJECTED');
 
   // Handle approval
   const handleApprove = () => {
@@ -165,25 +155,6 @@ export default function StaffingRequisitionDetailView({
   // Handle PDF download
   const handleDownloadPDF = () => {
     downloadMutation.mutate(requisitionId);
-  };
-
-  // Handle delete
-  const handleDelete = () => {
-    deleteMutation.mutate(requisitionId, {
-      onSuccess: () => {
-        toast.success("Requisition deleted successfully");
-        setDeleteDialog(false);
-        router.push("/dashboard/hr/staffing-requisitions");
-      },
-      onError: (error: any) => {
-        toast.error(error?.response?.data?.error || "Failed to delete requisition");
-      },
-    });
-  };
-
-  // Handle edit
-  const handleEdit = () => {
-    router.push(`/dashboard/hr/staffing-requisitions/${requisitionId}/edit`);
   };
 
   // Get status badge color
@@ -257,30 +228,6 @@ export default function StaffingRequisitionDetailView({
             <Badge className={getStatusColor(requisition.status)}>
               {REQUISITION_STATUS_LABELS[requisition.status]}
             </Badge>
-
-            {/* Edit Button */}
-            {canEdit && (
-              <Button
-                variant="outline"
-                onClick={handleEdit}
-                className="gap-2"
-              >
-                <Edit className="h-4 w-4" />
-                Edit
-              </Button>
-            )}
-
-            {/* Delete Button */}
-            {canDelete && (
-              <Button
-                variant="outline"
-                onClick={() => setDeleteDialog(true)}
-                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </Button>
-            )}
 
             {requisition.status === "APPROVED" && (
               <Button
@@ -811,41 +758,6 @@ export default function StaffingRequisitionDetailView({
                 <Shield className="mr-2 h-4 w-4" />
               )}
               Approve All Levels
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialog} onOpenChange={setDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Staffing Requisition</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this staffing requisition ({requisition.requisition_code})?
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialog(false)}
-              disabled={deleteMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="mr-2 h-4 w-4" />
-              )}
-              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
