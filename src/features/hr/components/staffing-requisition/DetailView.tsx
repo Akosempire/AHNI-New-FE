@@ -26,6 +26,7 @@ import {
   XCircle,
   FileText,
   Shield,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -47,7 +48,7 @@ import {
   useDownloadRequisitionPDF,
   useApproveAllLevels,
 } from "../../controllers/staffing-requisition";
-import { useFileAttachments } from "@/controllers/fileAttachmentController";
+import { useFileAttachments, useUploadFileAttachments } from "@/controllers/fileAttachmentController";
 import { useGetUserProfile } from "@/features/auth/controllers/userController";
 
 interface DetailViewProps {
@@ -63,6 +64,8 @@ export default function StaffingRequisitionDetailView({
   const [superAdminDialog, setSuperAdminDialog] = useState(false);
   const [comments, setComments] = useState("");
   const [superAdminComments, setSuperAdminComments] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // API Hooks
   const { data: requisition, isLoading } = useGetStaffingRequisition(requisitionId);
@@ -73,6 +76,7 @@ export default function StaffingRequisitionDetailView({
   const submitMutation = useSubmitForReview(requisitionId);
   const downloadMutation = useDownloadRequisitionPDF();
   const approveAllLevelsMutation = useApproveAllLevels(requisitionId);
+  const uploadMutation = useUploadFileAttachments();
 
   // File attachments
   const { data: attachmentsData } = useFileAttachments(
@@ -155,6 +159,52 @@ export default function StaffingRequisitionDetailView({
   // Handle PDF download
   const handleDownloadPDF = () => {
     downloadMutation.mutate(requisitionId);
+  };
+
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      setSelectedFile(file);
+      toast.success(`File "${file.name}" selected`);
+    }
+  };
+
+  // Handle file upload
+  const handleUploadMemo = async () => {
+    if (!selectedFile) {
+      toast.error("Please select a file first");
+      return;
+    }
+
+    setIsUploading(true);
+    uploadMutation.mutate(
+      {
+        files: [selectedFile],
+        content_type: "staffing_requisitions.staffingrequisition",
+        object_id: requisitionId,
+        descriptions: ["Approved Memo"],
+        categories: ["MEMO"],
+      },
+      {
+        onSuccess: () => {
+          toast.success("Memo uploaded successfully");
+          setSelectedFile(null);
+          setIsUploading(false);
+          // Refresh the page to show the new attachment
+          window.location.reload();
+        },
+        onError: (error: any) => {
+          toast.error(error?.response?.data?.message || "Failed to upload memo");
+          setIsUploading(false);
+        },
+      }
+    );
   };
 
   // Get status badge color
@@ -351,11 +401,13 @@ export default function StaffingRequisitionDetailView({
         </div>
       </Card>
 
-      {/* Approved Memo */}
-      {memoAttachments.length > 0 && (
-        <Card className="p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Approved Memo</h2>
-          <div className="space-y-2">
+      {/* Approved Memo Upload Section */}
+      <Card className="p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4">Approved Memo</h2>
+
+        {/* Existing Memos */}
+        {memoAttachments.length > 0 && (
+          <div className="space-y-2 mb-4">
             {memoAttachments.map((attachment) => (
               <a
                 key={attachment.id}
@@ -376,8 +428,73 @@ export default function StaffingRequisitionDetailView({
               </a>
             ))}
           </div>
-        </Card>
-      )}
+        )}
+
+        {/* Upload Section */}
+        {memoAttachments.length === 0 && (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-4">
+            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+            <label
+              htmlFor="memo-upload"
+              className="text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800"
+            >
+              Click to upload approved memo
+              <input
+                id="memo-upload"
+                type="file"
+                className="hidden"
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx"
+              />
+            </label>
+            <p className="text-xs text-gray-500 mt-2">
+              PDF, DOC, or DOCX (max 10MB)
+            </p>
+          </div>
+        )}
+
+        {selectedFile && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-md">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">
+                    Selected: {selectedFile.name}
+                  </p>
+                  <p className="text-xs text-blue-700">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => setSelectedFile(null)}
+                variant="ghost"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              onClick={handleUploadMemo}
+              disabled={isUploading}
+              className="w-full"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Memo
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+      </Card>
 
       {/* Approval Workflow */}
       <Card className="p-6 mb-6">
