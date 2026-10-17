@@ -2,8 +2,9 @@
 
 export const dynamic = "force-dynamic";
 import { useParams } from "next/navigation";
-import { use Effect } from "react";
-import { useApiManager } from "@/hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import Axios from "@/constants/api_management/MyHttpHelper";
+import { AxiosError } from "axios";
 import BackNavigation from "@/components/BackNavigation";
 import Card from "@/components/Card";
 import { LoadingSpinner } from "@/components/Loading";
@@ -103,22 +104,29 @@ export default function ProjectJobsPage() {
   const params = useParams();
   const tag = Array.isArray(params?.tag) ? params.tag[0] : params?.tag;
 
-  const { callApi, data, isLoading, error } = useApiManager<{ data: JobAdvertisement[] }>({
-    endpoint: `hr/jobs/advertisements/by-project/${tag}/`,
-    method: "GET",
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["project-job-advertisements", tag],
+    queryFn: async () => {
+      try {
+        const response = await Axios.get(`hr/jobs/advertisements/by-project/${tag}/`);
+        // The response has nested structure: response.data.data.data
+        return response.data;
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        throw new Error("Sorry: " + (axiosError.response?.data as any)?.message);
+      }
+    },
+    enabled: !!tag,
+    refetchOnWindowFocus: false,
   });
-
-  useEffect(() => {
-    if (tag) {
-      callApi();
-    }
-  }, [tag]);
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  if (error || !data?.data || data.data.length === 0) {
+  // The response is: { status: "success", data: { status: true, data: [...] } }
+  // So we need to access: data.data.data
+  if (error || !data?.data?.data || data.data.data.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card>
@@ -134,7 +142,7 @@ export default function ProjectJobsPage() {
     );
   }
 
-  const advertisements = data.data;
+  const advertisements = data.data.data;
 
   // Get shared information from the first advertisement
   const firstAd = advertisements[0];

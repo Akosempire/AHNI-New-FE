@@ -26,6 +26,8 @@ import {
   XCircle,
   FileText,
   Shield,
+  Briefcase,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -47,6 +49,7 @@ import {
   useDownloadRequisitionPDF,
   useApproveAllLevels,
 } from "../../controllers/staffing-requisition";
+import { useCreateAdvertFromRequisition } from "../../controllers/jobAdvertisementController";
 import { useFileAttachments } from "@/controllers/fileAttachmentController";
 import { useGetUserProfile } from "@/features/auth/controllers/userController";
 
@@ -73,6 +76,8 @@ export default function StaffingRequisitionDetailView({
   const submitMutation = useSubmitForReview(requisitionId);
   const downloadMutation = useDownloadRequisitionPDF();
   const approveAllLevelsMutation = useApproveAllLevels(requisitionId);
+  const { createFromRequisition } = useCreateAdvertFromRequisition();
+  const [creatingAdvert, setCreatingAdvert] = useState(false);
 
   // File attachments
   const { data: attachmentsData } = useFileAttachments(
@@ -157,6 +162,20 @@ export default function StaffingRequisitionDetailView({
     downloadMutation.mutate(requisitionId);
   };
 
+  // Handle Create Job Advertisement
+  const handleCreateJobAdvertisement = async () => {
+    setCreatingAdvert(true);
+    try {
+      const response = await createFromRequisition(requisitionId);
+      toast.success("Draft job advertisement created successfully");
+      // Redirect to edit the advertisement
+      router.push(`/dashboard/hr/advertisement/${response.data.id}/edit`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create job advertisement");
+      setCreatingAdvert(false);
+    }
+  };
+
   // Get status badge color
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -230,18 +249,51 @@ export default function StaffingRequisitionDetailView({
             </Badge>
 
             {requisition.status === "APPROVED" && (
-              <Button
-                variant="outline"
-                onClick={handleDownloadPDF}
-                disabled={downloadMutation.isPending}
-              >
-                {downloadMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleDownloadPDF}
+                  disabled={downloadMutation.isPending}
+                >
+                  {downloadMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  Download PDF
+                </Button>
+
+                {/* Create Job Advertisement Button */}
+                {!requisition.job_advertisement ? (
+                  <Button
+                    onClick={handleCreateJobAdvertisement}
+                    disabled={creatingAdvert}
+                    className="gap-2"
+                  >
+                    {creatingAdvert ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Briefcase className="h-4 w-4" />
+                    )}
+                    Create Job Advertisement
+                  </Button>
                 ) : (
-                  <Download className="mr-2 h-4 w-4" />
+                  <div className="flex items-center gap-2">
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      Advertisement Created
+                    </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/dashboard/hr/advertisement/${requisition.job_advertisement?.id}`)}
+                      className="gap-2"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      View Advertisement
+                    </Button>
+                  </div>
                 )}
-                Download PDF
-              </Button>
+              </>
             )}
 
             {/* Super Admin: Approve All Levels Button */}

@@ -80,6 +80,14 @@ export interface StaffingRequisitionListItem {
   created_at: string;
 }
 
+// Minimal job advertisement type
+export interface MinimalJobAdvertisement {
+  id: string;
+  title: string;
+  status: string;
+  is_published: boolean;
+}
+
 // Full detail type
 export interface StaffingRequisition {
   // Primary fields
@@ -140,6 +148,9 @@ export interface StaffingRequisition {
   created_by: MinimalUser;
   created_at: string;
   updated_at: string;
+
+  // Job Advertisement Link
+  job_advertisement: MinimalJobAdvertisement | null;
 
   // Computed fields
   approval_progress: number;

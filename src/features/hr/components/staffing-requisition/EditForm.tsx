@@ -99,11 +99,6 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
   const users = usersData || [];
   const fcoNumbers = Array.isArray(fcoData) ? fcoData : [];
 
-  // Debug logging
-  console.log('DEBUG: usersData =', usersData);
-  console.log('DEBUG: users array length =', users.length);
-  console.log('DEBUG: users array =', users);
-
   // Filter users by position for each role
   const hiringManagers = users.filter(user =>
     user.position_title?.toLowerCase().includes('manager') ||
@@ -304,7 +299,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="position">Position *</Label>
                 <Select
-                  value={watch("position")}
+                  value={watch("position") || ""}
                   onValueChange={(value) => setValue("position", value)}
                 >
                   <SelectTrigger>
@@ -333,7 +328,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="nature_of_hire">Nature of Hire *</Label>
                 <Select
-                  value={watch("nature_of_hire")}
+                  value={watch("nature_of_hire") || ""}
                   onValueChange={(value) =>
                     setValue("nature_of_hire", value as NatureOfHire)
                   }
@@ -355,7 +350,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="position_type">Position Type *</Label>
                 <Select
-                  value={watch("position_type")}
+                  value={watch("position_type") || ""}
                   onValueChange={(value) =>
                     setValue("position_type", value as PositionType)
                   }
@@ -377,7 +372,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="employment_status">Employment Status *</Label>
                 <Select
-                  value={watch("employment_status")}
+                  value={watch("employment_status") || ""}
                   onValueChange={(value) =>
                     setValue("employment_status", value as EmploymentStatus)
                   }
@@ -399,7 +394,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="department">Department *</Label>
                 <Select
-                  value={watch("department")}
+                  value={watch("department") || ""}
                   onValueChange={(value) => setValue("department", value)}
                 >
                   <SelectTrigger>
@@ -425,7 +420,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 <Select
-                  value={watch("location")}
+                  value={watch("location") || ""}
                   onValueChange={(value) => setValue("location", value)}
                 >
                   <SelectTrigger>
@@ -451,7 +446,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="supervisor">Supervisor *</Label>
                 <Select
-                  value={watch("supervisor")}
+                  value={watch("supervisor") || ""}
                   onValueChange={(value) => setValue("supervisor", value)}
                 >
                   <SelectTrigger>
@@ -480,7 +475,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="fco_number">FCO Number</Label>
                 <Select
-                  value={watch("fco_number")}
+                  value={watch("fco_number") || ""}
                   onValueChange={(value) => setValue("fco_number", value)}
                 >
                   <SelectTrigger>
@@ -590,7 +585,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="office_type">Office Type *</Label>
                 <Select
-                  value={watch("office_type")}
+                  value={watch("office_type") || ""}
                   onValueChange={(value) =>
                     setValue("office_type", value as OfficeType)
                   }
@@ -613,7 +608,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="position_nature">Position Nature *</Label>
                 <Select
-                  value={watch("position_nature")}
+                  value={watch("position_nature") || ""}
                   onValueChange={(value) =>
                     setValue("position_nature", value as PositionNature)
                   }
@@ -708,7 +703,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <Label htmlFor="hiring_manager">Hiring Manager *</Label>
                 <p className="text-xs text-gray-500">Manager of the department requesting the staff</p>
                 <Select
-                  value={watch("hiring_manager")}
+                  value={watch("hiring_manager") || ""}
                   onValueChange={(value) => setValue("hiring_manager", value)}
                 >
                   <SelectTrigger>
@@ -739,7 +734,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <div className="space-y-2">
                   <Label htmlFor="dof">Director of Finance *</Label>
                   <Select
-                    value={watch("dof")}
+                    value={watch("dof") || ""}
                     onValueChange={(value) => setValue("dof", value)}
                   >
                     <SelectTrigger>
@@ -767,7 +762,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <Label htmlFor="hr_reviewer">HR Reviewer *</Label>
                 <p className="text-xs text-gray-500">HR Manager</p>
                 <Select
-                  value={watch("hr_reviewer")}
+                  value={watch("hr_reviewer") || ""}
                   onValueChange={(value) => setValue("hr_reviewer", value)}
                 >
                   <SelectTrigger>
@@ -794,7 +789,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <div className="space-y-2">
                   <Label htmlFor="spm_stl">SPM/STL/Project Director *</Label>
                   <Select
-                    value={watch("spm_stl")}
+                    value={watch("spm_stl") || ""}
                     onValueChange={(value) => setValue("spm_stl", value)}
                   >
                     <SelectTrigger>
@@ -824,7 +819,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 </Label>
                 <p className="text-xs text-gray-500">Director of the Operations department</p>
                 <Select
-                  value={watch("director_of_operations")}
+                  value={watch("director_of_operations") || ""}
                   onValueChange={(value) =>
                     setValue("director_of_operations", value)
                   }
@@ -853,7 +848,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <Label htmlFor="managing_director">Managing Director *</Label>
                 <p className="text-xs text-gray-500">AHNI Managing Director</p>
                 <Select
-                  value={watch("managing_director")}
+                  value={watch("managing_director") || ""}
                   onValueChange={(value) => setValue("managing_director", value)}
                 >
                   <SelectTrigger>

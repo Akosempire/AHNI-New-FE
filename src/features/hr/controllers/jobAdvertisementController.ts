@@ -111,6 +111,37 @@ export const useUpdateJobAdvertisement = (id: string) => {
   return { updateJobAdvertisement, data, isLoading, isSuccess, error };
 };
 
+// Create Job Advertisement from Staffing Requisition
+export const useCreateAdvertFromRequisition = () => {
+  const { callApi, isLoading, isSuccess, error, data } = useApiManager<
+    JobAdvertisement,
+    Error,
+    void
+  >({
+    endpoint: "",  // Will be set dynamically
+    queryKey: ["job-advertisements", "staffing-requisitions"],
+    isAuth: true,
+    method: "POST",
+  });
+
+  const createFromRequisition = async (requisitionId: string) => {
+    try {
+      const response = await AxiosWithToken.post(
+        `${BASE_URL}from-requisition/${requisitionId}/`
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new Error(
+        "Failed to create advertisement: " +
+        ((axiosError.response?.data as any)?.message || "Unknown error")
+      );
+    }
+  };
+
+  return { createFromRequisition, data, isLoading, isSuccess, error };
+};
+
 // Legacy exports for backward compatibility
 export const useGetJobAdvertisementsQuery = useGetJobAdvertisements;
 export const useGetJobAdvertisementQuery = useGetJobAdvertisement;
