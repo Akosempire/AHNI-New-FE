@@ -1,9 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -21,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Loader2, Eye, Edit, Trash2 } from "lucide-react";
+import { Plus, Loader2, Eye, Edit, Trash2, Search, X } from "lucide-react";
 import {
   useGetStaffingRequisitions,
   useDeleteStaffingRequisition,
@@ -47,11 +55,83 @@ export default function StaffingRequisitionsPage() {
     code: string;
   } | null>(null);
 
+  // Filter and search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+
   const { data: requisitions, isLoading } = useGetStaffingRequisitions();
   const { data: currentUser } = useGetUserProfile();
   const deleteMutation = useDeleteStaffingRequisition();
 
   const isSuperUser = currentUser?.data?.is_superuser || false;
+
+  // Extract unique departments and locations for filters
+  const departments = useMemo(() => {
+    if (!requisitions) return [];
+    const uniqueDepts = new Map();
+    requisitions.forEach((req) => {
+      if (req.department?.id) {
+        uniqueDepts.set(req.department.id, req.department.name);
+      }
+    });
+    return Array.from(uniqueDepts.entries()).map(([id, name]) => ({ id, name }));
+  }, [requisitions]);
+
+  const locations = useMemo(() => {
+    if (!requisitions) return [];
+    const uniqueLocs = new Map();
+    requisitions.forEach((req) => {
+      if (req.location?.id) {
+        uniqueLocs.set(req.location.id, req.location.name);
+      }
+    });
+    return Array.from(uniqueLocs.entries()).map(([id, name]) => ({ id, name }));
+  }, [requisitions]);
+
+  // Filter and search logic
+  const filteredRequisitions = useMemo(() => {
+    if (!requisitions) return [];
+
+    return requisitions.filter((req) => {
+      // Search filter
+      const matchesSearch =
+        searchTerm === "" ||
+        req.requisition_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.position.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.department.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Status filter
+      const matchesStatus = statusFilter === "all" || req.status === statusFilter;
+
+      // Department filter
+      const matchesDepartment =
+        departmentFilter === "all" || req.department.id === departmentFilter;
+
+      // Location filter
+      const matchesLocation =
+        locationFilter === "all" ||
+        (req.location?.id && req.location.id === locationFilter);
+
+      return matchesSearch && matchesStatus && matchesDepartment && matchesLocation;
+    });
+  }, [requisitions, searchTerm, statusFilter, departmentFilter, locationFilter]);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setDepartmentFilter("all");
+    setLocationFilter("all");
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters =
+    searchTerm !== "" ||
+    statusFilter !== "all" ||
+    departmentFilter !== "all" ||
+    locationFilter !== "all";
 
   // Handle delete confirmation
   const handleDeleteClick = (id: string, code: string) => {
@@ -117,12 +197,94 @@ export default function StaffingRequisitionsPage() {
         </Button>
       </div>
 
+      {/* Search and Filters */}
+      <Card className="mb-6 p-4">
+        <div className="space-y-4">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by code, position, or department..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Filter Dropdowns */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
+                <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
+                <SelectItem value="APPROVED">Approved</SelectItem>
+                <SelectItem value="REJECTED">Rejected</SelectItem>
+                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Department Filter */}
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Departments" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Location Filter */}
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Locations" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                {locations.map((loc) => (
+                  <SelectItem key={loc.id} value={loc.id}>
+                    {loc.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="gap-2"
+              >
+                <X className="h-4 w-4" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
+
+          {/* Results Count */}
+          <div className="text-sm text-gray-600">
+            Showing {filteredRequisitions.length} of {requisitions?.length || 0} requisitions
+          </div>
+        </div>
+      </Card>
+
       <Card>
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
-        ) : requisitions && requisitions.length > 0 ? (
+        ) : filteredRequisitions && filteredRequisitions.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -137,7 +299,7 @@ export default function StaffingRequisitionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {requisitions.map((req) => (
+              {filteredRequisitions.map((req) => (
                 <TableRow key={req.id}>
                   <TableCell className="font-medium">{req.requisition_code}</TableCell>
                   <TableCell>{format(new Date(req.date), "MMM dd, yyyy")}</TableCell>
@@ -202,8 +364,19 @@ export default function StaffingRequisitionsPage() {
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-500">
-              No requisitions found. Click 'New Requisition' to create one.
+              {hasActiveFilters
+                ? "No requisitions match your search criteria. Try adjusting your filters."
+                : "No requisitions found. Click 'New Requisition' to create one."}
             </p>
+            {hasActiveFilters && (
+              <Button
+                variant="link"
+                onClick={clearFilters}
+                className="mt-2"
+              >
+                Clear all filters
+              </Button>
+            )}
           </div>
         )}
       </Card>
