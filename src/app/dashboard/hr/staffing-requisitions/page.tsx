@@ -29,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Loader2, Eye, Edit, Trash2, Search, X } from "lucide-react";
+import { Plus, Loader2, Eye, Edit, Trash2, Search, X, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import {
   useGetStaffingRequisitions,
   useDeleteStaffingRequisition,
@@ -60,6 +60,8 @@ export default function StaffingRequisitionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [requesterFilter, setRequesterFilter] = useState<string>("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data: requisitions, isLoading } = useGetStaffingRequisitions();
   const { data: currentUser } = useGetUserProfile();
@@ -90,6 +92,20 @@ export default function StaffingRequisitionsPage() {
     return Array.from(uniqueLocs.entries()).map(([id, name]) => ({ id, name }));
   }, [requisitions]);
 
+  const requesters = useMemo(() => {
+    if (!requisitions) return [];
+    const uniqueRequesters = new Map();
+    requisitions.forEach((req) => {
+      if (req.created_by?.id) {
+        const name = req.created_by.first_name && req.created_by.last_name
+          ? `${req.created_by.first_name} ${req.created_by.last_name}`
+          : req.created_by.email || 'Unknown';
+        uniqueRequesters.set(req.created_by.id, name);
+      }
+    });
+    return Array.from(uniqueRequesters.entries()).map(([id, name]) => ({ id, name }));
+  }, [requisitions]);
+
   // Filter and search logic
   const filteredRequisitions = useMemo(() => {
     if (!requisitions) return [];
@@ -114,9 +130,14 @@ export default function StaffingRequisitionsPage() {
         locationFilter === "all" ||
         (req.location?.id && req.location.id === locationFilter);
 
-      return matchesSearch && matchesStatus && matchesDepartment && matchesLocation;
+      // Requester filter
+      const matchesRequester =
+        requesterFilter === "all" ||
+        (req.created_by?.id && req.created_by.id === requesterFilter);
+
+      return matchesSearch && matchesStatus && matchesDepartment && matchesLocation && matchesRequester;
     });
-  }, [requisitions, searchTerm, statusFilter, departmentFilter, locationFilter]);
+  }, [requisitions, searchTerm, statusFilter, departmentFilter, locationFilter, requesterFilter]);
 
   // Clear all filters
   const clearFilters = () => {
@@ -124,6 +145,7 @@ export default function StaffingRequisitionsPage() {
     setStatusFilter("all");
     setDepartmentFilter("all");
     setLocationFilter("all");
+    setRequesterFilter("all");
   };
 
   // Check if any filters are active
@@ -131,7 +153,8 @@ export default function StaffingRequisitionsPage() {
     searchTerm !== "" ||
     statusFilter !== "all" ||
     departmentFilter !== "all" ||
-    locationFilter !== "all";
+    locationFilter !== "all" ||
+    requesterFilter !== "all";
 
   // Handle delete confirmation
   const handleDeleteClick = (id: string, code: string) => {
@@ -200,81 +223,122 @@ export default function StaffingRequisitionsPage() {
       {/* Search and Filters */}
       <Card className="mb-6 p-4">
         <div className="space-y-4">
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search by code, position, or department..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          {/* Search and Filter Button Row */}
+          <div className="flex gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by code, position, or department..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Filter Toggle Button */}
+            <Button
+              variant={showFilters ? "default" : "outline"}
+              onClick={() => setShowFilters(!showFilters)}
+              className="gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+              {hasActiveFilters && !showFilters && (
+                <Badge className="ml-1 bg-red-500 text-white">
+                  {[statusFilter, departmentFilter, locationFilter, requesterFilter].filter(f => f !== "all").length}
+                </Badge>
+              )}
+              {showFilters ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />}
+            </Button>
           </div>
 
-          {/* Filter Dropdowns */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="DRAFT">Draft</SelectItem>
-                <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
-                <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
-                <SelectItem value="APPROVED">Approved</SelectItem>
-                <SelectItem value="REJECTED">Rejected</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Collapsible Filter Dropdowns */}
+          {showFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-4 border-t">
+              {/* Status Filter */}
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
+                  <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
+                  <SelectItem value="APPROVED">Approved</SelectItem>
+                  <SelectItem value="REJECTED">Rejected</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
 
-            {/* Department Filter */}
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Departments" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {/* Department Filter */}
+              <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Departments" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Location Filter */}
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Locations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                {locations.map((loc) => (
-                  <SelectItem key={loc.id} value={loc.id}>
-                    {loc.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {/* Location Filter */}
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Locations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  {locations.map((loc) => (
+                    <SelectItem key={loc.id} value={loc.id}>
+                      {loc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Clear Filters Button */}
-            {hasActiveFilters && (
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="gap-2"
-              >
-                <X className="h-4 w-4" />
-                Clear Filters
-              </Button>
-            )}
-          </div>
+              {/* Requester Filter */}
+              <Select value={requesterFilter} onValueChange={setRequesterFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Requesters" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Requesters</SelectItem>
+                  {requesters.map((req) => (
+                    <SelectItem key={req.id} value={req.id}>
+                      {req.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Clear Filters Button */}
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  onClick={clearFilters}
+                  className="gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* Results Count */}
           <div className="text-sm text-gray-600">
             Showing {filteredRequisitions.length} of {requisitions?.length || 0} requisitions
+            {hasActiveFilters && (
+              <span className="text-blue-600 ml-2">
+                (filtered)
+              </span>
+            )}
           </div>
         </div>
       </Card>
@@ -292,6 +356,7 @@ export default function StaffingRequisitionsPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Position</TableHead>
                 <TableHead>Department</TableHead>
+                <TableHead>Requester</TableHead>
                 <TableHead>Qty</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Progress</TableHead>
@@ -305,6 +370,11 @@ export default function StaffingRequisitionsPage() {
                   <TableCell>{format(new Date(req.date), "MMM dd, yyyy")}</TableCell>
                   <TableCell>{req.position.title}</TableCell>
                   <TableCell>{req.department.name}</TableCell>
+                  <TableCell>
+                    {req.created_by?.first_name && req.created_by?.last_name
+                      ? `${req.created_by.first_name} ${req.created_by.last_name}`
+                      : req.created_by?.email || 'Unknown'}
+                  </TableCell>
                   <TableCell>{req.number_of_staff}</TableCell>
                   <TableCell>
                     <Badge
