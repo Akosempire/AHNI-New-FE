@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -61,6 +62,8 @@ export default function StaffingRequisitionsPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [requesterFilter, setRequesterFilter] = useState<string>("all");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
 
   const { data: requisitions, isLoading } = useGetStaffingRequisitions();
@@ -135,9 +138,14 @@ export default function StaffingRequisitionsPage() {
         requesterFilter === "all" ||
         (req.created_by?.id && req.created_by.id === requesterFilter);
 
-      return matchesSearch && matchesStatus && matchesDepartment && matchesLocation && matchesRequester;
+      // Date range filter
+      const reqDate = new Date(req.date);
+      const matchesFromDate = !fromDate || reqDate >= new Date(fromDate);
+      const matchesToDate = !toDate || reqDate <= new Date(toDate);
+
+      return matchesSearch && matchesStatus && matchesDepartment && matchesLocation && matchesRequester && matchesFromDate && matchesToDate;
     });
-  }, [requisitions, searchTerm, statusFilter, departmentFilter, locationFilter, requesterFilter]);
+  }, [requisitions, searchTerm, statusFilter, departmentFilter, locationFilter, requesterFilter, fromDate, toDate]);
 
   // Clear all filters
   const clearFilters = () => {
@@ -146,6 +154,8 @@ export default function StaffingRequisitionsPage() {
     setDepartmentFilter("all");
     setLocationFilter("all");
     setRequesterFilter("all");
+    setFromDate("");
+    setToDate("");
   };
 
   // Check if any filters are active
@@ -154,7 +164,9 @@ export default function StaffingRequisitionsPage() {
     statusFilter !== "all" ||
     departmentFilter !== "all" ||
     locationFilter !== "all" ||
-    requesterFilter !== "all";
+    requesterFilter !== "all" ||
+    fromDate !== "" ||
+    toDate !== "";
 
   // Handle delete confirmation
   const handleDeleteClick = (id: string, code: string) => {
@@ -246,7 +258,8 @@ export default function StaffingRequisitionsPage() {
               Filters
               {hasActiveFilters && !showFilters && (
                 <Badge className="ml-1 bg-red-500 text-white">
-                  {[statusFilter, departmentFilter, locationFilter, requesterFilter].filter(f => f !== "all").length}
+                  {[statusFilter, departmentFilter, locationFilter, requesterFilter].filter(f => f !== "all").length +
+                   (fromDate ? 1 : 0) + (toDate ? 1 : 0)}
                 </Badge>
               )}
               {showFilters ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />}
@@ -255,7 +268,9 @@ export default function StaffingRequisitionsPage() {
 
           {/* Collapsible Filter Dropdowns */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-4 border-t">
+            <div className="space-y-4 pt-4 border-t">
+              {/* First Row: Status, Department, Location, Requester */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
@@ -316,18 +331,50 @@ export default function StaffingRequisitionsPage() {
                   ))}
                 </SelectContent>
               </Select>
+              </div>
 
-              {/* Clear Filters Button */}
-              {hasActiveFilters && (
-                <Button
-                  variant="outline"
-                  onClick={clearFilters}
-                  className="gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  Clear All
-                </Button>
-              )}
+              {/* Second Row: Date Range and Clear Button */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* From Date */}
+                <div className="space-y-2">
+                  <Label htmlFor="from-date" className="text-sm font-medium">
+                    From Date
+                  </Label>
+                  <Input
+                    id="from-date"
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                  />
+                </div>
+
+                {/* To Date */}
+                <div className="space-y-2">
+                  <Label htmlFor="to-date" className="text-sm font-medium">
+                    To Date
+                  </Label>
+                  <Input
+                    id="to-date"
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                  />
+                </div>
+
+                {/* Clear Filters Button */}
+                {hasActiveFilters && (
+                  <div className="flex items-end">
+                    <Button
+                      variant="outline"
+                      onClick={clearFilters}
+                      className="gap-2 w-full"
+                    >
+                      <X className="h-4 w-4" />
+                      Clear All Filters
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
