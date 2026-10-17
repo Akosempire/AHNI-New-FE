@@ -304,6 +304,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="position">Position *</Label>
                 <Select
+                  value={watch("position")}
                   onValueChange={(value) => setValue("position", value)}
                 >
                   <SelectTrigger>
@@ -332,6 +333,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="nature_of_hire">Nature of Hire *</Label>
                 <Select
+                  value={watch("nature_of_hire")}
                   onValueChange={(value) =>
                     setValue("nature_of_hire", value as NatureOfHire)
                   }
@@ -353,6 +355,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="position_type">Position Type *</Label>
                 <Select
+                  value={watch("position_type")}
                   onValueChange={(value) =>
                     setValue("position_type", value as PositionType)
                   }
@@ -374,6 +377,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="employment_status">Employment Status *</Label>
                 <Select
+                  value={watch("employment_status")}
                   onValueChange={(value) =>
                     setValue("employment_status", value as EmploymentStatus)
                   }
@@ -395,6 +399,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="department">Department *</Label>
                 <Select
+                  value={watch("department")}
                   onValueChange={(value) => setValue("department", value)}
                 >
                   <SelectTrigger>
@@ -420,6 +425,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 <Select
+                  value={watch("location")}
                   onValueChange={(value) => setValue("location", value)}
                 >
                   <SelectTrigger>
@@ -445,6 +451,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="supervisor">Supervisor *</Label>
                 <Select
+                  value={watch("supervisor")}
                   onValueChange={(value) => setValue("supervisor", value)}
                 >
                   <SelectTrigger>
@@ -473,6 +480,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="fco_number">FCO Number</Label>
                 <Select
+                  value={watch("fco_number")}
                   onValueChange={(value) => setValue("fco_number", value)}
                 >
                   <SelectTrigger>
@@ -559,6 +567,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="flex items-center space-x-2 pt-8">
                 <Checkbox
                   id="working_tools_available"
+                  checked={watch("working_tools_available")}
                   onCheckedChange={(checked) =>
                     setValue("working_tools_available", checked as boolean)
                   }
@@ -581,6 +590,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="office_type">Office Type *</Label>
                 <Select
+                  value={watch("office_type")}
                   onValueChange={(value) =>
                     setValue("office_type", value as OfficeType)
                   }
@@ -603,6 +613,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               <div className="space-y-2">
                 <Label htmlFor="position_nature">Position Nature *</Label>
                 <Select
+                  value={watch("position_nature")}
                   onValueChange={(value) =>
                     setValue("position_nature", value as PositionNature)
                   }
@@ -697,6 +708,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <Label htmlFor="hiring_manager">Hiring Manager *</Label>
                 <p className="text-xs text-gray-500">Manager of the department requesting the staff</p>
                 <Select
+                  value={watch("hiring_manager")}
                   onValueChange={(value) => setValue("hiring_manager", value)}
                 >
                   <SelectTrigger>
@@ -726,7 +738,10 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               {watchPositionNature === PositionNature.NEW && (
                 <div className="space-y-2">
                   <Label htmlFor="dof">Director of Finance *</Label>
-                  <Select onValueChange={(value) => setValue("dof", value)}>
+                  <Select
+                    value={watch("dof")}
+                    onValueChange={(value) => setValue("dof", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Director of Finance" />
                     </SelectTrigger>
@@ -752,6 +767,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <Label htmlFor="hr_reviewer">HR Reviewer *</Label>
                 <p className="text-xs text-gray-500">HR Manager</p>
                 <Select
+                  value={watch("hr_reviewer")}
                   onValueChange={(value) => setValue("hr_reviewer", value)}
                 >
                   <SelectTrigger>
@@ -777,7 +793,10 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
               {watchOfficeType === OfficeType.STATE && (
                 <div className="space-y-2">
                   <Label htmlFor="spm_stl">SPM/STL/Project Director *</Label>
-                  <Select onValueChange={(value) => setValue("spm_stl", value)}>
+                  <Select
+                    value={watch("spm_stl")}
+                    onValueChange={(value) => setValue("spm_stl", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select SPM/STL/Project Director" />
                     </SelectTrigger>
@@ -805,6 +824,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 </Label>
                 <p className="text-xs text-gray-500">Director of the Operations department</p>
                 <Select
+                  value={watch("director_of_operations")}
                   onValueChange={(value) =>
                     setValue("director_of_operations", value)
                   }
@@ -833,6 +853,7 @@ export default function EditStaffingRequisitionForm({ requisitionId }: EditStaff
                 <Label htmlFor="managing_director">Managing Director *</Label>
                 <p className="text-xs text-gray-500">AHNI Managing Director</p>
                 <Select
+                  value={watch("managing_director")}
                   onValueChange={(value) => setValue("managing_director", value)}
                 >
                   <SelectTrigger>
