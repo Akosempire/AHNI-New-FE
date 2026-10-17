@@ -67,7 +67,7 @@ export default function StaffingRequisitionDetailView({
   // API Hooks
   const { data: requisition, isLoading } = useGetStaffingRequisition(requisitionId);
   const { data: currentUser } = useGetUserProfile();
-  const isSuperUser = currentUser?.is_superuser || false;
+  const isSuperUser = currentUser?.data?.is_superuser || false;
   const approveMutation = useApproveRequisition(requisitionId);
   const rejectMutation = useRejectRequisition(requisitionId);
   const submitMutation = useSubmitForReview(requisitionId);
