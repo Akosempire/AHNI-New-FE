@@ -19,22 +19,22 @@ const PORTAL_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="relative z-0 -mt-[var(--radius-sheet)] bg-[var(--ink)] pt-[calc(var(--radius-sheet)+96px)] text-white">
+    <footer className="relative z-0 -mt-[var(--radius-sheet)] bg-[var(--ink)] pt-[calc(var(--radius-sheet)+56px)] md:pt-[calc(var(--radius-sheet)+96px)] text-white">
       <div className="wrap">
-        <div className="grid gap-14 md:grid-cols-[1.3fr_0.8fr_1.3fr]">
+        <div className="grid gap-10 md:grid-cols-[1.3fr_0.8fr_1.3fr] md:gap-14">
           <div>
             <p className="t-eyebrow !text-white/50">Browse</p>
-            <ul className="space-y-2">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 md:block md:space-y-2">
               {BROWSE.map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="text-[24px] font-bold tracking-[-0.025em] transition-colors hover:text-[var(--primary-text)]">
+                  <Link href={l.href} className="text-[18px] font-bold tracking-[-0.025em] transition-colors hover:text-[var(--primary-text)] md:text-[24px]">
                     {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-          <div>
+          <div className="hidden md:block">
             <p className="t-eyebrow !text-white/50">Portals</p>
             <ul className="space-y-2.5">
               {PORTAL_LINKS.map((l) => (
@@ -69,7 +69,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <Heartbeat className="mt-20 h-auto w-full opacity-60" color="rgba(255,255,255,.35)" />
+        <Heartbeat className="mt-12 h-auto w-full opacity-60 md:mt-20" color="rgba(255,255,255,.35)" />
 
         <div className="flex flex-col gap-4 border-t border-white/10 py-8 text-[13px] text-white/55 md:flex-row md:items-center md:justify-between">
           <p>

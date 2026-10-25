@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { APPROACH, FOCUS_AREAS, OPP_TYPES, STORIES } from "@/components/public/content";
+import { APPROACH, FOCUS_AREAS, STORIES } from "@/components/public/content";
 import { FocusIcon, Heartbeat } from "@/components/public/icons";
-import { OppCard, OppCardSkeleton } from "@/components/public/OppCard";
 import { FinalCTA, PartnerMarquee, StoryCard } from "@/components/public/sections";
 import {
   AccordionItem,
@@ -15,11 +14,12 @@ import {
   Eyebrow,
   Pill,
   Rail,
+  ScrollText,
   Sheet,
   cx,
   reveal,
 } from "@/components/public/ui";
-import { useOpportunities } from "@/components/public/useOpportunities";
+import { deadlineText, useOpportunities } from "@/components/public/useOpportunities";
 
 /* ---------------- Hero ---------------- */
 const P = {
@@ -118,7 +118,7 @@ function Hero() {
 /* ---------------- Page ---------------- */
 export default function HomePage() {
   const { items, isLoading, isError } = useOpportunities({ size: 100 });
-  const featured = items.slice(0, 8);
+  const latest = items.slice(0, 4);
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
     items.forEach((o) => (c[o.type] = (c[o.type] ?? 0) + 1));
@@ -128,71 +128,68 @@ export default function HomePage() {
   const [openApproach, setOpenApproach] = useState(0);
 
   const countCards = [
-    { label: "Jobs open now", value: counts.JOB ?? 0 },
-    { label: "Consultancies & ad-hoc roles", value: (counts.CONSULTANT ?? 0) + (counts.ADHOC ?? 0) },
-    { label: "Procurement calls (EOI, RFQ, RFP)", value: (counts.EOI ?? 0) + (counts.RFQ ?? 0) + (counts.RFP ?? 0) },
+    { label: "Jobs", short: "Jobs", value: counts.JOB ?? 0, href: "/opportunities?type=JOB" },
+    { label: "Consultancies", short: "Consulting", value: (counts.CONSULTANT ?? 0) + (counts.ADHOC ?? 0), href: "/opportunities?type=CONSULTANT" },
+    { label: "Procurement", short: "Tenders", value: (counts.EOI ?? 0) + (counts.RFQ ?? 0) + (counts.RFP ?? 0), href: "/opportunities?type=EOI" },
   ];
 
   return (
     <>
       <Hero />
 
-      {/* Intro statement */}
-      <Sheet tone="white" z={19} id="intro" ariaLabel="Who we are">
-        <div className="wrap text-center">
-          <Eyebrow>Healthy communities are built by communities</Eyebrow>
-          <p {...reveal()} className="t-statement mx-auto max-w-[980px]">
-            We partner with government, donors and communities to{" "}
-            <span className="hl">end HIV, TB and malaria</span>, protect mothers and children, and build health
-            systems that keep working long after a project ends.
-          </p>
-          <div {...reveal(1)} className="mt-12 flex flex-wrap items-center justify-center gap-5">
-            <div className="flex -space-x-4">
-              {[P.a, P.c, P.b].map((src) => (
-                <span key={src} className="relative h-14 w-14 overflow-hidden rounded-full border-[3px] border-white">
-                  <Image src={src} alt="" fill sizes="56px" className="object-cover" />
-                </span>
-              ))}
-            </div>
-            <Pill href="/about" tone="primary">About AHNi</Pill>
-          </div>
-        </div>
+      {/* Partners – straight after the hero */}
+      <Sheet tone="white" z={19} ariaLabel="Partners" className="!pb-12 md:!pb-16" style={{ paddingTop: "calc(var(--radius-sheet) + 40px)" }}>
+        <p className="t-eyebrow !mb-6 text-center">Trusted by government &amp; development partners</p>
+        <PartnerMarquee className="[&_li]:!h-[104px] [&_li]:!w-[180px] [&_li]:bg-[var(--mist)]" />
       </Sheet>
 
-      {/* Focus areas */}
-      <Sheet tone="mist" z={18} ariaLabel="Focus areas">
-        <div className="wrap relative">
-          <Aurora className="-left-24 -top-16 h-[320px] w-[520px]" />
-          <div className="relative">
-            <Eyebrow>Where we work</Eyebrow>
-            <h2 {...reveal()} className="t-h2">Focus Areas</h2>
-          </div>
-          <ul className="relative mt-14 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-            {FOCUS_AREAS.slice(0, 8).map((f, i) => (
-              <li key={f.slug} {...reveal(i % 4)}>
-                <Link href={`/focus-areas#${f.slug}`} className="group block">
-                  <span className="relative grid h-[120px] place-items-center overflow-hidden rounded-[24px] bg-white text-[#8b8b95] transition-colors duration-300 group-hover:bg-[var(--accent)] group-hover:text-[var(--ink)] md:h-[140px]">
-                    <FocusIcon name={f.icon} size={64} className="transition-transform duration-500 group-hover:scale-110" />
-                    <span className="arrow-btn sm chip-bg absolute right-3 top-3">
-                      <ArrowUpRight size={14} />
+      {/* Intro statement + compact focus areas */}
+      <Sheet tone="mist" z={18} id="intro" ariaLabel="Who we are">
+        <div className="wrap">
+          <Eyebrow className="text-center">Healthy communities are built by communities</Eyebrow>
+          <ScrollText
+            className="t-statement mx-auto max-w-[980px] text-center"
+            parts={[
+              "We partner with government, donors and communities to ",
+              { t: "end HIV, TB and malaria,", hl: true },
+              " protect mothers and children, and build health systems that keep working long after a project ends.",
+            ]}
+          />
+
+          <div className="mt-14 md:mt-20">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <p className="t-eyebrow !mb-0">Focus areas</p>
+              <Link href="/focus-areas" className="text-[13px] font-bold uppercase tracking-[0.06em] underline-offset-4 hover:underline">
+                See all →
+              </Link>
+            </div>
+            <ul className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
+              {FOCUS_AREAS.slice(0, 8).map((f, i) => (
+                <li key={f.slug} className="snap-start" {...reveal(i % 4)}>
+                  <Link
+                    href={`/focus-areas#${f.slug}`}
+                    className="group flex h-[56px] items-center gap-3 whitespace-nowrap rounded-full bg-white pl-2 pr-5 transition-colors duration-300 hover:bg-[var(--accent)]"
+                  >
+                    <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--mist)] transition-colors group-hover:bg-white">
+                      <FocusIcon name={f.icon} size={20} />
                     </span>
-                  </span>
-                  <span className="mt-3 block text-[16px] font-bold tracking-[-0.015em]">{f.short}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                    <span className="text-[15px] font-bold tracking-[-0.01em]">{f.short}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </Sheet>
 
       {/* Impact stories carousel */}
       <Sheet tone="white" z={17} ariaLabel="Impact stories">
-        <div className="wrap mb-12 flex flex-wrap items-end justify-between gap-6">
+        <div className="wrap mb-10 flex flex-wrap items-end justify-between gap-6 md:mb-12">
           <div>
             <Eyebrow>Impact stories</Eyebrow>
             <h2 {...reveal()} className="t-h2">Our Work</h2>
           </div>
-          <Pill href="/focus-areas" tone="chip">All focus areas</Pill>
+          <Pill href="/about" tone="chip" className="hidden md:inline-flex">About AHNi</Pill>
         </div>
         <Rail label="Impact stories">
           {STORIES.map((s, i) => (
@@ -201,82 +198,112 @@ export default function HomePage() {
         </Rail>
       </Sheet>
 
-      {/* Reach orbit */}
-      <Sheet tone="mist" z={16} ariaLabel="Our reach">
-        <div className="wrap grid items-center gap-16 lg:grid-cols-2">
-          <ReachOrbit />
+      {/* Compact live opportunities */}
+      <Sheet tone="ink" z={16} ariaLabel="Open opportunities">
+        <div className="wrap grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 [&>*]:min-w-0">
           <div>
+            <Eyebrow>Open right now · live from our portal</Eyebrow>
+            <ScrollText
+              as="h2"
+              className="text-[clamp(34px,4.4vw,56px)] font-bold leading-[1.02] tracking-[-0.045em]"
+              parts={["Find your ", { t: "place", hl: true }, " in the work"]}
+            />
+            <div className="mt-8 grid grid-cols-3 gap-2 md:gap-3">
+              {countCards.map((c) => (
+                <Link key={c.label} href={c.href} className="rounded-[22px] bg-[var(--ink-2)] p-4 transition-colors hover:bg-[#33333b] md:p-6">
+                  <span className="block text-[clamp(34px,4vw,52px)] font-bold leading-none tracking-[-0.05em]">
+                    <CountUp value={haveData ? c.value : null} />
+                  </span>
+                  <span className="mt-2 block text-[11px] font-bold uppercase tracking-[0.04em] text-white/60 md:text-[13px] md:tracking-[0.06em]"><span className="md:hidden">{c.short}</span><span className="hidden md:inline">{c.label}</span></span>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-8 hidden lg:block">
+              <Pill href="/opportunities" tone="accent">All opportunities</Pill>
+            </div>
+          </div>
+
+          <div>
+            <ul className="divide-y divide-white/10 border-y border-white/10">
+              {isLoading &&
+                [0, 1, 2].map((i) => (
+                  <li key={i} className="py-5" aria-hidden="true">
+                    <div className="h-5 w-3/4 animate-pulse rounded bg-white/10" />
+                    <div className="mt-3 h-3 w-1/3 animate-pulse rounded bg-white/10" />
+                  </li>
+                ))}
+              {!isLoading &&
+                latest.map((o) => (
+                  <li key={o.id}>
+                    <Link href={o.href} className="group flex items-center gap-4 py-5">
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[18px] font-bold tracking-[-0.02em] md:text-[20px]">{o.title}</span>
+                        <span className="mt-1 block text-[13px] text-white/60">
+                          {o.typeLabel} · {o.location} · {deadlineText(o.deadline)}
+                        </span>
+                      </span>
+                      <span className="arrow-btn sm"><ArrowUpRight size={14} /></span>
+                    </Link>
+                  </li>
+                ))}
+              {!isLoading && latest.length === 0 && (
+                <li className="py-8 text-white/70">
+                  {isError ? "We couldn't load opportunities right now – please try again shortly." : "No open opportunities right now – new roles are posted regularly."}
+                </li>
+              )}
+            </ul>
+            <div className="mt-8 lg:hidden">
+              <Pill href="/opportunities" tone="accent">All opportunities</Pill>
+            </div>
+          </div>
+        </div>
+      </Sheet>
+
+      {/* Reach orbit */}
+      <Sheet tone="mist" z={15} ariaLabel="Our reach">
+        <div className="wrap grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="order-2 lg:order-1">
+            <ReachOrbit />
+          </div>
+          <div className="order-1 lg:order-2">
             <Eyebrow>Community-led. Evidence-driven.</Eyebrow>
-            <p {...reveal()} className="t-statement">
-              From our Abuja headquarters we work across <span className="hl">five geopolitical zones</span> – from
-              federal ministries to the last-mile community health worker.
-            </p>
-            <div {...reveal(1)} className="mt-10">
+            <ScrollText
+              className="t-statement"
+              parts={[
+                "From our Abuja headquarters we work across ",
+                { t: "five geopolitical zones", hl: true },
+                " – from federal ministries to the last-mile community health worker.",
+              ]}
+            />
+            <div className="mt-8 md:mt-10">
               <Pill href="/contact" tone="ink">Contact us</Pill>
             </div>
           </div>
         </div>
       </Sheet>
 
-      {/* Featured opportunities */}
-      <Sheet tone="white" z={15} ariaLabel="Featured opportunities">
-        <div className="wrap mb-12">
-          <Eyebrow>Find your next role</Eyebrow>
-          <h2 {...reveal()} className="t-h2">Opportunities</h2>
-        </div>
-        <div className="[&_article]:bg-[var(--mist)] [&_.animate-pulse]:bg-[var(--mist)]">
-          {isLoading ? (
-            <Rail label="Loading opportunities" controls={false}>
-              {[0, 1, 2].map((i) => (
-                <OppCardSkeleton key={i} className="w-[min(380px,calc(100vw-48px))]" />
-              ))}
-            </Rail>
-          ) : featured.length ? (
-            <Rail label="Featured opportunities">
-              {featured.map((o) => (
-                <OppCard key={o.id} o={o} className="w-[min(380px,calc(100vw-48px))]" />
-              ))}
-            </Rail>
-          ) : (
-            <div className="wrap">
-              <div className="rounded-[var(--radius-card)] bg-[var(--mist)] p-10 text-center">
-                <p className="text-[24px] font-bold tracking-[-0.02em]">
-                  {isError ? "We couldn't load opportunities right now." : "No open opportunities right now."}
-                </p>
-                <p className="mt-2 text-[var(--ink-soft)]">
-                  {isError ? "Please try again in a moment." : "New roles and procurement calls are posted regularly – check back soon."}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="wrap mt-10">
-          <Pill href="/opportunities" tone="accent">All opportunities</Pill>
-        </div>
-      </Sheet>
-
       {/* How we work */}
-      <Sheet tone="mist" z={14} ariaLabel="How we work">
+      <Sheet tone="white" z={14} ariaLabel="How we work">
         <div className="wrap grid items-start gap-16 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="relative mx-auto h-[440px] w-full max-w-[460px] md:h-[540px]" aria-hidden="true">
+          <div className="relative mx-auto hidden h-[540px] w-full max-w-[460px] lg:block" aria-hidden="true">
             <Aurora className="inset-10" />
             <div {...reveal(0)} className="absolute left-0 top-0 h-[58%] w-[62%] overflow-hidden rounded-[32px]">
-              <Image src={P.b} alt="" fill sizes="300px" className="object-cover" />
+              <Image src={P.b} alt="" fill sizes="300px" className="kenburns object-cover" />
             </div>
             <div {...reveal(1)} className="absolute right-0 top-[18%] h-[46%] w-[48%] overflow-hidden rounded-[32px]">
               <Image src={P.c} alt="" fill sizes="240px" className="object-cover" />
             </div>
             <div {...reveal(2)} className="absolute bottom-0 left-[16%] h-[40%] w-[56%] overflow-hidden rounded-[32px]">
-              <Image src={P.a} alt="" fill sizes="280px" className="object-cover" />
+              <Image src={P.a} alt="" fill sizes="280px" className="kenburns object-cover" />
             </div>
           </div>
           <div>
             <Eyebrow>How we work</Eyebrow>
-            <p {...reveal()} className="t-statement !text-[clamp(26px,3vw,40px)]">
-              Lasting change needs more than a single intervention. We combine technical expertise with local
-              ownership.
-            </p>
-            <div className="mt-10 border-t border-[var(--line)]">
+            <ScrollText
+              className="t-statement !text-[clamp(26px,3vw,40px)]"
+              parts={["Lasting change needs more than a single intervention. We combine ", { t: "technical expertise", hl: true }, " with local ownership."]}
+            />
+            <div className="mt-8 border-t border-[var(--line)] md:mt-10">
               {APPROACH.map((a, i) => (
                 <AccordionItem
                   key={a.title}
@@ -297,7 +324,7 @@ export default function HomePage() {
       <Sheet tone="ink" z={13} ariaLabel="Our mission">
         <div className="wrap">
           <div className="grid gap-12 lg:grid-cols-[220px_1fr]">
-            <div {...reveal()} className="relative h-[200px] w-[180px] md:h-[240px] md:w-[210px]">
+            <div {...reveal()} className="relative hidden h-[240px] w-[210px] lg:block">
               <div className="relative h-full w-full overflow-hidden rounded-[28px]">
                 <Image src={P.c} alt="" fill sizes="210px" className="object-cover" />
               </div>
@@ -307,103 +334,90 @@ export default function HomePage() {
             </div>
             <div>
               <Eyebrow>Our mission</Eyebrow>
-              <h2 {...reveal()} className="text-[clamp(38px,5.4vw,72px)] font-bold leading-[1] tracking-[-0.05em]">
-                Health is built in <span className="hl">communities</span>, not only in clinics
-              </h2>
+              <ScrollText
+                as="h2"
+                className="text-[clamp(36px,5.4vw,72px)] font-bold leading-[1] tracking-[-0.05em]"
+                parts={["Health is built in ", { t: "communities,", hl: true }, " not only in clinics"]}
+              />
               <div className="mt-8 grid max-w-[860px] gap-6 md:grid-cols-2">
-                <p className="t-body !text-[18px]">
+                <p className="t-body !text-[17px] md:!text-[18px]">
                   Our mission is improved quality of life for people – especially vulnerable groups – through
                   inclusive and innovative community-led programming.
                 </p>
-                <p className="t-body !text-[18px]">
+                <p className="t-body hidden !text-[18px] md:block">
                   Our vision is a healthy and safe society where everyone thrives, with equitable access to
                   quality healthcare and opportunities for sustainable development.
                 </p>
               </div>
-              <p className="mt-8 text-[13px] font-bold uppercase tracking-[0.1em] text-white/60">
-                Achieving Health Nigeria Initiative · Abuja
-              </p>
             </div>
           </div>
 
-          <div className="mt-16 grid gap-4 md:grid-cols-3">
+          <div className="mt-12 grid grid-cols-3 gap-2 md:mt-16 md:gap-4">
             {[
-              { v: "2009", t: "Founded to give Nigeria's public health sector dedicated technical support." },
-              { v: "5", t: "Geopolitical zones where our programmes operate, coordinated from Abuja." },
-              { v: "10+", t: "Government and international partners, including the Global Fund, USAID and UNICEF." },
+              { v: "2009", s: "Founded", t: "Founded to give Nigeria's public health sector dedicated technical support." },
+              { v: "5", s: "Zones", t: "Geopolitical zones where our programmes operate, coordinated from Abuja." },
+              { v: "10+", s: "Partners", t: "Government and international partners, including the Global Fund, USAID and UNICEF." },
             ].map((s, i) => (
-              <div key={s.v} {...reveal(i)} className="rounded-[28px] bg-[var(--ink-2)] p-8">
-                <div className="text-[clamp(48px,5vw,68px)] font-bold leading-none tracking-[-0.05em]">{s.v}</div>
-                <p className="mt-5 text-[16px] leading-relaxed text-white/70">{s.t}</p>
+              <div key={s.v} {...reveal(i)} className="rounded-[22px] bg-[var(--ink-2)] p-4 md:rounded-[28px] md:p-8">
+                <div className="text-[clamp(30px,5vw,68px)] font-bold leading-none tracking-[-0.05em]">{s.v}</div>
+                <p className="mt-2 text-[12px] font-bold uppercase tracking-[0.06em] text-white/60 md:hidden">{s.s}</p>
+                <p className="mt-5 hidden text-[16px] leading-relaxed text-white/70 md:block">{s.t}</p>
               </div>
             ))}
           </div>
-          <div className="mt-12 text-center">
+          <div className="mt-10 text-center md:mt-12">
             <Pill href="/contact?type=partnership" tone="primary">Partner with us</Pill>
           </div>
         </div>
       </Sheet>
 
-      {/* Live numbers + partners */}
-      <Sheet tone="mist" z={12} ariaLabel="Open right now">
-        <div className="wrap text-center">
-          <Eyebrow>Open right now</Eyebrow>
-          <h2 {...reveal()} className="t-statement mx-auto max-w-[760px]">Ways to join the work, live from our portal</h2>
-          <div className="mt-12 grid gap-4 md:grid-cols-3">
-            {countCards.map((c, i) => (
-              <div key={c.label} {...reveal(i)} className="rounded-[28px] bg-white p-8 text-left">
-                <div className="text-[clamp(52px,6vw,80px)] font-bold leading-none tracking-[-0.055em]">
-                  <CountUp value={haveData ? c.value : null} />
-                </div>
-                <div className="my-4 h-px bg-[var(--line)]" />
-                <p className="text-[16px] font-medium text-[var(--ink-soft)]">{c.label}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10">
-            <Pill href="/opportunities" tone="primary">Browse opportunities</Pill>
-          </div>
-        </div>
-        <div className="mt-24">
-          <p className="t-eyebrow text-center">Trusted by government & development partners</p>
-          <PartnerMarquee className="mt-6" />
-        </div>
-      </Sheet>
-
-      {/* Get involved */}
-      <Sheet tone="white" z={11} ariaLabel="Get involved">
-        <div className="wrap mb-12 flex flex-wrap items-end justify-between gap-6">
+      {/* Get involved – continuously moving cards */}
+      <Sheet tone="white" z={12} ariaLabel="Get involved">
+        <div className="wrap mb-10 flex flex-wrap items-end justify-between gap-6 md:mb-12">
           <div>
             <Eyebrow>Get involved</Eyebrow>
             <h2 {...reveal()} className="t-h2">Work With Us</h2>
           </div>
+          <Pill href="/opportunities" tone="ink" className="hidden md:inline-flex">All opportunities</Pill>
         </div>
-        <Rail label="Ways to work with AHNi">
-          {ENGAGE.map((e) => (
-            <Link key={e.title} href={e.href} className="group block w-[min(400px,calc(100vw-48px))]">
-              <span className="relative block aspect-video overflow-hidden rounded-[32px]">
-                <Image src={e.img} alt="" fill sizes="400px" className="object-cover transition-transform duration-700 group-hover:scale-105" />
-                <span className="arrow-btn absolute right-4 top-4"><ArrowUpRight /></span>
-              </span>
-              <span className="mt-5 block text-[13px] font-bold uppercase tracking-[0.08em]">
-                {e.who} <span className="font-medium text-[var(--ink-soft)]">· {e.via}</span>
-              </span>
-              <span className="mt-2 block text-[26px] font-bold leading-[1.12] tracking-[-0.03em]">{e.title}</span>
-              <span className="mt-4 flex flex-wrap gap-2">
-                {e.tags.map((t) => (
-                  <span key={t} className="chip !h-8">{t}</span>
-                ))}
-              </span>
-            </Link>
-          ))}
-        </Rail>
-        <div className="wrap mt-10">
-          <Pill href="/opportunities" tone="ink">All opportunities</Pill>
-        </div>
+        <EngageMarquee />
       </Sheet>
 
       <FinalCTA z={10} />
     </>
+  );
+}
+
+function EngageMarquee() {
+  const row = [...ENGAGE, ...ENGAGE];
+  return (
+    <div className="marquee-host overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_6%,#000_94%,transparent)]">
+      <ul className="marquee-cards flex w-max gap-6 py-2">
+        {row.map((e, i) => {
+          const dup = i >= ENGAGE.length;
+          return (
+            <li key={`${e.title}-${i}`} aria-hidden={dup || undefined}>
+              <Link href={e.href} tabIndex={dup ? -1 : undefined} className="group block w-[280px] transition-transform duration-500 hover:-translate-y-2 md:w-[380px]">
+                <span className="relative block aspect-[4/3] overflow-hidden rounded-[28px] md:aspect-video md:rounded-[32px]">
+                  <Image src={e.img} alt="" fill sizes="380px" className="kenburns object-cover" style={{ animationDelay: `${-i * 3}s` }} />
+                  <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+                  <span className="absolute bottom-4 left-4 flex flex-wrap gap-1.5">
+                    {e.tags.map((t) => (
+                      <span key={t} className="chip chip-glass !h-7 !px-3 !text-[11px]">{t}</span>
+                    ))}
+                  </span>
+                  <span className="arrow-btn absolute right-4 top-4"><ArrowUpRight /></span>
+                </span>
+                <span className="mt-4 block text-[12px] font-bold uppercase tracking-[0.08em]">
+                  {e.who} <span className="font-medium text-[var(--ink-soft)]">· {e.via}</span>
+                </span>
+                <span className="mt-1.5 block text-[22px] font-bold leading-[1.15] tracking-[-0.03em] md:text-[26px]">{e.title}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -457,7 +471,7 @@ function ReachOrbit() {
     { src: P.b, x: "38%", y: "96%" },
   ];
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[520px]" aria-hidden="true">
+    <div className="relative mx-auto aspect-square w-full max-w-[340px] md:max-w-[520px]" aria-hidden="true">
       <Aurora className="inset-[12%]" />
       <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full">
         <g className="orbit-spin" style={{ transformBox: "fill-box" } as any}>

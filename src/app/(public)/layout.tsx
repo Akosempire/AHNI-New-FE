@@ -4,6 +4,7 @@ import "./public.css";
 import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
 import CookieBanner from "@/components/public/CookieBanner";
+import MobileDock from "@/components/public/MobileDock";
 import { RevealRoot } from "@/components/public/ui";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <Header />
       <main id="main">{children}</main>
       <Footer />
+      <MobileDock />
       <CookieBanner />
       <RevealRoot />
     </div>

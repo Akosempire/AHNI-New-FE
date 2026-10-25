@@ -311,3 +311,73 @@ export function AccordionItem({
     </div>
   );
 }
+
+/* ---------- Scroll-linked text: words fill from grey to ink as you scroll ---------- */
+export type TextPart = string | { t: string; hl?: boolean };
+export function ScrollText({
+  parts,
+  className,
+  as: Tag = "p",
+}: {
+  parts: TextPart[];
+  className?: string;
+  as?: "p" | "h2" | "h3";
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const words: { w: string; hl: boolean }[] = [];
+  parts.forEach((p) => {
+    const t = typeof p === "string" ? p : p.t;
+    const hl = typeof p !== "string" && !!p.hl;
+    t.split(/(\s+)/).forEach((w) => w && words.push({ w, hl }));
+  });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const spans = Array.from(el.querySelectorAll<HTMLElement>("[data-w]"));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      spans.forEach((s) => s.setAttribute("data-on", ""));
+      return;
+    }
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // starts filling when the top reaches 85% of the viewport, done when the bottom reaches 45%
+      const start = vh * 0.85;
+      const end = vh * 0.45;
+      const p = Math.min(1, Math.max(0, (start - r.top) / (start - end + r.height)));
+      const lit = Math.round(p * spans.length);
+      spans.forEach((s, i) => (i < lit ? s.setAttribute("data-on", "") : s.removeAttribute("data-on")));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <Tag ref={ref as any} className={cx("scroll-text", className)}>
+      <span className="sr-only">{words.map((x) => x.w).join("")}</span>
+      <span aria-hidden="true">
+        {words.map((x, i) =>
+          /^\s+$/.test(x.w) ? (
+            x.w
+          ) : (
+            <span key={i} data-w="" className={x.hl ? "is-hl" : undefined}>
+              {x.w}
+            </span>
+          )
+        )}
+      </span>
+    </Tag>
+  );
+}

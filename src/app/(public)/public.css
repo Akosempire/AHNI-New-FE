@@ -355,3 +355,40 @@
   margin: 0;
   border: 0;
 }
+
+/* Scroll-linked text fill */
+.ahni-public .scroll-text [data-w] { color: #c9c9d2; transition: color 0.25s ease; }
+.ahni-public .scroll-text [data-w][data-on] { color: var(--ink); }
+.ahni-public .scroll-text [data-w].is-hl[data-on] { color: var(--primary-text-light); }
+.ahni-public .is-ink .scroll-text [data-w] { color: rgba(255,255,255,.22); }
+.ahni-public .is-ink .scroll-text [data-w][data-on] { color: #fff; }
+.ahni-public .is-ink .scroll-text [data-w].is-hl[data-on] { color: var(--primary-text); }
+
+/* Slow Ken Burns zoom for imagery in motion sections */
+@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.12) translate(-2%, -2%); } }
+.ahni-public .kenburns { animation: kenburns 14s ease-in-out infinite alternate; }
+
+/* Card marquee (Work With Us) */
+@keyframes marquee-cards { to { transform: translateX(calc(-50% - 12px)); } }
+.ahni-public .marquee-cards { animation: marquee-cards 55s linear infinite; }
+.ahni-public .marquee-host:hover .marquee-cards,
+.ahni-public .marquee-host:focus-within .marquee-cards { animation-play-state: paused; }
+
+/* Tighter vertical rhythm on phones so the page isn't endless */
+@media (max-width: 767px) {
+  .ahni-public .sheet { padding-block: 64px; }
+  .ahni-public .sheet + .sheet,
+  .ahni-public .sheet + .sheet-under { padding-top: calc(64px + var(--radius-sheet)); }
+  .ahni-public .t-h2 { font-size: 46px; }
+}
+
+/* Let Tailwind's responsive display utilities win over component display rules */
+.ahni-public .pill.hidden,
+.ahni-public .arrow-btn.hidden { display: none; }
+@media (min-width: 768px) {
+  .ahni-public .pill.md\:inline-flex { display: inline-flex; }
+  .ahni-public .arrow-btn.md\:inline-grid { display: inline-grid; }
+}
+@media (min-width: 1024px) {
+  .ahni-public .pill.lg\:inline-flex { display: inline-flex; }
+}

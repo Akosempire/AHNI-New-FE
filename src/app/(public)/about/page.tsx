@@ -4,7 +4,7 @@ import Image from "next/image";
 import { STORIES } from "@/components/public/content";
 import { FocusIcon, Heartbeat } from "@/components/public/icons";
 import { FinalCTA, PartnerMarquee, StoryCard } from "@/components/public/sections";
-import { Aurora, Eyebrow, Pill, Rail, Sheet, reveal } from "@/components/public/ui";
+import { Aurora, Eyebrow, Pill, Rail, ScrollText, Sheet, reveal } from "@/components/public/ui";
 
 const PILLARS = [
   {
@@ -176,10 +176,10 @@ export default function AboutPage() {
       <Sheet tone="white" z={15} id="partners" ariaLabel="Partners">
         <div className="wrap text-center">
           <Eyebrow>Partners & funders</Eyebrow>
-          <p {...reveal()} className="t-statement mx-auto max-w-[900px]">
-            We work alongside government agencies and international partners to strengthen Nigeria&apos;s health
-            systems.
-          </p>
+          <ScrollText
+            className="t-statement mx-auto max-w-[900px]"
+            parts={["We work alongside government agencies and international partners to ", { t: "strengthen Nigeria's health systems.", hl: true }]}
+          />
         </div>
         <div className="mt-14 [&_li]:bg-[var(--mist)]">
           <PartnerMarquee />

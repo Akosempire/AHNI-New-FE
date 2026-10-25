@@ -13,7 +13,7 @@ export function StoryCard({ s, className, priority }: { s: Story; className?: st
     <Link
       href={s.href}
       className={cx(
-        "group relative block h-[520px] overflow-hidden rounded-[var(--radius-img)] bg-[var(--ink)] text-white md:h-[560px]",
+        "group relative block h-[460px] overflow-hidden rounded-[var(--radius-img)] bg-[var(--ink)] text-white md:h-[560px]",
         className
       )}
     >
@@ -36,12 +36,12 @@ export function StoryCard({ s, className, priority }: { s: Story; className?: st
           {s.title}
         </h3>
         <div className="mt-auto flex items-end justify-between gap-4">
-          <div className="grid w-full max-w-[560px] grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid w-full max-w-[560px] grid-cols-2 gap-2 md:gap-3">
             {s.stats.map((st) => (
-              <div key={st.l} className="glass px-6 py-5">
-                <div className="text-[clamp(34px,4vw,52px)] font-bold leading-none tracking-[-0.045em]">{st.v}</div>
-                <div className="my-3 h-px bg-[var(--ink)]/15" />
-                <div className="text-[14px] font-medium text-[var(--ink-soft)]">{st.l}</div>
+              <div key={st.l} className="glass px-4 py-4 md:px-6 md:py-5">
+                <div className="text-[clamp(26px,4vw,52px)] font-bold leading-none tracking-[-0.045em]">{st.v}</div>
+                <div className="my-2.5 h-px bg-[rgba(23,23,28,.15)] md:my-3" />
+                <div className="text-[12px] font-medium leading-snug text-[var(--ink-soft)] md:text-[14px]">{st.l}</div>
               </div>
             ))}
           </div>
