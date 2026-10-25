@@ -1,0 +1,357 @@
+/*
+ * AHNi public site design system.
+ * Everything is scoped under .ahni-public so the ERP dashboard styles are untouched.
+ */
+
+.ahni-public {
+  --ink: #17171c;
+  --ink-2: #26262d;
+  --ink-soft: #5a5a64;
+  --white: #ffffff;
+  --mist: #f3f2f7;
+  --primary: #f2564d; /* AHNi coral-red, from the dot in the logo */
+  --primary-strong: #d93a31;
+  --primary-text: #ff7a70; /* highlighted word on dark backgrounds */
+  --primary-text-light: #d63a30; /* highlighted word on light backgrounds */
+  --accent: #89f0ca; /* clinical mint */
+  --accent-strong: #5fdcae;
+  --chip: #ebebef;
+  --line: #e2e2e8;
+
+  --a-mint: #a6f5d6;
+  --a-coral: #ffb0a6;
+  --a-lilac: #c9b4ff;
+  --a-butter: #ffe7a8;
+  --a-blush: #ffd3d8;
+
+  --radius-sheet: 56px;
+  --radius-card: 32px;
+  --radius-img: 48px;
+  --container: 1120px;
+  --gutter: 48px;
+
+  font-family: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+@media (max-width: 767px) {
+  .ahni-public {
+    --radius-sheet: 32px;
+    --radius-img: 28px;
+    --radius-card: 24px;
+    --gutter: 16px;
+  }
+}
+
+.ahni-public *:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* ---------- Layout ---------- */
+.ahni-public .wrap {
+  width: 100%;
+  max-width: calc(var(--container) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Stacked "sheets": each section overlaps the one below with big rounded corners */
+.ahni-public .sheet {
+  position: relative;
+  border-radius: 0 0 var(--radius-sheet) var(--radius-sheet);
+  padding-block: clamp(88px, 11vw, 150px);
+}
+.ahni-public .sheet + .sheet,
+.ahni-public .sheet + .sheet-under {
+  margin-top: calc(var(--radius-sheet) * -1);
+  padding-top: calc(clamp(88px, 11vw, 150px) + var(--radius-sheet));
+}
+.ahni-public .sheet.is-white { background: var(--white); }
+.ahni-public .sheet.is-mist { background: var(--mist); }
+.ahni-public .sheet.is-ink { background: var(--ink); color: var(--white); }
+
+/* ---------- Type ---------- */
+.ahni-public .t-display {
+  font-weight: 750;
+  font-size: clamp(50px, 8.6vw, 112px);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+.ahni-public .t-h2 {
+  font-weight: 750;
+  font-size: clamp(52px, 8vw, 100px);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+.ahni-public .t-statement {
+  font-weight: 700;
+  font-size: clamp(28px, 3.6vw, 46px);
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+}
+.ahni-public .t-card {
+  font-weight: 700;
+  font-size: clamp(24px, 2.6vw, 34px);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+.ahni-public .t-eyebrow {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.ahni-public .is-ink .t-eyebrow,
+.ahni-public .on-dark .t-eyebrow { color: rgba(255, 255, 255, 0.62); }
+.ahni-public .t-body {
+  font-size: clamp(17px, 1.5vw, 21px);
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.ahni-public .is-ink .t-body { color: rgba(255, 255, 255, 0.72); }
+.ahni-public .hl { color: var(--primary-text-light); }
+.ahni-public .on-dark .hl,
+.ahni-public .is-ink .hl { color: var(--primary-text); }
+
+/* ---------- Pills & chips ---------- */
+.ahni-public .pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 54px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: transform 0.25s ease, background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+.ahni-public .pill:hover { transform: scale(1.03); }
+.ahni-public .pill.sm { height: 44px; padding: 0 20px; font-size: 12px; }
+.ahni-public .pill-primary { background: var(--primary); color: var(--ink); }
+.ahni-public .pill-primary:hover { background: var(--primary-strong); color: var(--white); }
+.ahni-public .pill-accent { background: var(--accent); color: var(--ink); }
+.ahni-public .pill-accent:hover { background: var(--accent-strong); }
+.ahni-public .pill-ink { background: var(--ink); color: var(--white); }
+.ahni-public .pill-ink:hover { background: #000; }
+.ahni-public .pill-white { background: var(--white); color: var(--ink); }
+.ahni-public .pill-white:hover { background: var(--mist); }
+.ahni-public .pill-chip { background: var(--chip); color: var(--ink); }
+.ahni-public .pill-chip:hover { background: #dcdce3; }
+
+.ahni-public .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--chip);
+  color: var(--ink);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.ahni-public .chip[aria-pressed="true"] { background: var(--ink); color: var(--white); }
+.ahni-public .chip-glass {
+  background: rgba(23, 23, 28, 0.55);
+  color: var(--white);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Round arrow button that rotates on hover */
+.ahni-public .arrow-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), background-color 0.2s ease;
+}
+.ahni-public .arrow-btn.sm { width: 36px; height: 36px; }
+.ahni-public .arrow-btn.dark { background: var(--ink); color: var(--white); }
+.ahni-public .arrow-btn.chip-bg { background: var(--chip); }
+.ahni-public .group:hover .arrow-btn,
+.ahni-public .arrow-btn:hover { transform: rotate(45deg); }
+
+/* Glass stat card */
+.ahni-public .glass {
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 28px;
+  color: var(--ink);
+}
+
+/* ---------- Aurora ---------- */
+.ahni-public .aurora {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(70px);
+  opacity: 0.75;
+  z-index: 0;
+  background:
+    radial-gradient(closest-side at 30% 40%, var(--a-mint), transparent 70%),
+    radial-gradient(closest-side at 70% 35%, var(--a-lilac), transparent 70%),
+    radial-gradient(closest-side at 55% 70%, var(--a-coral), transparent 70%),
+    radial-gradient(closest-side at 20% 75%, var(--a-butter), transparent 70%);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+.ahni-public .aurora-band {
+  background:
+    radial-gradient(60% 90% at 0% 60%, #f2564d 0%, transparent 60%),
+    radial-gradient(50% 80% at 35% 40%, var(--a-lilac) 0%, transparent 70%),
+    radial-gradient(50% 90% at 70% 70%, var(--a-blush) 0%, transparent 70%),
+    radial-gradient(45% 70% at 92% 10%, var(--a-mint) 0%, transparent 70%),
+    radial-gradient(40% 60% at 80% 0%, var(--a-butter) 0%, transparent 70%),
+    #ffd9cf;
+}
+@keyframes aurora-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(4%, -6%, 0) scale(1.08); }
+}
+
+/* ---------- Reveal on scroll ---------- */
+.ahni-public [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+.ahni-public [data-reveal].is-in { opacity: 1; transform: none; }
+
+/* ---------- Carousel ---------- */
+.ahni-public .rail {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--gutter);
+  padding-inline: var(--gutter);
+  padding-bottom: 8px;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.ahni-public .rail::-webkit-scrollbar { display: none; }
+.ahni-public .rail > * { scroll-snap-align: start; flex: none; }
+.ahni-public .progress {
+  position: relative;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.ahni-public .is-ink .progress { background: rgba(255,255,255,.15); }
+.ahni-public .progress > span {
+  position: absolute;
+  inset-block: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  transition: left 0.15s linear, width 0.15s linear;
+}
+.ahni-public .is-ink .progress > span { background: var(--white); }
+
+/* ---------- Hero photo drift ---------- */
+@keyframes drift-up { from { transform: translateY(0); } to { transform: translateY(-12%); } }
+@keyframes drift-down { from { transform: translateY(-12%); } to { transform: translateY(0); } }
+.ahni-public .drift-up { animation: drift-up 26s ease-in-out infinite alternate; }
+.ahni-public .drift-down { animation: drift-down 26s ease-in-out infinite alternate; }
+
+/* Heartbeat line drawing */
+@keyframes ecg-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.ahni-public .ecg path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ecg-draw 2.4s cubic-bezier(.6,.1,.2,1) 0.4s forwards;
+}
+@keyframes ecg-pulse { 0%, 100% { opacity: .9; r: 5; } 50% { opacity: .35; r: 9; } }
+.ahni-public .ecg circle { animation: ecg-pulse 1.6s ease-in-out 2.8s infinite; }
+
+/* Orbit */
+@keyframes spin { to { transform: rotate(360deg); } }
+.ahni-public .orbit-spin { animation: spin 80s linear infinite; transform-origin: center; }
+.ahni-public .orbit-spin-rev { animation: spin 80s linear infinite reverse; transform-origin: center; }
+
+/* Partner marquee */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.ahni-public .marquee { animation: marquee 40s linear infinite; }
+.ahni-public .marquee:hover { animation-play-state: paused; }
+
+/* Page transition (template.tsx) – no fill-mode so transform is removed after it ends */
+@keyframes page-in {
+  from { transform: translateX(56px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.ahni-public .page-in { animation: page-in 0.5s cubic-bezier(.2,.8,.2,1); }
+
+/* Accordion */
+.ahni-public .acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+.ahni-public .acc-panel[data-open="true"] { grid-template-rows: 1fr; }
+.ahni-public .acc-panel > div { overflow: hidden; }
+
+/* Mobile safety: never allow horizontal page scroll */
+.ahni-public img { max-width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ahni-public *,
+  .ahni-public *::before,
+  .ahni-public *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ahni-public [data-reveal] { opacity: 1; transform: none; }
+  .ahni-public .ecg path { stroke-dashoffset: 0; }
+}
+
+/* Neutralise the ERP's global `input` rule (16px checkbox styling) inside the public site */
+.ahni-public input:not([type]),
+.ahni-public input[type="text"],
+.ahni-public input[type="email"],
+.ahni-public input[type="search"],
+.ahni-public input[type="tel"] {
+  appearance: none;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.ahni-public input.field-input,
+.ahni-public textarea.field-input {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--white);
+  padding: 16px 20px;
+}
+.ahni-public input.field-input:focus,
+.ahni-public textarea.field-input:focus { border-color: var(--ink); }
+.ahni-public input[type="checkbox"] {
+  appearance: auto;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 0;
+}
