@@ -2,9 +2,9 @@ import FormButton from "@/components/FormButton";
 import { toast } from "sonner";
 import { OtpInput } from "reactjs-otp-input";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Card from "@/components/Card";
+import AuthLayout, { AuthLink } from "@/components/app/AuthLayout";
+import { useForgotPassword } from "../../controllers/authController";
 import useQuery from "@/hooks/useQuery";
 
 export default function VerifyOTPForm() {
@@ -31,22 +31,39 @@ export default function VerifyOTPForm() {
         }
     }, [countTimer]);
 
-    const handleResendOTP = (
+    const { forgotPassword } = useForgotPassword();
+
+    // Actually request a new code (previously this only showed a toast)
+    const handleResendOTP = async (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => {
         e.preventDefault();
-
+        const email = query?.get("email");
+        if (!email) {
+            toast.error("We couldn't find your email address. Please start again.");
+            router.push("/auth/forgot-password");
+            return;
+        }
         setLoading(true);
-        setCountTimer(60);
-        toast.success(
-            "We've resent the OTP to your inbox. Please check your email and enter the code to continue."
-        );
+        try {
+            await forgotPassword({ email });
+            setCountTimer(60);
+            toast.success("We've sent a new code to your email.");
+        } catch {
+            /* error toast is shown by the API layer */
+        } finally {
+            setLoading(false);
+        }
     };
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const email = query.get("email");
+        const email = query?.get("email");
+        if (otpValue.length !== 6) {
+            toast.error("Enter all 6 digits of the code.");
+            return;
+        }
 
         try {
             localStorage.setItem("authToken", JSON.stringify(otpValue));
@@ -57,74 +74,44 @@ export default function VerifyOTPForm() {
             );
         }
     };
+    const email = query?.get("email");
     return (
-        <div>
-            <form className="flex flex-col gap-y-6" onSubmit={onSubmit}>
-                <img src="/imgs/logo.png" className="w-[130px] mx-auto" />
-                <Card className="max-w-[500px] flex flex-col items-center gap-y-14 mt-10 py-10">
-                    <div className="text-center">
-                        <h1 className="text-heading-1">Enter OTP</h1>
-                        <p className="text-gray-text text-body-base">
-                            Enter the 6 digit code sent to you email address
-                        </p>
+        <AuthLayout
+            step="Step 2 of 3"
+            title="Check your email"
+            subtitle={
+                <>
+                    Enter the 6-digit code we sent{email ? <> to <b className="text-[var(--ink)]">{email}</b></> : null}.
+                </>
+            }
+            footer={
+                <p>
+                    Wrong email? <AuthLink href="/auth/forgot-password">Start again</AuthLink>
+                </p>
+            }
+        >
+            <form className="space-y-6" onSubmit={onSubmit} noValidate>
+                <fieldset>
+                    <legend className="sr-only">6-digit code</legend>
+                    <div className="[&_input]:!h-12 [&_input]:!w-11 [&_input]:rounded-xl [&_input]:border [&_input]:border-[var(--line-strong)] [&_input]:bg-[var(--surface)] [&_input]:text-[20px] [&_input]:font-bold [&_input:focus]:border-[var(--ink)] [&_input:focus]:outline-none sm:[&_input]:!w-12">
+                        <OtpInput numInputs={6} separator={<span className="w-2" />} onChange={handleChange} shouldAutoFocus value={otpValue} isInputNum />
                     </div>
+                </fieldset>
 
-                    <div className="space-y-8">
-                        <OtpInput
-                            numInputs={6}
-                            separator="&nbsp;&nbsp;&nbsp;"
-                            onChange={handleChange}
-                            inputStyle={{
-                                width: 50,
-                                height: 50,
-                                backgroundColor: "#FEE4E2",
-                                borderTopColor: "#F97066",
-                            }}
-                            shouldAutoFocus
-                            value={otpValue}
-                        />
-                    </div>
+                <p className="text-[14px] text-[var(--muted)]" aria-live="polite">
+                    {countTimer > 0 ? (
+                        <>You can request a new code in <b className="tabular-nums text-[var(--ink)]">0:{String(countTimer).padStart(2, "0")}</b></>
+                    ) : (
+                        <button type="button" onClick={handleResendOTP} disabled={loading} className="font-semibold text-[var(--brand-ink)] hover:underline disabled:opacity-50">
+                            {loading ? "Sending…" : "Send a new code"}
+                        </button>
+                    )}
+                </p>
 
-                    <div className="flex flex-col items-center">
-                        <p className="text-body-sm text-gray-text">
-                            OTP will expire in
-                        </p>
-                        <span className="text-body-sm text-gray-text font-semibold">
-                            00:{countTimer < 10 && "0"}
-                            {countTimer}
-                        </span>
-
-                        {countTimer === 0 && (
-                            <FormButton
-                                variant="ghost"
-                                loading={loading}
-                                onClick={handleResendOTP}
-                                type="button"
-                                className="text-primary hover:text-primary"
-                            >
-                                Resend OTP
-                            </FormButton>
-                        )}
-                    </div>
-
-                    <div className="w-full self-stretch">
-                        <FormButton
-                            type="submit"
-                            className="w-full rounded-full"
-                            size="lg"
-                        >
-                            Confirm
-                        </FormButton>
-
-                        <p className="text-center text-[#98A2B3] mt-2 text-[12px]">
-                            Having a bit of trouble?{" "}
-                            <Link href="/auth/login" className="text-primary font-semibold">
-                                Contact support
-                            </Link>
-                        </p>
-                    </div>
-                </Card>
+                <FormButton type="submit" disabled={otpValue.length !== 6} className="h-12 w-full rounded-xl bg-[var(--ink)] text-[15px] font-bold text-[var(--surface)] hover:bg-black" size="lg">
+                    Continue
+                </FormButton>
             </form>
-        </div>
+        </AuthLayout>
     );
 }

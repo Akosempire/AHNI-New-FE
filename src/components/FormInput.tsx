@@ -50,6 +50,11 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                       : type
                   }
                   placeholder={rest.placeholder}
+                  autoComplete={(rest as any).autoComplete}
+                  name={field.name}
+                  ref={field.ref}
+                  onBlur={field.onBlur}
+                  aria-required={required || undefined}
                   disabled={disabled}
                   onChange={(e) => {
                     // Convert to number for number inputs
@@ -73,21 +78,24 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                   )}
                 />
                 {rest.type === "password" && (
-                  <div
-                    className='absolute transform -translate-y-1/2 cursor-pointer top-1/2 right-4'
+                  <button
+                    type='button'
+                    className='absolute top-1/2 right-2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground hover:text-foreground'
                     onClick={() => setPasswordVisibility(!isPasswordVisible)}
+                    aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                    aria-pressed={isPasswordVisible}
                   >
                     {isPasswordVisible ? (
-                      <EyeOff name='eye-off' className='text-primary' />
+                      <EyeOff aria-hidden='true' className='h-5 w-5' />
                     ) : (
-                      <Eye name='eye' className='text-primary' />
+                      <Eye aria-hidden='true' className='h-5 w-5' />
                     )}
-                  </div>
+                  </button>
                 )}
 
                 {rest.type === "email" && (
-                  <div className='absolute transform -translate-y-1/2 cursor-pointer top-1/2 right-4'>
-                    <Mail className='text-primary' />
+                  <div aria-hidden='true' className='pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-muted-foreground'>
+                    <Mail className='h-5 w-5' />
                   </div>
                 )}
               </div>

@@ -8,7 +8,7 @@ import FormInput from "@/components/FormInput";
 import FormButton from "@/components/FormButton";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Card from "@/components/Card";
+import AuthLayout, { AuthLink } from "@/components/app/AuthLayout";
 import PasswordHint from "../PasswordHint";
 import useQuery from "@/hooks/useQuery";
 import {
@@ -36,7 +36,7 @@ const ChangePasswordForm = () => {
     new_password,
     confirm_password,
   }: TChangePasswordFormValues) => {
-    const email = query.get("email");
+    const email = query?.get("email") ?? null;
     const token = JSON.parse(localStorage.getItem("authToken") || "{}");
 
     const payload = {
@@ -52,58 +52,27 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <div>
+    <AuthLayout
+      step="Step 3 of 3"
+      title="Choose a new password"
+      subtitle="You'll use it to sign in from now on."
+      footer={
+        <p>
+          Changed your mind? <AuthLink href="/auth/login">Back to sign in</AuthLink>
+        </p>
+      }
+    >
       <Form {...form}>
-        <form
-          className='flex flex-col gap-y-5'
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <img src='/src/assets/svgs/logo.svg' className='w-[130px] mx-auto' />
-
-          <Card className='max-w-[500px] flex flex-col items-center gap-y-8 py-10'>
-            <div className='text-center'>
-              <h1 className='text-2xl font-bold'>Set New Password</h1>
-
-              <p className='text-[#8F8585] text-base font-normal'>
-                {/* Create new password{" "} */}
-                Create a new password to login your account with
-              </p>
-            </div>
-            <div className='space-y-8 self-stretch'>
-              <div className=''>
-                <FormInput
-                  label='New Password'
-                  type='password'
-                  name='new_password'
-                  placeholder='Enter new password'
-                />
-              </div>
-              <div className=''>
-                <FormInput
-                  label='Confirm password'
-                  type='password'
-                  name='confirm_password'
-                  placeholder='Confirm new password'
-                />
-              </div>
-            </div>
-
-            <PasswordHint password={form.watch("new_password")} />
-
-            <div className='w-full self-stretch'>
-              <FormButton
-                loading={isLoading}
-                className='w-full rounded-full'
-                size='lg'
-                type='submit'
-              >
-                Update Password
-              </FormButton>
-            </div>
-          </Card>
+        <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)} noValidate>
+          <FormInput label="New password" type="password" name="new_password" placeholder="Enter a new password" autoComplete="new-password" />
+          <FormInput label="Confirm new password" type="password" name="confirm_password" placeholder="Type it again" autoComplete="new-password" />
+          <PasswordHint password={form.watch("new_password")} />
+          <FormButton loading={isLoading} className="h-12 w-full rounded-xl bg-[var(--ink)] text-[15px] font-bold text-[var(--surface)] hover:bg-black" size="lg" type="submit">
+            Update password
+          </FormButton>
         </form>
       </Form>
-    </div>
+    </AuthLayout>
   );
 };
 
