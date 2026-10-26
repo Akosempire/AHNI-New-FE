@@ -165,7 +165,7 @@ export default function AboutPage() {
           <Eyebrow>In the field</Eyebrow>
           <h2 {...reveal()} className="t-h2">Our Work</h2>
         </div>
-        <Rail label="Stories from our work">
+        <Rail label="Stories from our work" autoplay={5000}>
           {STORIES.map((s) => (
             <StoryCard key={s.title} s={s} className="w-[min(1000px,calc(100vw-32px))]" />
           ))}

@@ -144,14 +144,21 @@ export function Rail({
   label,
   className,
   controls = true,
+  autoplay = 0,
 }: {
   children: ReactNode;
   label: string;
   className?: string;
   controls?: boolean;
+  /** milliseconds between automatic slides; 0 = off */
+  autoplay?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
   const [bar, setBar] = useState({ left: 0, width: 100 });
+  const [playing, setPlaying] = useState(autoplay > 0); // user's play/pause choice
+  const [held, setHeld] = useState(false); // temporarily held by hover / focus / touch
+  const [inView, setInView] = useState(false);
 
   const update = useCallback(() => {
     const el = ref.current;
@@ -183,14 +190,52 @@ export function Rail({
     el.scrollBy({ left: dir * amount, behavior: "smooth" });
   };
 
+  // Autoplay: advance one card at a time, loop back to the start at the end.
+  useEffect(() => {
+    if (!autoplay) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setPlaying(false);
+    const host = hostRef.current;
+    if (!host) return;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.35 });
+    io.observe(host);
+    return () => io.disconnect();
+  }, [autoplay]);
+
+  useEffect(() => {
+    if (!autoplay || !playing || held || !inView) return;
+    const t = setInterval(() => {
+      if (document.hidden) return;
+      const el = ref.current;
+      if (!el) return;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+      if (atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
+      else step(1);
+    }, autoplay);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay, playing, held, inView]);
+
+  const hold = autoplay
+    ? {
+        onMouseEnter: () => setHeld(true),
+        onMouseLeave: () => setHeld(false),
+        onFocus: () => setHeld(true),
+        onBlur: (e: React.FocusEvent) => !e.currentTarget.contains(e.relatedTarget as Node) && setHeld(false),
+        onTouchStart: () => setHeld(true),
+        onTouchEnd: () => setTimeout(() => setHeld(false), 4000),
+      }
+    : {};
+
   return (
-    <div className={className}>
+    <div className={className} ref={hostRef}>
       <div
         ref={ref}
+        {...hold}
         className="rail"
         role="region"
         aria-roledescription="carousel"
         aria-label={label}
+        aria-live={autoplay && playing ? "off" : "polite"}
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") step(1);
@@ -211,6 +256,22 @@ export function Rail({
         </div>
         {controls && (
           <div className="flex gap-2">
+            {autoplay > 0 && (
+              <button
+                type="button"
+                aria-label={playing ? "Pause automatic sliding" : "Play automatic sliding"}
+                aria-pressed={!playing}
+                onClick={() => setPlaying((v) => !v)}
+                className="arrow-btn sm chip-bg"
+                style={{ transform: "none" }}
+              >
+                {playing ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" /></svg>
+                )}
+              </button>
+            )}
             <button type="button" aria-label="Previous" onClick={() => step(-1)} className="arrow-btn sm chip-bg" style={{ transform: "none" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>

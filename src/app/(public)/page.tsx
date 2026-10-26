@@ -191,7 +191,7 @@ export default function HomePage() {
           </div>
           <Pill href="/about" tone="chip" className="hidden md:inline-flex">About AHNi</Pill>
         </div>
-        <Rail label="Impact stories">
+        <Rail label="Impact story cards" autoplay={5000}>
           {STORIES.map((s, i) => (
             <StoryCard key={s.title} s={s} priority={i === 0} className="w-[min(1000px,calc(100vw-32px))]" />
           ))}
