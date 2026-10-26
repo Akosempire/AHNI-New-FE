@@ -1,0 +1,240 @@
+/*
+ * AHNi staff app shell – Paytrail-style layout on AHNi brand tokens.
+ * Scoped to .ahni-app so nothing outside the dashboard changes.
+ */
+.ahni-app {
+  --app-bg: #f6f5f9;
+  --surface: #ffffff;
+  --surface-2: #f3f2f7; /* AHNi mist */
+  --ink: #17171c;
+  --ink-2: #3a3a44;
+  --muted: #6b6b76;
+  --faint: #9a9aa5;
+  --line: #e7e6ee;
+  --line-strong: #d9d8e2;
+  --brand: #f2564d; /* AHNi coral – brand accent, active states, highlights */
+  --brand-soft: #fff0ee;
+  --brand-ink: #b8302a; /* coral text on light surfaces (AA) */
+  --mint: #89f0ca;
+  --mint-soft: #e7fbf3;
+  --mint-ink: #0f7a55;
+  --butter: #ffe7a8;
+  --butter-ink: #8a5a00;
+  --lilac: #c9b4ff;
+  --lilac-soft: #f2edff;
+  --lilac-ink: #5b3fc4;
+  --danger: #c62828; /* errors stay a distinct, deeper red than the brand coral */
+  --danger-soft: #fdecec;
+  --focus: #17171c;
+  --shadow-1: 0 1px 2px rgba(23, 23, 28, 0.04), 0 1px 1px rgba(23, 23, 28, 0.03);
+  --shadow-2: 0 12px 40px rgba(23, 23, 28, 0.12);
+  --sidebar-w: 272px;
+  --sidebar-w-collapsed: 76px;
+  --header-h: 68px;
+
+  /* Re-map the shadcn tokens used by every module page so they pick up the AHNi brand */
+  --primary: 3 86% 63%;
+  --primary-foreground: 240 10% 10%;
+  --ring: 240 10% 10%;
+  --radius: 0.75rem;
+
+  font-family: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--app-bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.dark .ahni-app {
+  --app-bg: #111115;
+  --surface: #1a1a20;
+  --surface-2: #22222a;
+  --ink: #f2f2f6;
+  --ink-2: #d4d4dc;
+  --muted: #a3a3ae;
+  --faint: #767682;
+  --line: #2b2b34;
+  --line-strong: #383843;
+  --brand-soft: rgba(242, 86, 77, 0.14);
+  --brand-ink: #ff8a82;
+  --mint-soft: rgba(137, 240, 202, 0.12);
+  --mint-ink: #89f0ca;
+  --butter-ink: #ffd36b;
+  --lilac-soft: rgba(201, 180, 255, 0.14);
+  --lilac-ink: #c9b4ff;
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.12);
+  --focus: #f2f2f6;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --primary-foreground: 240 10% 10%;
+  --ring: 0 0% 96%;
+}
+
+.ahni-app *:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Surfaces */
+.ahni-app .app-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-1);
+}
+.ahni-app .app-panel-head {
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+/* Buttons */
+.ahni-app .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.ahni-app .btn:active { transform: translateY(1px); }
+.ahni-app .btn-primary { background: var(--ink); color: var(--surface); }
+.ahni-app .btn-primary:hover { background: #000; }
+.dark .ahni-app .btn-primary:hover { background: #fff; }
+.ahni-app .btn-brand { background: var(--brand); color: #17171c; }
+.ahni-app .btn-brand:hover { background: #e2443b; }
+.ahni-app .btn-outline { background: var(--surface); border: 1px solid var(--line-strong); color: var(--ink); }
+.ahni-app .btn-outline:hover { background: var(--surface-2); }
+.ahni-app .btn-ghost { color: var(--ink-2); }
+.ahni-app .btn-ghost:hover { background: var(--surface-2); color: var(--ink); }
+.ahni-app .btn-icon { width: 40px; padding: 0; }
+
+/* Status badges – colour is never the only signal: every badge has a dot + text */
+.ahni-app .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.ahni-app .badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+.ahni-app .badge-success { color: var(--mint-ink); background: var(--mint-soft); }
+.ahni-app .badge-warning { color: var(--butter-ink); background: rgba(255, 231, 168, 0.35); }
+.ahni-app .badge-danger { color: var(--danger); background: var(--danger-soft); }
+.ahni-app .badge-info { color: var(--lilac-ink); background: var(--lilac-soft); }
+.ahni-app .badge-neutral { color: var(--muted); background: var(--surface-2); }
+
+/* Sidebar nav */
+.ahni-app .nav-label {
+  padding: 18px 12px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.ahni-app .nav-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--ink-2);
+  text-align: left;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.ahni-app .nav-item:hover { background: var(--surface-2); color: var(--ink); }
+.ahni-app .nav-item[aria-current="page"] {
+  background: var(--brand-soft);
+  border-color: rgba(242, 86, 77, 0.25);
+  color: var(--ink);
+  font-weight: 700;
+}
+.ahni-app .nav-item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--brand);
+}
+.ahni-app .nav-item.is-ancestor { color: var(--ink); font-weight: 700; }
+.ahni-app .nav-sub {
+  margin-left: 21px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+.ahni-app .nav-sub .nav-item { min-height: 34px; padding: 6px 10px; font-size: 13.5px; }
+.ahni-app .nav-sub .nav-item[aria-current="page"]::before { left: -13px; }
+
+/* Smooth expand/collapse */
+.ahni-app .collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s ease;
+}
+.ahni-app .collapse[data-open="true"] { grid-template-rows: 1fr; }
+.ahni-app .collapse > div { overflow: hidden; }
+
+/* Thin scrollbars inside the sidebar */
+.ahni-app .thin-scroll { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+
+/* Skeleton shimmer */
+.ahni-app .skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%;
+  animation: skeleton 1.4s ease infinite;
+  border-radius: 8px;
+}
+@keyframes skeleton { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
+
+/* Tour */
+.ahni-tour-spot {
+  position: fixed;
+  z-index: 1100;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(10, 10, 14, 0.62);
+  pointer-events: none;
+  transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+.ahni-tour-spot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 20px;
+  border: 2px solid #f2564d;
+  animation: tour-pulse 1.8s ease-in-out infinite;
+}
+@keyframes tour-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ahni-app *, .ahni-app *::before, .ahni-app *::after,
+  .ahni-tour-spot, .ahni-tour-spot::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Let Tailwind's responsive display utilities win over .btn's display */
+.ahni-app .btn.hidden { display: none; }
+@media (min-width: 640px) { .ahni-app .btn.sm\:inline-flex { display: inline-flex; } }
+@media (min-width: 768px) { .ahni-app .btn.md\:hidden { display: none; } }

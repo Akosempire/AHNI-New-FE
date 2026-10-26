@@ -4,12 +4,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 import { useRouter } from "next/navigation";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
+import AppShell from "@/components/app/AppShell";
 import Suspense from "@/components/Suspense";
-import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuthInitialization } from "@/hooks/useAuthInitialization";
 import { useSessionManager } from "@/hooks/useSessionManager";
 import { toast } from "sonner";
@@ -19,7 +16,6 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [sidebarWidth, setSidebarWidth] = useState(false);
     const router = useRouter();
 
     // Initialize authentication state properly
@@ -47,32 +43,8 @@ export default function DashboardLayout({
     }, [router, isInitialized, isAuthenticated]);
 
     return (
-        <div className="flex">
-            <div
-                className={cn(
-                    "hidden md:block",
-                    sidebarWidth ? "w-[5%]" : "w-[19%]"
-                )}
-            >
-                <Sidebar
-                    setSidebarWidth={setSidebarWidth}
-                    sidebarWidth={sidebarWidth}
-                />
-            </div>
-            <div
-                className={cn(
-                    "w-full",
-                    sidebarWidth ? "md:w-[95%]" : "md:w-[81%]"
-                )}
-            >
-                <Header sidebarWidth={sidebarWidth} />
-                <Suspense>
-                    <main className="p-5 mt-20">
-                        {children}
-                    </main>
-                </Suspense>
-                <Footer />
-            </div>
-        </div>
+        <AppShell>
+            <Suspense>{children}</Suspense>
+        </AppShell>
     );
 }

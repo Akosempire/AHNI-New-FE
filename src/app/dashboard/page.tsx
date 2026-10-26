@@ -1,7 +1,7 @@
 "use client";
 
-import { MainDashboard } from "@/features/dashboard";
+import DashboardHome from "@/components/app/DashboardHome";
 
 export default function DashboardPage() {
-    return <MainDashboard />;
+    return <DashboardHome />;
 }
