@@ -187,13 +187,13 @@
 .ahni-app .nav-sub .nav-item[aria-current="page"]::before { left: -13px; }
 
 /* Smooth expand/collapse */
-.ahni-app .collapse {
+.ahni-app .nav-collapse {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.22s ease;
 }
-.ahni-app .collapse[data-open="true"] { grid-template-rows: 1fr; }
-.ahni-app .collapse > div { overflow: hidden; }
+.ahni-app .nav-collapse[data-open="true"] { grid-template-rows: 1fr; }
+.ahni-app .nav-collapse > div { overflow: hidden; }
 
 /* Thin scrollbars inside the sidebar */
 .ahni-app .thin-scroll { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
@@ -238,3 +238,7 @@
 .ahni-app .btn.hidden { display: none; }
 @media (min-width: 640px) { .ahni-app .btn.sm\:inline-flex { display: inline-flex; } }
 @media (min-width: 768px) { .ahni-app .btn.md\:hidden { display: none; } }
+
+/* Closed groups must not be reachable by Tab or screen readers */
+.ahni-app .nav-collapse > div { visibility: hidden; transition: visibility 0s linear 0.22s; }
+.ahni-app .nav-collapse[data-open="true"] > div { visibility: visible; transition-delay: 0s; }

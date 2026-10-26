@@ -392,3 +392,7 @@
 @media (min-width: 1024px) {
   .ahni-public .pill.lg\:inline-flex { display: inline-flex; }
 }
+
+/* Closed accordion panels must not be reachable by Tab or screen readers */
+.ahni-public .acc-panel > div { visibility: hidden; transition: visibility 0s linear 0.35s; }
+.ahni-public .acc-panel[data-open="true"] > div { visibility: visible; transition-delay: 0s; }

@@ -33,7 +33,7 @@ import {
 } from "react";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import { useTheme } from "@/configs/theme-provider";
-import { ancestorsOf, bestMatch, flatten, NavNode, NavSection, prettify } from "./nav";
+import { activeIdOf, ancestorsOfId, bestMatch, flatten, NavNode, NavSection, prettify } from "./nav";
 import { useLogout } from "./useLogout";
 import { useNavSections } from "./useNavSections";
 import { Tour, useTourControls } from "./Tour";
@@ -186,7 +186,8 @@ function SidebarContent({
 
   const allHrefs = useMemo(() => flatten(sections).map((x) => x.href), [sections]);
   const active = useMemo(() => bestMatch(pathname, allHrefs), [pathname, allHrefs]);
-  const ancestors = useMemo(() => ancestorsOf(sections, active), [sections, active]);
+  const activeId = useMemo(() => activeIdOf(sections, active), [sections, active]);
+  const ancestors = useMemo(() => ancestorsOfId(sections, activeId), [sections, activeId]);
 
   // Groups the user opened by hand; groups containing the current page are always open
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -268,7 +269,7 @@ function SidebarContent({
                     node={n}
                     depth={0}
                     collapsed={collapsed}
-                    active={active}
+                    active={activeId}
                     ancestors={ancestors}
                     open={open}
                     toggle={toggle}
@@ -355,8 +356,8 @@ function NavRow({
   expandSidebar?: () => void;
 }) {
   const hasKids = !!node.children?.length;
-  const isActive = !!node.href && node.href === active && !ancestors.has(node.id);
-  const isAncestor = ancestors.has(node.id);
+  const isActive = node.id === active && !hasKids;
+  const isAncestor = ancestors.has(node.id) || (hasKids && node.id === active);
   const isOpen = open.has(node.id) || isAncestor;
 
   if (collapsed && depth === 0) {
@@ -407,13 +408,13 @@ function NavRow({
       ) : null}
 
       {hasKids && (
-        <div className="collapse" data-open={isOpen}>
+        <div className="nav-collapse" data-open={isOpen}>
           <div>
             <ul className="nav-sub my-1 space-y-0.5">
               {/* A group that is also a page gets an explicit "Overview" entry, so the page stays reachable */}
               {node.href && !node.children!.some((c) => c.href === node.href) && (
                 <li>
-                  <Link href={node.href} className="nav-item" aria-current={node.href === active ? "page" : undefined}>
+                  <Link href={node.href} className="nav-item" aria-current={node.id === active ? "page" : undefined}>
                     Overview
                   </Link>
                 </li>
@@ -692,6 +693,7 @@ function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }
           <Search className="h-5 w-5 text-[var(--muted)]" />
           <input
             ref={inputRef}
+            autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {

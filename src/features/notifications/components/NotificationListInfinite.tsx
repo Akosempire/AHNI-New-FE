@@ -5,7 +5,7 @@ import NotificationGroup from "./NotificationGroup";
 import { NotificationItemSkeleton } from "./NotificationSkeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Icon } from "@iconify/react";
 import { Badge } from "@/components/ui/badge";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";

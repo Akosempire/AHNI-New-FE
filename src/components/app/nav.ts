@@ -69,3 +69,33 @@ export function prettify(segment: string) {
     })
     .join(" ");
 }
+
+/** id of the single node to highlight: the first node (in sidebar order) whose href is the active one */
+export function activeIdOf(sections: NavSection[], active: string | null): string | null {
+  if (!active) return null;
+  let found: string | null = null;
+  const walk = (n: NavNode): boolean => {
+    if (n.href === active && !n.children?.some((c) => c.href === active)) {
+      found = n.id;
+      return true;
+    }
+    return !!n.children?.some(walk);
+  };
+  sections.some((s) => s.items.some(walk));
+  return found;
+}
+
+/** ids of the ancestors of a specific node id */
+export function ancestorsOfId(sections: NavSection[], id: string | null): Set<string> {
+  const out = new Set<string>();
+  if (!id) return out;
+  const walk = (n: NavNode, chain: string[]): boolean => {
+    if (n.id === id) {
+      chain.forEach((c) => out.add(c));
+      return true;
+    }
+    return !!n.children?.some((c) => walk(c, [...chain, n.id]));
+  };
+  sections.some((s) => s.items.some((n) => walk(n, [])));
+  return out;
+}
