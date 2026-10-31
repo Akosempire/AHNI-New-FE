@@ -316,6 +316,20 @@ export default function ResponsiveTable<T>({
     failed = true;
   }
 
+  // Amount / count columns line up on the right (Waya: amounts and dates right-aligned)
+  const numericCols = new Set<string>();
+  if (rows.length) {
+    for (const c of rows[0].getVisibleCells()) {
+      try {
+        const vals = rows.slice(0, 5).map((r) => r.getValue(c.column.id));
+        if (vals.every((v) => typeof v === "number" || (typeof v === "string" && /^[₦$€£]?\s?-?[\d,]+(\.\d+)?$/.test(v.trim()))) && !/id$|^id|phone|year/i.test(c.column.id))
+          numericCols.add(c.column.id);
+      } catch {
+        /* computed column */
+      }
+    }
+  }
+
   const empty = (
     <EmptyState
       title={failed ? "We couldn't show this list" : term ? `No results for “${term}”` : emptyTitle}
@@ -345,7 +359,11 @@ export default function ResponsiveTable<T>({
   }
 
   return (
-    <ShadTable aria-busy={isLoading || undefined}>
+    <>
+    <ShadTable
+      aria-busy={isLoading || undefined}
+      containerClassName={rows.length > 15 ? "max-h-[calc(100vh-240px)]" : undefined}
+    >
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
@@ -353,7 +371,11 @@ export default function ResponsiveTable<T>({
               <TableCell
                 key={header.id}
                 colSpan={header.colSpan}
-                className={`font-semibold text-black cursor-pointer dark:text-gray-300 text-center ${headClass ?? ""}`}
+                className={cn(
+                  "sticky top-0 z-[1] h-11 whitespace-nowrap bg-[var(--surface,#fff)] py-0 text-[12.5px] font-medium text-[var(--muted,#6b6b76)] shadow-[inset_0_-1px_0_var(--line-strong,#e3e2ea)]",
+                  numericCols.has(header.column.id) ? "text-right" : "text-left",
+                  headClass
+                )}
                 style={{
                   minWidth: header.column.columnDef.size,
                   maxWidth: header.column.columnDef.size,
@@ -380,15 +402,13 @@ export default function ResponsiveTable<T>({
               onClick={onRowClick ? () => onRowClick(row) : undefined}
             >
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                <TableCell key={cell.id} className={numericCols.has(cell.column.id) ? "text-right tabular-nums" : undefined}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
               ))}
             </TableRow>
           ))
-        ) : (
-          <TableRow className="hover:bg-transparent">
-            <TableCell colSpan={columnsCount}>{empty}</TableCell>
-          </TableRow>
-        )}
+        ) : null}
       </TableBody>
       {footer && (
         <TableFooter>
@@ -409,5 +429,7 @@ export default function ResponsiveTable<T>({
         </TableFooter>
       )}
     </ShadTable>
+    {!isLoading && !rows.length && empty}
+    </>
   );
 }

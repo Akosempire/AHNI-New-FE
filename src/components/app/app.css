@@ -1,46 +1,75 @@
 /*
- * AHNi staff app shell – Paytrail-style layout on AHNi brand tokens.
- * Scoped to .ahni-app so nothing outside the dashboard changes.
+ * AHNi staff app shell.
+ * Structure, type, spacing and motion follow the Waya ERP playbook; colours are AHNi's own
+ * (ink, coral, mint, mist). Coral is the one accent; ink is the main action colour.
+ * Scoped to .ahni-app (and the body while the shell is mounted, so portalled dialogs match).
  */
 .ahni-app,
 body:has(.ahni-app) {
-  /* body too, so dialogs/menus rendered in portals get the same tokens */
-  --app-bg: #f6f5f9;
+  /* Surfaces: quiet canvas, grey panels without borders (Waya "content first") */
+  --app-bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f3f2f7; /* AHNi mist */
+  --surface-2: #f3f2f7; /* AHNi mist – inputs, active nav, selected */
+  --panel: #f8f7fb; /* KPI / chart panels */
+  --hover: #f6f5f9;
   --ink: #17171c;
   --ink-2: #3a3a44;
   --muted: #6b6b76;
   --faint: #9a9aa5;
-  --line: #e7e6ee;
-  --line-strong: #d9d8e2;
-  --brand: #f2564d; /* AHNi coral – brand accent, active states, highlights */
+  --line: #efeef3; /* row dividers */
+  --line-strong: #e3e2ea; /* section rules, control borders */
+  --brand: #f2564d; /* AHNi coral – the one accent */
+  --brand-hover: #e2443b;
   --brand-soft: #fff0ee;
   --brand-ink: #b8302a; /* coral text on light surfaces (AA) */
   --mint: #89f0ca;
   --mint-soft: #e7fbf3;
   --mint-ink: #0f7a55;
   --butter: #ffe7a8;
+  --butter-soft: #fdf6e3;
   --butter-ink: #8a5a00;
   --lilac: #c9b4ff;
   --lilac-soft: #f2edff;
   --lilac-ink: #5b3fc4;
-  --danger: #c62828; /* errors stay a distinct, deeper red than the brand coral */
+  --danger: #c62828;
   --danger-soft: #fdecec;
-  --focus: #17171c;
-  --shadow-1: 0 1px 2px rgba(23, 23, 28, 0.04), 0 1px 1px rgba(23, 23, 28, 0.03);
-  --shadow-2: 0 12px 40px rgba(23, 23, 28, 0.12);
-  --sidebar-w: 272px;
-  --sidebar-w-collapsed: 76px;
-  --header-h: 68px;
+  --focus: #f2564d;
+  --overlay: rgba(23, 23, 28, 0.32);
 
-  /* Re-map the shadcn tokens used by every module page so they pick up the AHNi brand */
-  --primary: 3 86% 63%;
-  --primary-foreground: 240 10% 10%;
-  --ring: 240 10% 10%;
-  --radius: 0.75rem;
+  /* Elevation – panels are flat, only floating layers cast shadows */
+  --shadow-1: none;
+  --shadow-pop: 0 12px 35px rgba(23, 23, 28, 0.12);
+  --shadow-menu: 0 12px 28px rgba(23, 23, 28, 0.1);
+  --shadow-dialog: 0 20px 80px rgba(23, 23, 28, 0.2);
+  --shadow-toast: 0 10px 30px rgba(23, 23, 28, 0.18);
+  --shadow-2: var(--shadow-pop);
 
-  font-family: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Radius */
+  --r-control: 6px;
+  --r-card: 10px;
+  --r-dialog: 10px;
+  --r-sheet: 12px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-std: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layout */
+  --sidebar-w: 247px;
+  --sidebar-w-collapsed: 60px;
+  --header-h: 60px;
+
+  /* shadcn tokens used by every module page */
+  --primary: 240 10% 10%; /* ink: buttons, submit */
+  --primary-foreground: 0 0% 100%;
+  --ring: 3 86% 63%; /* coral focus ring */
+  --radius: 0.375rem;
+  --card: 0 0% 100%;
+  --border: 250 17% 91%;
+  --input: 250 17% 91%;
+
+  --font-serif: "Playfair Display Variable", "Playfair Display", Georgia, serif;
+  font-family: "DM Sans Variable", "DM Sans", ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
   background: var(--app-bg);
   min-height: 100vh;
@@ -49,29 +78,37 @@ body:has(.ahni-app) {
 
 .dark .ahni-app,
 .dark body:has(.ahni-app) {
-  --app-bg: #111115;
-  --surface: #1a1a20;
-  --surface-2: #22222a;
+  --app-bg: #0b0b0d;
+  --surface: #0b0b0d;
+  --surface-2: #1c1c22;
+  --panel: #131317;
+  --hover: #18181d;
   --ink: #f2f2f6;
   --ink-2: #d4d4dc;
   --muted: #a3a3ae;
   --faint: #767682;
-  --line: #2b2b34;
-  --line-strong: #383843;
+  --line: #222228;
+  --line-strong: #32323a;
   --brand-soft: rgba(242, 86, 77, 0.14);
   --brand-ink: #ff8a82;
   --mint-soft: rgba(137, 240, 202, 0.12);
   --mint-ink: #89f0ca;
+  --butter-soft: rgba(255, 231, 168, 0.12);
   --butter-ink: #ffd36b;
   --lilac-soft: rgba(201, 180, 255, 0.14);
   --lilac-ink: #c9b4ff;
   --danger: #ff6b6b;
   --danger-soft: rgba(255, 107, 107, 0.12);
-  --focus: #f2f2f6;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-2: 0 16px 48px rgba(0, 0, 0, 0.5);
-  --primary-foreground: 240 10% 10%;
-  --ring: 0 0% 96%;
+  --overlay: rgba(0, 0, 0, 0.68);
+  --shadow-pop: 0 12px 35px rgba(0, 0, 0, 0.5);
+  --shadow-menu: 0 12px 28px rgba(0, 0, 0, 0.45);
+  --shadow-dialog: 0 20px 80px rgba(0, 0, 0, 0.6);
+  --shadow-toast: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --primary: 240 14% 95%;
+  --primary-foreground: 240 10% 6%;
+  --card: 240 7% 5%;
+  --border: 240 6% 15%;
+  --input: 240 6% 15%;
 }
 
 .ahni-app *:focus-visible {
@@ -81,15 +118,26 @@ body:has(.ahni-app) {
 
 /* Surfaces */
 .ahni-app .app-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  box-shadow: var(--shadow-1);
+  background: var(--panel);
+  border: 1px solid transparent;
+  border-radius: var(--r-card);
+  transition: border-color 0.15s ease;
 }
+.ahni-app .app-card:hover { border-color: var(--line-strong); }
 .ahni-app .app-panel-head {
-  background: var(--surface-2);
-  border-radius: 14px;
-  padding: 12px 16px;
+  background: transparent;
+  border-radius: 0;
+  padding: 4px 0 10px;
+}
+
+/* Serif page title (Waya: one page, one job) */
+.ahni-app .page-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(34px, 3.6vw, 48px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 
 /* Buttons */
@@ -98,53 +146,59 @@ body:has(.ahni-app) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 12px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-control);
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 600;
   white-space: nowrap;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.ahni-app .btn:active { transform: translateY(1px); }
 .ahni-app .btn-primary { background: var(--ink); color: var(--surface); }
 .ahni-app .btn-primary:hover { background: #000; }
 .dark .ahni-app .btn-primary:hover { background: #fff; }
-.ahni-app .btn-brand { background: var(--brand); color: #17171c; }
-.ahni-app .btn-brand:hover { background: #e2443b; }
+.ahni-app .btn-brand { background: var(--brand); color: #fff; }
+.ahni-app .btn-brand:hover { background: var(--brand-hover); }
 .ahni-app .btn-outline { background: var(--surface); border: 1px solid var(--line-strong); color: var(--ink); }
-.ahni-app .btn-outline:hover { background: var(--surface-2); }
+.ahni-app .btn-outline:hover { background: var(--hover); }
 .ahni-app .btn-ghost { color: var(--ink-2); }
-.ahni-app .btn-ghost:hover { background: var(--surface-2); color: var(--ink); }
-.ahni-app .btn-icon { width: 40px; padding: 0; }
+.ahni-app .btn-ghost:hover { background: var(--hover); color: var(--ink); }
+.ahni-app .btn-icon { width: 36px; padding: 0; }
 
-/* Status badges – colour is never the only signal: every badge has a dot + text */
+/* Status labels: filled dot + coloured word, no pill (Waya) */
 .ahni-app .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 650;
-  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
   white-space: nowrap;
 }
-.ahni-app .badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
-.ahni-app .badge-success { color: var(--mint-ink); background: var(--mint-soft); }
-.ahni-app .badge-warning { color: var(--butter-ink); background: rgba(255, 231, 168, 0.35); }
-.ahni-app .badge-danger { color: var(--danger); background: var(--danger-soft); }
-.ahni-app .badge-info { color: var(--lilac-ink); background: var(--lilac-soft); }
-.ahni-app .badge-neutral { color: var(--muted); background: var(--surface-2); }
+.ahni-app .badge::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
+.ahni-app .badge-success { color: var(--mint-ink); }
+.ahni-app .badge-warning { color: var(--butter-ink); }
+.ahni-app .badge-danger { color: var(--danger); }
+.ahni-app .badge-info { color: var(--lilac-ink); }
+.ahni-app .badge-neutral { color: var(--muted); }
+
+/* Keyboard chips */
+.ahni-app kbd, body:has(.ahni-app) kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 
 /* Sidebar nav */
 .ahni-app .nav-label {
-  padding: 18px 12px 6px;
+  padding: 16px 10px 4px;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--faint);
 }
 .ahni-app .nav-item {
@@ -152,48 +206,63 @@ body:has(.ahni-app) {
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 12px;
-  min-height: 40px;
-  padding: 8px 12px;
-  border-radius: 12px;
+  gap: 10px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: var(--r-control);
   font-size: 14px;
-  font-weight: 550;
+  font-weight: 500;
   color: var(--ink-2);
   text-align: left;
-  border: 1px solid transparent;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
-.ahni-app .nav-item:hover { background: var(--surface-2); color: var(--ink); }
+.ahni-app .nav-item:hover { background: var(--hover); color: var(--ink); }
 .ahni-app .nav-item[aria-current="page"] {
-  background: var(--brand-soft);
-  border-color: rgba(242, 86, 77, 0.25);
+  background: var(--surface-2);
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 600;
 }
-.ahni-app .nav-item[aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  left: -12px;
-  top: 10px;
-  bottom: 10px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--brand);
-}
-.ahni-app .nav-item.is-ancestor { color: var(--ink); font-weight: 700; }
+.ahni-app .nav-item.is-ancestor { color: var(--ink); font-weight: 600; }
+.ahni-app .nav-item svg { stroke-width: 1.5; }
 .ahni-app .nav-sub {
-  margin-left: 21px;
-  padding-left: 12px;
-  border-left: 1px solid var(--line);
+  margin-left: 19px;
+  padding-left: 10px;
+  border-left: 1px solid var(--line-strong);
 }
-.ahni-app .nav-sub .nav-item { min-height: 34px; padding: 6px 10px; font-size: 13.5px; }
-.ahni-app .nav-sub .nav-item[aria-current="page"]::before { left: -13px; }
+.ahni-app .nav-sub .nav-item { min-height: 32px; padding: 5px 10px; font-size: 13.5px; }
+
+/* Tooltip layer (positioned by the shell so it is never clipped by scrolling panels) */
+.ahni-tip {
+  position: fixed;
+  z-index: 2000;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #262626;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: ahni-tip-in 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ahni-tip kbd {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+@keyframes ahni-tip-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
 
 /* Smooth expand/collapse */
 .ahni-app .nav-collapse {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.22s ease;
+  transition: grid-template-rows 0.18s var(--ease-std);
 }
 .ahni-app .nav-collapse[data-open="true"] { grid-template-rows: 1fr; }
 .ahni-app .nav-collapse > div { overflow: hidden; }

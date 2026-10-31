@@ -156,10 +156,10 @@ export default function DashboardHome() {
       {/* Greeting */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[clamp(26px,3vw,32px)] font-bold tracking-[-0.03em]">
+          <h1 className="page-title">
             {greet}, {first}
           </h1>
-          <p className="mt-1 text-[15px] text-[var(--muted)]">
+          <p className="mt-3 text-[15px] text-[var(--muted)]">
             {[role, dept].filter(Boolean).join(" · ") || "Here's what's happening across your work"} ·{" "}
             {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
           </p>
@@ -170,17 +170,17 @@ export default function DashboardHome() {
       {quickActions.length > 0 && (
         <section className="app-card overflow-hidden" aria-labelledby="qs-title">
           <div className="flex items-baseline justify-between gap-4 px-5 pb-3 pt-4">
-            <h2 id="qs-title" className="text-[16px] font-bold">Start something</h2>
+            <h2 id="qs-title" className="text-[15px] font-semibold">Start something</h2>
             <span className="hidden text-[13px] text-[var(--muted)] sm:block">Your most-used requests</span>
           </div>
-          <ul className="grid grid-cols-2 gap-2 border-t border-[var(--line)] bg-[var(--surface-2)] p-2 sm:grid-cols-3 xl:grid-cols-6">
+          <ul className="grid grid-cols-2 gap-1 p-1 pt-0 sm:grid-cols-3 xl:grid-cols-6">
             {quickActions.map((q) => (
               <li key={q.href}>
-                <Link href={q.href} className="group flex h-full items-center gap-3 rounded-2xl bg-[var(--surface)] px-3 py-3 transition-shadow hover:shadow-[var(--shadow-2)]">
-                  <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--ink-2)] group-hover:bg-[var(--brand-soft)] group-hover:text-[var(--brand-ink)]">
+                <Link href={q.href} className="group flex h-full items-center gap-3 rounded-[8px] bg-[var(--surface)] px-3 py-3 ring-1 ring-transparent transition hover:ring-[var(--line-strong)]">
+                  <span className="grid h-8 w-8 flex-none place-items-center rounded-[6px] bg-[var(--surface-2)] text-[var(--ink-2)] [&_svg]:h-[17px] [&_svg]:w-[17px] group-hover:text-[var(--ink)]">
                     {QUICK_ICONS[q.label] ?? <ArrowRight className="h-5 w-5" />}
                   </span>
-                  <span className="text-[14px] font-semibold leading-tight">{q.label}</span>
+                  <span className="text-[14px] font-medium leading-tight">{q.label}</span>
                 </Link>
               </li>
             ))}
@@ -189,17 +189,19 @@ export default function DashboardHome() {
       )}
 
       {/* KPIs */}
-      <section aria-label="Key figures" data-tour="kpis" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <section aria-label="Key figures" data-tour="kpis" className="grid grid-cols-2 gap-1 xl:grid-cols-4">
         {shownKpis.map((k) => (
-          <Link key={k.label} href={k.href} className="app-card group flex min-w-0 flex-col p-4 transition-shadow hover:shadow-[var(--shadow-2)] md:p-5">
-            <span className={cx("grid h-9 w-9 place-items-center rounded-full md:h-10 md:w-10", k.tint)}>{k.icon}</span>
+          <Link key={k.label} href={k.href} className="app-card group flex min-w-0 flex-col p-4 md:p-5">
+            <span className="flex items-start justify-between gap-3">
+              <span className="text-[13px] font-medium leading-snug text-[var(--ink-2)] md:text-[14px]">{k.label}</span>
+              <span className="flex-none text-[var(--muted)] [&_svg]:h-[17px] [&_svg]:w-[17px]" aria-hidden="true">{k.icon}</span>
+            </span>
             {k.loading ? (
-              <span className="skeleton mt-5 h-9 w-24" aria-label="Loading" />
+              <span className="skeleton mt-4 h-8 w-24" aria-label="Loading" />
             ) : (
-              <span className="mt-4 truncate text-[24px] font-bold leading-none tracking-[-0.04em] md:mt-5 md:text-[30px]">{k.value}</span>
+              <span className="mt-4 truncate text-[24px] font-semibold leading-none tracking-[-0.02em] tabular-nums md:text-[28px]">{k.value}</span>
             )}
-            <span className="mt-2 text-[13px] font-semibold leading-snug text-[var(--ink-2)] md:text-[14px]">{k.label}</span>
-            <span className="mt-1 flex items-center justify-between text-[12px] text-[var(--muted)] md:text-[13px]">
+            <span className="mt-2 flex items-center justify-between text-[12px] text-[var(--muted)] md:text-[13px]">
               {k.sub}
               <ChevronRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
             </span>
@@ -212,7 +214,7 @@ export default function DashboardHome() {
           {/* Needs attention */}
           <section aria-labelledby="att-title" data-tour="attention">
             <div className="app-panel-head mb-2 flex items-center justify-between">
-              <h2 id="att-title" className="text-[15px] font-bold">
+              <h2 id="att-title" className="text-[15px] font-semibold">
                 Needs attention <span className="font-medium text-[var(--muted)]">({attention.length})</span>
               </h2>
             </div>
@@ -224,7 +226,7 @@ export default function DashboardHome() {
                 </div>
               ) : attention.length ? (
                 attention.map((a) => (
-                  <Link key={a.key} href={a.href} className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[var(--surface-2)]">
+                  <Link key={a.key} href={a.href} className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-[var(--hover)]">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] font-semibold">{a.title}</span>
                       <span className="block truncate text-[13px] text-[var(--muted)]">{a.sub}</span>
@@ -270,7 +272,7 @@ export default function DashboardHome() {
           {/* Recent activity */}
           <section aria-labelledby="act-title">
             <div className="app-panel-head mb-2">
-              <h2 id="act-title" className="text-[15px] font-bold">Recent activity</h2>
+              <h2 id="act-title" className="text-[15px] font-semibold">Recent activity</h2>
             </div>
             <div className="app-card">
               <ol className="space-y-4 p-5">
@@ -295,7 +297,7 @@ export default function DashboardHome() {
                   </li>
                 ))}
               </ol>
-              <Link href="/dashboard/notifications" className="flex items-center justify-between border-t border-[var(--line)] px-5 py-3.5 text-[14px] font-semibold text-[var(--brand-ink)] hover:bg-[var(--surface-2)]">
+              <Link href="/dashboard/notifications" className="flex items-center justify-between border-t border-[var(--line)] px-5 py-3.5 text-[14px] font-semibold text-[var(--brand-ink)] hover:bg-[var(--hover)]">
                 All notifications <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

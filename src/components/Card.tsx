@@ -12,7 +12,7 @@ const Card = ({
   return (
     <div
       className={cn(
-        "p-6 bg-card text-card-foreground border shadow-sm rounded-lg",
+        "p-6 bg-card text-card-foreground border border-[var(--line-strong,#e3e2ea)] rounded-[10px]",
         className
       )}
     >

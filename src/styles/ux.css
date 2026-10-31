@@ -235,41 +235,6 @@
   }
 }
 
-/* ---------- Tabs: compact segmented control that fits its labels ---------- */
-.ahni-app [role="tablist"][data-orientation="horizontal"],
-.ahni-app [role="tablist"][aria-orientation="horizontal"] {
-  display: inline-flex !important;
-  width: auto !important;
-  max-width: 100%;
-  height: auto !important;
-  gap: 2px !important;
-  padding: 4px !important;
-  justify-content: flex-start !important;
-  overflow-x: auto;
-  scrollbar-width: none;
-  border: 0 !important;
-  border-radius: 12px !important;
-  background: var(--surface-2, #f3f2f7) !important;
-}
-.ahni-app [role="tablist"] > [role="tab"] {
-  flex: 0 0 auto;
-  min-height: 36px;
-  padding: 6px 16px !important;
-  border-radius: 9px !important;
-  font-weight: 600;
-  color: var(--muted, #6b6b76) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-.ahni-app [role="tablist"] > [role="tab"]:hover {
-  color: var(--ink, #17171c) !important;
-}
-.ahni-app [role="tablist"] > [role="tab"][data-state="active"] {
-  color: var(--ink, #17171c) !important;
-  background: var(--surface, #fff) !important;
-  box-shadow: 0 1px 2px rgba(23, 23, 28, 0.08), 0 0 0 1px var(--line, #e7e6ee) !important;
-}
-
 /* ---------- No coloured side stripes on cards (reads as template-y) ---------- */
 .ahni-app :is(.border-l-2, .border-l-4, .border-l-8, [class*="border-l-["]) {
   border-left-width: 1px !important;
@@ -277,4 +242,204 @@
 }
 .ahni-app :is(.border-l-2, .border-l-4, .border-l-8, [class*="border-l-["]):not(.border, [class*="border-["], [class*="border-solid"]) {
   border-left-width: 0 !important;
+}
+
+
+/* =====================================================================
+ * Waya playbook layer – structure & behaviour, AHNi colours.
+ * Applies inside the staff shell and to dialogs/menus it opens (portals).
+ * ===================================================================== */
+:is(.ahni-app, body:has(.ahni-app)) {
+  --ux-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Page breadcrumbs move to the top bar; the in-page copies are hidden */
+.ahni-app main nav[aria-label="breadcrumb"] {
+  display: none;
+}
+
+/* ---------- Tabs: underlined, sized to their labels ---------- */
+.ahni-app [role="tablist"][data-orientation="horizontal"],
+.ahni-app [role="tablist"][aria-orientation="horizontal"] {
+  display: flex !important;
+  width: 100% !important;
+  height: auto !important;
+  gap: 4px !important;
+  padding: 0 !important;
+  justify-content: flex-start !important;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: inset 0 -1px 0 var(--line-strong) !important;
+}
+.ahni-app [role="tablist"] > [role="tab"] {
+  flex: 0 0 auto;
+  position: relative;
+  min-height: 40px;
+  padding: 8px 12px !important;
+  border-radius: 6px 6px 0 0 !important;
+  font-weight: 500;
+  color: var(--muted) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ahni-app [role="tablist"] > [role="tab"]:hover {
+  color: var(--ink) !important;
+}
+.ahni-app [role="tablist"] > [role="tab"][data-state="active"] {
+  color: var(--ink) !important;
+  font-weight: 600;
+}
+.ahni-app [role="tablist"] > [role="tab"][data-state="active"]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+/* ---------- Status labels (Badge status variants) ---------- */
+.ux-status {
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ux-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  flex: none;
+}
+
+/* ---------- Tables: 48px rows, divider only, density toggle ---------- */
+.ahni-app .ux-td {
+  height: 48px;
+}
+html[data-density="compact"] .ahni-app .ux-td {
+  height: 36px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+html[data-density="compact"] .ahni-app thead th,
+html[data-density="compact"] .ahni-app thead td {
+  height: 36px;
+}
+.ahni-app .ux-table-wrap {
+  scrollbar-width: thin;
+}
+
+/* ---------- Floating layers: dialogs, popovers, menus, selects ---------- */
+body:has(.ahni-app) [role="dialog"].ux-sheet,
+body:has(.ahni-app) [role="alertdialog"].ux-sheet {
+  border: 0 !important;
+  border-radius: var(--r-dialog) !important;
+  box-shadow: var(--shadow-dialog) !important;
+}
+@media (min-width: 640px) {
+  body:has(.ahni-app) .ux-sheet[data-state="open"] {
+    animation: ux-modal-in 0.25s var(--ux-out) !important;
+  }
+  body:has(.ahni-app) .ux-sheet[data-state="closed"] {
+    animation: ux-modal-out 0.15s ease-in forwards !important;
+  }
+}
+body:has(.ahni-app) .fixed.inset-0.z-50[data-state] {
+  background: var(--overlay) !important;
+}
+body:has(.ahni-app) [data-radix-popper-content-wrapper] > [data-state] {
+  border-radius: 8px !important;
+  border-color: var(--line) !important;
+  box-shadow: var(--shadow-pop) !important;
+}
+body:has(.ahni-app) [data-radix-popper-content-wrapper] > [data-state="open"] {
+  animation: ux-pop-in 0.25s var(--ux-out) !important;
+}
+body:has(.ahni-app) [data-radix-popper-content-wrapper] [role="menuitem"],
+body:has(.ahni-app) [data-radix-popper-content-wrapper] [role="option"] {
+  border-radius: 6px;
+}
+.ux-pop {
+  animation: ux-pop-in 0.25s var(--ux-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+@keyframes ux-pop-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes ux-modal-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes ux-modal-out {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.99); }
+}
+
+/* ---------- Toasts: top-right, 370px, rise + fade ---------- */
+body:has(.ahni-app) [data-sonner-toast] {
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-toast) !important;
+  font-family: inherit;
+}
+@media (min-width: 640px) {
+  body:has(.ahni-app) [data-sonner-toaster] {
+    --width: 370px;
+  }
+}
+
+/* ---------- Form controls ---------- */
+.ahni-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select, button[role="combobox"]):focus-visible,
+body:has(.ahni-app) [role="dialog"] :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select, button[role="combobox"]):focus-visible {
+  outline: 2px solid var(--focus, #f2564d) !important;
+  outline-offset: 1px;
+  box-shadow: none !important;
+}
+/* Invalid input shakes once (80ms + 60ms, 6px) and settles */
+[aria-invalid="true"]:is(input, textarea, select, button) {
+  border-color: var(--danger, #c62828) !important;
+  animation: ux-shake 0.42s ease-out 1;
+}
+@keyframes ux-shake {
+  0% { transform: translateX(0); }
+  19% { transform: translateX(-6px); }
+  33% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+/* Checkboxes and progress use the accent */
+body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
+  background: var(--brand, #f2564d) !important;
+  border-color: var(--brand, #f2564d) !important;
+  color: #fff !important;
+}
+.ahni-app [role="progressbar"] > div {
+  background: var(--brand, #f2564d);
+}
+/* Disabled looks the same everywhere */
+.ahni-app :is(button, input, select, textarea):disabled {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-pop,
+  [aria-invalid="true"],
+  body:has(.ahni-app) [data-radix-popper-content-wrapper] > [data-state],
+  body:has(.ahni-app) .ux-sheet {
+    animation: none !important;
+  }
+}
+
+/* Page action row lifted beside the serif title (set by the shell on desktop) */
+@media (min-width: 768px) {
+  .ahni-app .ux-title-actions {
+    position: absolute !important;
+    right: 32px;
+    margin: 0 !important;
+    z-index: 2;
+  }
 }
