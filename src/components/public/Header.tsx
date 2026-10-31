@@ -33,6 +33,7 @@ export default function Header() {
   const panelRef = useRef<HTMLDivElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
+  const portalMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -86,7 +87,8 @@ export default function Header() {
   useEffect(() => {
     if (!portalOpen) return;
     const onDown = (e: MouseEvent) => {
-      if (!portalRef.current?.contains(e.target as Node)) setPortalOpen(false);
+      const t = e.target as Node;
+      if (!portalRef.current?.contains(t) && !portalMenuRef.current?.contains(t)) setPortalOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPortalOpen(false);
     document.addEventListener("mousedown", onDown);
@@ -168,10 +170,10 @@ export default function Header() {
 
           {/* Portal dropdown */}
           {portalOpen && (
-            <div className="absolute right-0 top-[60px] w-[300px] rounded-[16px] bg-white p-2 shadow-[0_24px_60px_rgba(0,0,0,.16)]">
+            <div ref={portalMenuRef} className="absolute right-0 top-[60px] w-[300px] rounded-[16px] bg-white p-2 shadow-[0_24px_60px_rgba(0,0,0,.16)]">
               <p className="t-eyebrow px-4 pb-1 pt-3 !mb-0 text-[12px]">Log in to</p>
               {PORTALS.map((p) => (
-                <Link key={p.href} href={p.href} className="group flex items-center justify-between gap-3 rounded-[12px] px-4 py-3 hover:bg-[var(--mist)]">
+                <Link key={p.href} href={p.href} onClick={() => setPortalOpen(false)} className="group flex items-center justify-between gap-3 rounded-[12px] px-4 py-3 hover:bg-[var(--mist)]">
                   <span>
                     <span className="block text-[16px] font-bold tracking-[-0.01em]">{p.label}</span>
                     <span className="block text-[13px] text-[var(--ink-soft)]">{p.desc}</span>
