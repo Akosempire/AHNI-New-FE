@@ -39,8 +39,8 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
             <FormLabel className={`mb-1.5 ${required ? 'required' : ''}`}>
               {label}
             </FormLabel>
-            <FormControl>
-              <div className='relative'>
+            <div className='relative'>
+              <FormControl>
                 <Input
                   type={
                     type === "password"
@@ -77,6 +77,7 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                     rest.className
                   )}
                 />
+              </FormControl>
                 {rest.type === "password" && (
                   <button
                     type='button'
@@ -98,8 +99,7 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                     <Mail className='h-5 w-5' />
                   </div>
                 )}
-              </div>
-            </FormControl>
+            </div>
             <FormMessage className='mt-1' />
           </FormItem>
         );

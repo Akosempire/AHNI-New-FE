@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ReactNode } from "react";
+import DemoLoginHint from "@/components/DemoLoginHint";
 
 /**
  * Split-screen layout for staff sign-in flows (login, forgot password, OTP, new password).
@@ -44,7 +45,10 @@ export default function AuthLayout({
           {step && <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--brand-ink)]">{step}</p>}
           <h1 className="text-[clamp(28px,3.4vw,36px)] font-bold leading-tight tracking-[-0.035em]">{title}</h1>
           {subtitle && <p className="mt-2 text-[15px] leading-relaxed text-[var(--muted)]">{subtitle}</p>}
-          <div className="mt-8">{children}</div>
+          <div className="mt-8">
+            <DemoLoginHint kind="staff" />
+            {children}
+          </div>
           {footer && <div className="mt-8 text-[14px] text-[var(--muted)]">{footer}</div>}
         </main>
 

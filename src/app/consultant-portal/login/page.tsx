@@ -10,6 +10,8 @@ import Card from "@/components/Card";
 import { Home, AlertCircle } from "lucide-react";
 import { useConsultantLogin, ConsultantAuthUtils } from "@/features/consultant-portal/controllers/consultantAuthController";
 
+import DemoLoginHint from "@/components/DemoLoginHint";
+
 export default function ConsultantLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -86,6 +88,7 @@ export default function ConsultantLoginPage() {
         {/* Left Panel - Login Form */}
         <div className="w-full flex flex-1 items-center justify-center">
           <div>
+            <DemoLoginHint kind="consultant" />
             <form onSubmit={handleSubmit}>
               <img src="/imgs/logo.png" className="w-[130px] mx-auto" />
               <Card className="max-w-[500px] flex flex-col items-center gap-y-14 mt-10 py-10">

@@ -37,6 +37,7 @@ import { activeIdOf, ancestorsOfId, bestMatch, flatten, NavNode, NavSection, pre
 import { useLogout } from "./useLogout";
 import { useNavSections } from "./useNavSections";
 import { Tour, useTourControls } from "./Tour";
+import { DEMO_MODE } from "@/constants/demoMode";
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
 
@@ -488,7 +489,14 @@ function AppHeader({ pathname, onMenu }: { pathname: string; onMenu: () => void 
               </ol>
             </nav>
           )}
-          <p className="truncate text-[16px] font-bold tracking-[-0.015em] md:text-[18px]">{title}</p>
+          <p className="flex items-center gap-2 truncate text-[16px] font-bold tracking-[-0.015em] md:text-[18px]">
+            {title}
+            {DEMO_MODE && (
+              <span className="rounded-full border border-dashed border-amber-400 bg-amber-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.06em] text-amber-900" title="Sample data – not connected to AHNi's servers">
+                Preview data
+              </span>
+            )}
+          </p>
         </div>
 
         <button type="button" onClick={openSearch} className="btn btn-outline btn-icon md:hidden" aria-label="Search pages">

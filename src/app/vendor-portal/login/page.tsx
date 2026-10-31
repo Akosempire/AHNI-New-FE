@@ -24,6 +24,8 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+import DemoLoginHint from "@/components/DemoLoginHint";
+
 export default function VendorLoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -105,6 +107,7 @@ export default function VendorLoginPage() {
               </Button>
             </div>
 
+            <DemoLoginHint kind="vendor" />
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <img src="/imgs/logo.png" className="w-[130px] mx-auto" />
