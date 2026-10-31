@@ -9,6 +9,7 @@ import {
 import { TNotification } from "@/features/notifications/controllers/notificationController";
 import { useMarkNotificationAsRead, useMarkNotificationAsUnread, useDeleteNotification } from "@/features/notifications/controllers/notificationController";
 import { useRouter } from "next/navigation";
+import { moduleRoute } from "@/features/notifications/moduleRoutes";
 
 type PropsType = {
     notification: TNotification;
@@ -41,26 +42,7 @@ export default function NotificationItem({
     const isUnread = !is_read || status === "Pending";
     const isExpired = expires_at ? new Date(expires_at) < new Date() : false;
 
-    // Navigation mapping for different module types
-    const getModuleRoute = (moduleType: string) => {
-        const routes: { [key: string]: string } = {
-            'Project': '/dashboard/projects',
-            'ExpenseAuthorization': '/dashboard/admin/expense-authorization',
-            'Agreement': '/dashboard/c-and-g/agreements',
-            'User': '/account',
-            'ProcurementPlan': '/dashboard/procurement/procurement-plan',
-            'PurchaseOrder': '/dashboard/procurement/purchase-order',
-            'VehicleRequest': '/dashboard/admin/fleet-management/vehicle-request',
-            'FuelRequest': '/dashboard/admin/fleet-management/fuel-request',
-            'PaymentRequest': '/dashboard/admin/payment-request',
-            'AssetMaintenance': '/dashboard/admin/asset-maintenance',
-            'TravelExpenseReport': '/dashboard/admin/travel-expenses-report',
-            'ConsultancyReport': '/dashboard/c-and-g/consultancy-report',
-            'ContractRequest': '/dashboard/c-and-g/contract-request'
-        };
-        
-        return routes[moduleType] || '/dashboard';
-    };
+    const getModuleRoute = moduleRoute;
 
     const handleDeleteNotification = (e: React.MouseEvent) => {
         e.stopPropagation();
