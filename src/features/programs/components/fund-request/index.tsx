@@ -2,9 +2,9 @@
 import Link from "next/link";
 import Card from "@/components/Card";
 import { Button } from "@/components/ui/button";
+import StickyMobileAction from "@/components/ux/StickyMobileAction";
 import AddSquareIcon from "@/components/icons/AddSquareIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
-import FilterIcon from "@/components/icons/FilterIcon";
 import { RouteEnum } from "@/constants/RouterConstants";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
@@ -237,25 +237,28 @@ export default function FundRequest() {
       <BreadcrumbCard list={breadcrumbs} />
 
       <div className='flex justify-end gap-3'>
-        <Link href={RouteEnum.PROGRAM_FUND_REQUEST_CREATE}>
-          <Button className='flex gap-2 py-6'>
-            <AddSquareIcon />
-            New Fund Request
-          </Button>
-        </Link>
+        <StickyMobileAction>
+          <Link href={RouteEnum.PROGRAM_FUND_REQUEST_CREATE}>
+            <Button className='flex gap-2 py-6'>
+              <AddSquareIcon />
+              New Fund Request
+            </Button>
+          </Link>
+        </StickyMobileAction>
       </div>
 
       <Card className='space-y-5'>
-        <div className='flex items-center justify-between gap-2'>
-          <div className='flex items-center gap-2'>
-            <span className='flex items-center w-1/3 px-2 py-2 border rounded-lg'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <div className='flex w-full min-w-0 items-center gap-2 sm:w-auto'>
+            <span className='flex h-11 min-w-0 flex-1 items-center px-3 border rounded-xl sm:flex-none'>
               <SearchIcon />
               <input
                 placeholder='Search by project, ID, state, month, year...'
                 type='text'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className='ml-2 h-6 w-[350px] border-none bg-none focus:outline-none outline-none'
+                aria-label='Search fund requests'
+                className='ml-2 h-6 w-full min-w-0 border-none bg-transparent focus:outline-none outline-none sm:w-[320px]'
               />
             </span>
             {searchQuery && (
@@ -268,9 +271,6 @@ export default function FundRequest() {
                 Clear
               </Button>
             )}
-            <Button className='shadow-sm' variant='ghost'>
-              <FilterIcon />
-            </Button>
           </div>
 
           {/* Page Size Selector */}
@@ -543,23 +543,24 @@ const projectColumns: ColumnDef<ProjectWithFundRequests>[] = [
     accessorKey: "approvalStage",
     size: 150,
     cell: ({ getValue }) => {
-      const status = getValue() as string;
+      const raw = (getValue() as string) || "";
+      const status = raw.toUpperCase();
       return (
         <Badge
           variant='default'
           className={cn(
             "p-1 rounded-lg",
-            status === "PENDING" && "bg-yellow-200 text-yellow-500",
+            status === "PENDING" && "bg-amber-100 text-amber-800",
             status === "REVIEWED" && "bg-blue-200 text-blue-500",
             status === "LOCATION_REVIEWED" && "bg-blue-300 text-blue-600",
             status === "LOCATION_AUTHORIZED" && "bg-blue-400 text-blue-700",
             status === "HQ_REVIEWED" && "bg-purple-200 text-purple-500",
             status === "HQ_AUTHORIZED" && "bg-purple-300 text-purple-600",
-            status === "HQ_APPROVED" && "bg-green-200 text-green-500",
-            status === "REJECTED" && "bg-red-200 text-red-500"
+            (status === "HQ_APPROVED" || status === "APPROVED") && "bg-green-100 text-green-800",
+            status === "REJECTED" && "bg-red-100 text-red-800"
           )}
         >
-          {status}
+          {raw.replace(/_/g, " ")}
         </Badge>
       );
     },

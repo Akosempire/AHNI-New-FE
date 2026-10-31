@@ -3,19 +3,11 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   ColumnDef,
-  flexRender,
 } from "@tanstack/react-table";
-import { LoadingSpinner } from "@/components/Loading";
 import Pagination from "@/components/Pagination";
 
-import {
-  Table as ShadTable,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import ResponsiveTable from "@/components/Table/ResponsiveTable";
+import { ReactNode } from "react";
 
 type TPagination = {
   total: number;
@@ -31,6 +23,10 @@ interface TableProps<TData> {
   footer?: boolean;
   pagination?: TPagination;
   headClass?: string;
+  /** Shown when there are no rows */
+  emptyTitle?: string;
+  emptyMessage?: string;
+  emptyAction?: ReactNode;
 }
 
 export default function DataTable<TData>({
@@ -41,6 +37,9 @@ export default function DataTable<TData>({
   footer = false,
   pagination,
   headClass,
+  emptyTitle,
+  emptyMessage,
+  emptyAction,
 }: TableProps<TData>) {
   const table = useReactTable<TData>({
     data,
@@ -62,127 +61,17 @@ export default function DataTable<TData>({
 
   return (
     <div>
-      <ShadTable>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableCell
-                  key={header.id}
-                  colSpan={header.colSpan}
-                  className={`font-semibold text-black cursor-pointer dark:text-gray-300 text-center ${headClass}`}
-                  style={{
-                    minWidth: header.column.columnDef.size,
-                    maxWidth: header.column.columnDef.size,
-                  }}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className='h-24'>
-                <LoadingSpinner />
-              </TableCell>
-            </TableRow>
-          ) : (
-            <>
-              {(() => {
-                try {
-                  if (!table || typeof table.getRowModel !== 'function') {
-                    return (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className='h-24'>
-                          <p className='text-center'>No Data</p>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  }
-                  const rowModel = table.getRowModel();
-                  if (!rowModel || !rowModel.rows) {
-                    return (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className='h-24'>
-                          <p className='text-center'>No Data</p>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  }
-                  const rows = rowModel.rows;
-                  return rows.length > 0 ? (
-                    rows.map((row) => (
-                  <TableRow
-                    className={`text-gray-text text-sm dark:text-white ${onRowClick ? 'cursor-pointer' : ''}`}
-                    key={row.id}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className='h-24'>
-                    <p className='text-center'>No Data</p>
-                  </TableCell>
-                </TableRow>
-              );
-                } catch (error) {
-                  console.error('DataTable render error:', error);
-                  return (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className='h-24'>
-                        <p className='text-center'>Error loading data</p>
-                      </TableCell>
-                    </TableRow>
-                  );
-                }
-              })()}
-            </>
-          )}
-        </TableBody>
-        {footer && (
-          <TableFooter>
-            {table.getFooterGroups().map((footerGroup) => (
-              <TableRow key={footerGroup.id}>
-                {footerGroup.headers.map((footer) => (
-                  <TableCell
-                    key={footer.id}
-                    colSpan={footer.colSpan}
-                    className='font-semibold text-black cursor-pointer dark:text-gray-300'
-                    style={{
-                      minWidth: footer.column.columnDef.size,
-                      maxWidth: footer.column.columnDef.size,
-                    }}
-                  >
-                    {footer.isPlaceholder
-                      ? null
-                      : flexRender(
-                          footer.column.columnDef.footer,
-                          footer.getContext()
-                        )}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableFooter>
-        )}
-      </ShadTable>
+      <ResponsiveTable
+        table={table}
+        columnsCount={columns.length}
+        isLoading={isLoading}
+        onRowClick={onRowClick}
+        footer={footer}
+        headClass={headClass}
+        emptyTitle={emptyTitle}
+        emptyMessage={emptyMessage}
+        emptyAction={emptyAction}
+      />
 
       {pagination && (
         <Pagination

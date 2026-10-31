@@ -5,9 +5,8 @@ import NotificationGroup from "./NotificationGroup";
 import { NotificationItemSkeleton } from "./NotificationSkeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Bell, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Icon } from "@iconify/react";
-import { Badge } from "@/components/ui/badge";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
 
 interface NotificationListInfiniteProps {
@@ -104,7 +103,6 @@ export default function NotificationListInfinite({
   }, [allNotifications, groupBy]);
 
   const totalCount = data?.pages[0]?.count || 0;
-  const loadedCount = allNotifications.length;
   const unreadCount = allNotifications.filter(n => !n.is_read || n.status === "Pending").length;
 
   if (error) {
@@ -129,23 +127,14 @@ export default function NotificationListInfinite({
   return (
     <div className="w-[35%] border-solid border-[1px] border-gray-200 rounded-sm shadow-md pb-4">
       {/* Header */}
-      <div className="flex items-center justify-between py-2 px-4">
-        <div className="flex items-center gap-2">
-          <h2 className="font-medium">Notifications</h2>
-          <div className="flex items-center gap-1">
-            <Badge variant="outline" className="text-xs">
-              {loadedCount}/{totalCount}
-            </Badge>
-            {unreadCount > 0 && (
-              <Badge className="text-xs bg-blue-100 text-blue-800">
-                {unreadCount} unread
-              </Badge>
-            )}
-          </div>
-        </div>
-        
+      <div className="flex items-center justify-between gap-3 py-3 px-4">
+        <p className="min-w-0 text-sm text-gray-600">
+          <span className="font-semibold text-gray-900">{totalCount}</span> total
+          {unreadCount > 0 && <span> · {unreadCount} unread</span>}
+        </p>
+
         <Select value={groupBy} onValueChange={setGroupBy}>
-          <SelectTrigger className="w-[140px] h-8">
+          <SelectTrigger className="h-9 w-auto shrink-0 gap-2 border-none bg-transparent px-2 text-sm text-gray-600 shadow-none" aria-label="Group notifications">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

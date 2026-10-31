@@ -2,6 +2,7 @@ import React from 'react';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { cn } from '@/lib/utils';
+import ApprovalProgress, { toStepState } from './ux/ApprovalProgress';
 import { CheckCircle, Clock, XCircle, AlertCircle, UserIcon, CalendarIcon } from 'lucide-react';
 
 export interface ApprovalInfo {
@@ -78,11 +79,23 @@ const ApprovalDisplay: React.FC<ApprovalDisplayProps> = ({
     }
   };
 
+  const progress = approvals.length > 1 && (
+    <ApprovalProgress
+      className="pt-3"
+      steps={approvals.map((a) => ({
+        label: a.level || a.position || a.name,
+        sub: a.level || a.position ? a.name : undefined,
+        state: toStepState(a.status),
+      }))}
+    />
+  );
+
   if (showTimeline) {
     return (
       <Card className={cn("w-full", className)}>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          {progress}
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -181,6 +194,7 @@ const ApprovalDisplay: React.FC<ApprovalDisplayProps> = ({
     <Card className={cn("w-full", className)}>
       <CardHeader>
         <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        {progress}
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

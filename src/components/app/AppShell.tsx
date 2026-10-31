@@ -38,6 +38,7 @@ import { useLogout } from "./useLogout";
 import { useNavSections } from "./useNavSections";
 import { Tour, useTourControls } from "./Tour";
 import { DEMO_MODE } from "@/constants/demoMode";
+import PullToRefresh from "@/components/ux/PullToRefresh";
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
 
@@ -161,6 +162,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </main>
         </div>
 
+        <PullToRefresh />
         <SearchPalette open={search} onClose={() => setSearch(false)} />
         <Tour {...tour} openDrawer={() => setDrawer(true)} closeDrawer={() => setDrawer(false)} />
       </div>

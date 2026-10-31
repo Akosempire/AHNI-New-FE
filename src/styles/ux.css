@@ -1,0 +1,280 @@
+/*
+ * App-wide UX patterns (staff dashboard, vendor & consultant portals).
+ * Colours fall back to AHNi tokens when used outside .ahni-app.
+ */
+
+/* ---------- Cards & skeletons (Doherty threshold) ---------- */
+.ux-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #e7e6ee);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(23, 23, 28, 0.04);
+}
+.ux-skel {
+  background: linear-gradient(90deg, #ecebf2 0%, #f6f5fa 40%, #ecebf2 80%);
+  background-size: 200% 100%;
+  animation: ux-shimmer 1.3s ease-in-out infinite;
+}
+.dark .ux-skel {
+  background: linear-gradient(90deg, #26262e 0%, #30303a 40%, #26262e 80%);
+  background-size: 200% 100%;
+}
+@keyframes ux-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+/* ---------- Things that need attention stand out (Von Restorff) ---------- */
+/* A quiet tint + small label instead of loud side stripes */
+.ux-urgent-row > td {
+  background: color-mix(in srgb, var(--brand, #f2564d) 4%, transparent);
+}
+
+/* ---------- Big enough to tap (Fitts's law) ---------- */
+@media (max-width: 767px) {
+  .ux-actions > div > *,
+  .ux-actions button,
+  .ux-actions [role="button"],
+  .ux-actions a {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Pagination (react-paginate) */
+  ul[role="navigation"] > li > a {
+    min-width: 40px;
+    min-height: 40px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  ul[role="navigation"] {
+    gap: 6px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    flex-wrap: wrap;
+  }
+  /* Checkboxes get a bigger invisible hit area */
+  button[role="checkbox"] {
+    position: relative;
+  }
+  button[role="checkbox"]::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+  }
+}
+
+/* ---------- Sticky primary action on phones (Fitts + thumb zone) ---------- */
+.ux-sticky-action {
+  display: none;
+}
+@media (max-width: 767px) {
+  .ux-sticky-action {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line, #e7e6ee);
+  }
+  .ux-sticky-action > * {
+    width: 100%;
+  }
+  .ux-sticky-action button,
+  .ux-sticky-action a {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+  }
+  .ux-sticky-spacer {
+    height: 76px;
+  }
+  .ux-hide-on-phone {
+    display: none !important;
+  }
+}
+
+/* ---------- Pull to refresh (Jakob's law) ---------- */
+.ux-ptr {
+  position: fixed;
+  left: 50%;
+  top: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  border-radius: 999px;
+  background: var(--surface, #fff);
+  color: var(--ink, #17171c);
+  box-shadow: 0 6px 20px rgba(23, 23, 28, 0.16);
+  pointer-events: none;
+}
+
+/* ---------- Bottom-sheet dialogs on phones (Jakob's law) ---------- */
+@media (max-width: 639px) {
+  .ux-sheet {
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 92dvh !important;
+    --tw-translate-x: 0 !important;
+    --tw-translate-y: 0 !important;
+    border-radius: 22px 22px 0 0 !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    padding-top: 28px !important;
+  }
+  .ux-sheet[data-state="open"] {
+    animation: ux-sheet-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  }
+  .ux-sheet[data-state="closed"] {
+    animation: ux-sheet-out 0.2s ease-in forwards !important;
+  }
+  .ux-sheet > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* button rows wrap instead of running off the edge */
+  .ux-sheet .flex:has(> button + button),
+  .ux-sheet .flex:has(> a + a),
+  .ux-sheet .flex:has(> button + a),
+  .ux-sheet .flex:has(> a + button) {
+    flex-wrap: wrap;
+  }
+  .ux-sheet :where(p, span, h2, h3, h4, label) {
+    overflow-wrap: anywhere;
+  }
+  .ux-sheet :where(.flex > div) {
+    min-width: 0;
+  }
+  .ux-sheet::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 999px;
+    background: var(--line-strong, #d9d8e2);
+  }
+  .ux-sheet > .ux-sheet-close {
+    width: 44px;
+    height: 44px;
+    right: 8px !important;
+    top: 8px !important;
+    display: grid;
+    place-items: center;
+  }
+}
+@keyframes ux-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes ux-sheet-out {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+/* ---------- Inline helper under inputs (Postel's law) ---------- */
+.ux-hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted, #6b6b76);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-skel,
+  .ux-sheet {
+    animation: none !important;
+  }
+}
+
+/* Wrap a page's main button: normal on desktop, sticky bottom bar on phones */
+@media (max-width: 767px) {
+  .ux-sticky-mobile {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line, #e7e6ee);
+  }
+  .ux-sticky-mobile > *,
+  .ux-sticky-mobile button,
+  .ux-sticky-mobile a {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+  }
+  /* keep the last content clear of the bar */
+  body:has(.ux-sticky-mobile) {
+    padding-bottom: 84px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* lift the chat bubble above sticky bars and bottom toasts */
+  body:has(.ux-sticky-mobile) .ux-chat-fab,
+  body:has(.ux-sticky-action) .ux-chat-fab {
+    bottom: 92px;
+  }
+}
+
+/* ---------- Tabs: compact segmented control that fits its labels ---------- */
+.ahni-app [role="tablist"][data-orientation="horizontal"],
+.ahni-app [role="tablist"][aria-orientation="horizontal"] {
+  display: inline-flex !important;
+  width: auto !important;
+  max-width: 100%;
+  height: auto !important;
+  gap: 2px !important;
+  padding: 4px !important;
+  justify-content: flex-start !important;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: var(--surface-2, #f3f2f7) !important;
+}
+.ahni-app [role="tablist"] > [role="tab"] {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 6px 16px !important;
+  border-radius: 9px !important;
+  font-weight: 600;
+  color: var(--muted, #6b6b76) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ahni-app [role="tablist"] > [role="tab"]:hover {
+  color: var(--ink, #17171c) !important;
+}
+.ahni-app [role="tablist"] > [role="tab"][data-state="active"] {
+  color: var(--ink, #17171c) !important;
+  background: var(--surface, #fff) !important;
+  box-shadow: 0 1px 2px rgba(23, 23, 28, 0.08), 0 0 0 1px var(--line, #e7e6ee) !important;
+}
+
+/* ---------- No coloured side stripes on cards (reads as template-y) ---------- */
+.ahni-app :is(.border-l-2, .border-l-4, .border-l-8, [class*="border-l-["]) {
+  border-left-width: 1px !important;
+  border-left-color: var(--line, #e7e6ee) !important;
+}
+.ahni-app :is(.border-l-2, .border-l-4, .border-l-8, [class*="border-l-["]):not(.border, [class*="border-["], [class*="border-solid"]) {
+  border-left-width: 0 !important;
+}

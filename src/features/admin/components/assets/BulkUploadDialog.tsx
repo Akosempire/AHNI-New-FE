@@ -567,7 +567,7 @@ export default function AssetBulkUploadDialog({ open, onOpenChange }: BulkUpload
         <DialogHeader>
           <DialogTitle>Bulk Upload Assets</DialogTitle>
           <DialogDescription>
-            Upload multiple assets at once using an Excel or CSV file. Download the template to get started.
+            Add many assets at once from a spreadsheet.
           </DialogDescription>
         </DialogHeader>
 
@@ -577,86 +577,45 @@ export default function AssetBulkUploadDialog({ open, onOpenChange }: BulkUpload
             <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
               <p className="text-sm text-blue-900">
-                Loading reference data for name resolution...
+                Preparing…
               </p>
             </div>
           )}
 
-          {/* Info Banners */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <Info className="text-blue-600" size={18} />
-              <div className="flex-1">
-                <p className="text-sm text-blue-900">
-                  <span className="font-medium">Multi-Category Upload:</span> You can now upload assets from different categories in a single file.
-                </p>
-                <p className="text-xs text-blue-700 mt-1">
-                  Each row in your CSV should include the category name for that asset.
-                </p>
-              </div>
+          {/* Step 1 */}
+          <section>
+            <h4 className="mb-1 text-sm font-semibold">1. Get the template</h4>
+            <p className="mb-3 text-sm text-muted-foreground">
+              It comes filled with your categories and locations, so you can just type names.
+            </p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Button onClick={handleDownloadBackendTemplate} size="sm">
+                <Download size={16} className="mr-2" />
+                Download template
+              </Button>
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+              >
+                Blank version
+              </button>
             </div>
-
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-300 rounded-lg">
-              <CheckCircle className="text-green-600" size={18} />
-              <div className="flex-1">
-                <p className="text-sm text-green-900">
-                  <span className="font-medium">✨ Smart Name Resolution:</span> Use friendly names for Asset Type, Project, Donor, Location, etc.
-                </p>
-                <p className="text-xs text-green-700 mt-1">
-                  Names will be automatically converted to the correct system IDs. Leave fields empty if not needed.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Download Template Section */}
-          <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
-            <div className="flex items-start gap-3">
-              <FileSpreadsheet className="text-blue-600 mt-1" size={20} />
-              <div className="flex-1">
-                <h4 className="font-semibold text-sm text-blue-900 mb-1">Step 1: Download Template</h4>
-                <p className="text-sm text-blue-700 mb-3">
-                  Download the CSV template pre-filled with your actual system data (recommended), or use the basic template.
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleDownloadBackendTemplate}
-                    variant="default"
-                    size="sm"
-                    className="bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    <Download size={16} className="mr-2" />
-                    Download Pre-filled Template
-                  </Button>
-                  <Button
-                    onClick={handleDownloadTemplate}
-                    variant="outline"
-                    size="sm"
-                    className="border-blue-600 text-blue-600 hover:bg-blue-100"
-                  >
-                    Basic Template
-                  </Button>
-                </div>
-                <p className="text-xs text-blue-600 mt-2">
-                  💡 The pre-filled template includes your actual categories, locations, employees, etc. - making it easier to fill out!
-                </p>
-              </div>
-            </div>
-          </div>
+          </section>
 
           {/* Upload Section */}
           <div className="space-y-4">
             <div>
-              <h4 className="font-semibold text-sm mb-2">Step 2: Upload Filled Template</h4>
+              <h4 className="font-semibold text-sm mb-2">2. Upload it</h4>
               <div className="border-2 border-dashed rounded-lg p-6 text-center">
                 {!selectedFile ? (
                   <>
                     <Upload className="mx-auto mb-3 text-gray-400" size={40} />
                     <p className="text-sm text-gray-600 mb-2">
-                      Click to select or drag and drop your file here
+                      Drop your file here or choose one
                     </p>
                     <p className="text-xs text-gray-500 mb-4">
-                      Supported formats: CSV, XLS, XLSX (Max 10MB)
+                      CSV or Excel, up to 10 MB
                     </p>
                     <input
                       ref={fileInputRef}
@@ -788,27 +747,18 @@ export default function AssetBulkUploadDialog({ open, onOpenChange }: BulkUpload
             )}
           </div>
 
-          {/* Instructions */}
-          <div className="border rounded-lg p-4 bg-gray-50">
-            <h4 className="font-semibold text-sm mb-2">Important Instructions:</h4>
-            <ul className="text-xs text-gray-700 space-y-1 list-disc list-inside">
-              <li><strong className="text-blue-600">🎯 Universal Template:</strong> This single template works for ALL asset types (Vehicles, IT Equipment, Furniture, etc.)</li>
-              <li><strong className="text-green-600">💾 Pre-filled Template (Recommended):</strong> The backend template includes your actual system data (categories, employees, locations, etc.) in comment rows for easy reference</li>
-              <li><strong>Required fields:</strong> Category, Name, UOM, Unit - must be filled for every asset</li>
-              <li><strong>Optional fields:</strong> Leave EMPTY if not applicable to your asset type</li>
-              <li><strong>Column headers:</strong> Do not modify the header row - keep column names exactly as provided</li>
-              <li><strong>Comment lines:</strong> Lines starting with # are automatically ignored - you can leave or delete them</li>
-              <li><strong>Category:</strong> Must match an existing category name exactly (case-sensitive)</li>
-              <li><strong>Date format:</strong> Use YYYY-MM-DD (e.g., 2024-01-15)</li>
-              <li><strong className="text-purple-600">🚗 Vehicle fields:</strong> 18 vehicle-specific fields available (plate, VIN, odometer, insurance, maintenance, etc.) - ONLY fill these for vehicles</li>
-              <li><strong className="text-purple-600">💻 IT/Lab fields:</strong> Serial Number field available - ONLY fill for IT/Lab equipment</li>
-              <li><strong className="text-green-600">✨ Name-based Fields:</strong> Use friendly names for Asset Type, Project, Donor, Location, Classification, Asset Condition - automatically converted to system IDs</li>
-              <li><strong>Assignee field:</strong> Use email address (e.g., employee@example.com) - will be matched to employee</li>
-              <li><strong>Asset codes:</strong> Should be unique if provided</li>
-              <li><strong>Mixed upload:</strong> Upload multiple asset types in ONE file (vehicles + laptops + furniture all together!)</li>
-              <li><strong>Sample data:</strong> Templates include 2-3 examples showing different asset types - modify or delete and add your own</li>
+          {/* Tips – collapsed so the dialog stays short */}
+          <details className="group rounded-lg border px-4 py-3 text-sm">
+            <summary className="cursor-pointer list-none font-medium text-foreground marker:hidden">
+              Tips for filling it in
+            </summary>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+              <li>Category, Name, UOM and Unit are required.</li>
+              <li>Don&apos;t change the header row.</li>
+              <li>Dates as YYYY-MM-DD. Assignee as an email address.</li>
+              <li>Vehicle and IT fields only apply to those asset types.</li>
             </ul>
-          </div>
+          </details>
         </div>
 
         <div className="flex justify-end gap-3">

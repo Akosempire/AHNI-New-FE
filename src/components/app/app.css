@@ -2,7 +2,9 @@
  * AHNi staff app shell – Paytrail-style layout on AHNi brand tokens.
  * Scoped to .ahni-app so nothing outside the dashboard changes.
  */
-.ahni-app {
+.ahni-app,
+body:has(.ahni-app) {
+  /* body too, so dialogs/menus rendered in portals get the same tokens */
   --app-bg: #f6f5f9;
   --surface: #ffffff;
   --surface-2: #f3f2f7; /* AHNi mist */
@@ -45,7 +47,8 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.dark .ahni-app {
+.dark .ahni-app,
+.dark body:has(.ahni-app) {
   --app-bg: #111115;
   --surface: #1a1a20;
   --surface-2: #22222a;

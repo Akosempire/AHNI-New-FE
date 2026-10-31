@@ -34,7 +34,8 @@ export default function Notifications() {
     });
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("notifications");
-    const [useInfiniteScroll, setUseInfiniteScroll] = useState(true);
+    const [useInfiniteScroll] = useState(true);
+    const [showMoreFilters, setShowMoreFilters] = useState(false);
 
     const notificationParams: NotificationFilters = {
         page: 1,
@@ -156,26 +157,72 @@ export default function Notifications() {
             </Breadcrumb>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList>
                     <TabsTrigger value="notifications">Notifications</TabsTrigger>
                     <TabsTrigger value="preferences">Preferences</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="notifications" className="space-y-5">
-                    {/* Filters and Actions */}
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="flex items-center px-2 py-2 border rounded-lg bg-white">
+                    {/* Filters and Actions – search and read state up front, the rest behind "More filters" (Hick's law) */}
+                    <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border bg-white px-3 sm:max-w-[320px]">
                                 <SearchIcon />
+                                <span className="sr-only">Search notifications</span>
                                 <input
-                                    placeholder="Search notifications..."
-                                    type="text"
+                                    placeholder="Search notifications"
+                                    type="search"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="ml-2 h-6 border-none w-[250px] bg-white focus:outline-none outline-none"
+                                    className="h-full w-full min-w-0 border-none bg-transparent text-sm !shadow-none !outline-none !ring-0"
                                 />
-                            </span>
-                            
+                            </label>
+
+                            <div className="inline-flex rounded-xl bg-[#f3f2f7] p-1" role="group" aria-label="Show">
+                                {[
+                                    { v: "all_status", l: "All" },
+                                    { v: "Pending", l: "Unread" },
+                                ].map((o) => (
+                                    <button
+                                        key={o.v}
+                                        type="button"
+                                        aria-pressed={(filters.status || "all_status") === o.v}
+                                        onClick={() => setFilters({ ...filters, status: o.v })}
+                                        className={`h-9 rounded-lg px-4 text-sm font-semibold transition-colors ${
+                                            (filters.status || "all_status") === o.v
+                                                ? "bg-white text-gray-900 shadow-sm"
+                                                : "text-gray-500 hover:text-gray-900"
+                                        }`}
+                                    >
+                                        {o.l}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="h-11 rounded-xl"
+                                aria-expanded={showMoreFilters}
+                                onClick={() => setShowMoreFilters((v) => !v)}
+                            >
+                                {showMoreFilters ? "Fewer filters" : "More filters"}
+                            </Button>
+
+                            {hasUnreadNotifications && (
+                                <button
+                                    type="button"
+                                    onClick={handleMarkAllAsRead}
+                                    disabled={isMarkingAll}
+                                    className="ml-auto h-11 px-2 text-sm font-semibold text-gray-600 underline-offset-4 hover:text-gray-900 hover:underline disabled:opacity-50"
+                                >
+                                    {isMarkingAll ? "Marking…" : "Mark all as read"}
+                                </button>
+                            )}
+                        </div>
+
+                        {showMoreFilters && (
+                            <div className="flex flex-wrap items-center gap-2">
                             <Select value={filters.module_type} onValueChange={(value) => setFilters({...filters, module_type: value})}>
                                 <SelectTrigger className="w-[150px]">
                                     <SelectValue placeholder="All Modules" />
@@ -185,17 +232,6 @@ export default function Notifications() {
                                     {moduleTypes.map(type => (
                                         <SelectItem key={type} value={type}>{type}</SelectItem>
                                     ))}
-                                </SelectContent>
-                            </Select>
-
-                            <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
-                                <SelectTrigger className="w-[130px]">
-                                    <SelectValue placeholder="All Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all_status">All Status</SelectItem>
-                                    <SelectItem value="Pending">Unread</SelectItem>
-                                    <SelectItem value="Read">Read</SelectItem>
                                 </SelectContent>
                             </Select>
 
@@ -226,40 +262,8 @@ export default function Notifications() {
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
-
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                onClick={() => setUseInfiniteScroll(!useInfiniteScroll)}
-                                className="flex items-center gap-2"
-                            >
-                                <Icon icon={useInfiniteScroll ? "mdi:view-list" : "mdi:infinity"} />
-                                {useInfiniteScroll ? "Standard View" : "Infinite Scroll"}
-                            </Button>
-                            
-                            {hasUnreadNotifications && (
-                                <Button
-                                    onClick={handleMarkAllAsRead}
-                                    disabled={isMarkingAll}
-                                    className="py-6 font-bold"
-                                    type="button"
-                                    size="lg"
-                                    variant="outline"
-                                >
-                                    {isMarkingAll ? "Marking all..." : "Mark all as read"}
-                                </Button>
-                            )}
-                            <Button
-                                className="flex gap-2 py-6 font-bold"
-                                type="button"
-                                size="lg"
-                                variant="default"
-                            >
-                                Actions
-                                <ArrowDownIcon />
-                            </Button>
-                        </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Notification Content */}

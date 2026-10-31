@@ -6,12 +6,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TNotification, NotificationPriority, NotificationCategory } from "@/features/notifications/controllers/notificationController";
+import { TNotification } from "@/features/notifications/controllers/notificationController";
 import { useMarkNotificationAsRead, useMarkNotificationAsUnread, useDeleteNotification } from "@/features/notifications/controllers/notificationController";
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle } from 'lucide-react';
-import { Icon } from "@iconify/react";
 
 type PropsType = {
     notification: TNotification;
@@ -33,7 +30,6 @@ export default function NotificationItem({
         module_type, 
         created_datetime,
         priority = 'medium',
-        category = 'info',
         action_url,
         expires_at
     } = notification;
@@ -44,32 +40,6 @@ export default function NotificationItem({
 
     const isUnread = !is_read || status === "Pending";
     const isExpired = expires_at ? new Date(expires_at) < new Date() : false;
-
-    // Priority configurations with standardized Badge variants
-    const getPriorityConfig = (priority: NotificationPriority) => {
-        const configs = {
-            urgent: { variant: 'urgent' as const, color: 'bg-destructive', icon: 'mdi:alert-circle', textColor: 'text-destructive' },
-            high: { variant: 'high' as const, color: 'bg-orange-500', icon: 'mdi:alert', textColor: 'text-orange-600' },
-            medium: { variant: 'medium' as const, color: 'bg-amber-500', icon: 'mdi:information', textColor: 'text-amber-600' },
-            low: { variant: 'low' as const, color: 'bg-blue-500', icon: 'mdi:minus-circle', textColor: 'text-gray-text' }
-        };
-        return configs[priority];
-    };
-
-    // Category configurations with standardized Badge variants
-    const getCategoryConfig = (category: NotificationCategory) => {
-        const configs = {
-            error: { variant: 'error' as const, icon: 'mdi:alert-circle' },
-            warning: { variant: 'warning' as const, icon: 'mdi:alert' },
-            success: { variant: 'success' as const, icon: 'mdi:check-circle' },
-            info: { variant: 'info' as const, icon: 'mdi:information' },
-            system: { variant: 'system' as const, icon: 'mdi:cog' }
-        };
-        return configs[category];
-    };
-
-    const priorityConfig = getPriorityConfig(priority);
-    const categoryConfig = getCategoryConfig(category);
 
     // Navigation mapping for different module types
     const getModuleRoute = (moduleType: string) => {
@@ -107,17 +77,15 @@ export default function NotificationItem({
         markAsUnread(id);
     };
 
+    const prettyModule = (module_type || "").replace(/([a-z])([A-Z])/g, "$1 $2");
+    const flag = priority === "urgent" ? "Urgent" : priority === "high" ? "High priority" : null;
+    const when = new Date(created_datetime).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+
     return (
         <li
-            className={`flex items-start gap-3 justify-between ${
-                active ? "bg-alternate" : isUnread ? "bg-background" : "bg-muted"
-            } border-gray-200 border-solid border-[1px] px-4 py-3 rounded-lg border-l-8 ${
-                priority === 'urgent' ? "border-l-red-500" :
-                priority === 'high' ? "border-l-orange-500" :
-                priority === 'medium' ? "border-l-blue-500" : "border-l-gray-400"
-            } cursor-pointer hover:bg-gray-50 transition-colors ${
-                isDeleting ? "opacity-50 pointer-events-none" : ""
-            } ${isExpired ? "opacity-75" : ""}`}
+            className={`group flex items-start gap-3 justify-between rounded-xl border px-4 py-3.5 cursor-pointer transition-colors ${
+                active ? "border-gray-300 bg-gray-50" : "border-gray-200 bg-background hover:bg-gray-50"
+            } ${isDeleting ? "opacity-50 pointer-events-none" : ""} ${isExpired ? "opacity-60" : ""}`}
             onClick={() => {
                 onSetActiveNotification(notification);
                 // Mark as read when clicked and navigate to relevant module
@@ -129,55 +97,42 @@ export default function NotificationItem({
                 router.push(route);
             }}
         >
-            <div className="flex items-start gap-3 flex-1">
-                <div className="flex flex-col items-center gap-1 mt-1">
-                    {isUnread && (
-                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${priorityConfig.color}`}></div>
+            <span
+                className={`mt-2 h-2 w-2 shrink-0 rounded-full ${isUnread ? "bg-[#f2564d]" : "bg-transparent"}`}
+                aria-hidden="true"
+            />
+            <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                    <h3 className={`line-clamp-1 text-[14.5px] ${isUnread ? "font-bold text-gray-900" : "font-medium text-gray-600"} ${isExpired ? "line-through" : ""}`}>
+                        {isUnread && <span className="sr-only">Unread: </span>}
+                        {title}
+                    </h3>
+                    {flag && (
+                        <span className="shrink-0 rounded-full bg-[#fff0ee] px-2 py-0.5 text-[11px] font-semibold text-[#b8302a]">
+                            {flag}
+                        </span>
                     )}
-                    <Icon 
-                        icon={categoryConfig.icon} 
-                        className={`w-4 h-4 ${priorityConfig.textColor}`}
-                    />
                 </div>
-                
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-2">
-                        <h3 className={`font-semibold line-clamp-2 ${
-                            isUnread ? "text-black" : "text-gray-600"
-                        } ${isExpired ? "line-through" : ""}`}>
-                            {title}
-                        </h3>
-                        
-                        <div className="flex flex-col gap-1 ml-2 flex-shrink-0">
-                            <Badge variant={categoryConfig.variant} className="text-xs">
-                                {category.toUpperCase()}
-                            </Badge>
-                            <Badge variant={priorityConfig.variant} className="text-xs">
-                                {priority.toUpperCase()}
-                            </Badge>
-                        </div>
-                    </div>
-                    
-                    <p className={`${
-                        isUnread ? "text-foreground font-medium" : "text-muted-foreground"
-                    } text-sm line-clamp-2 mb-2`}>
-                        {message}
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>{module_type} • {new Date(created_datetime).toLocaleDateString("en-US")}</span>
-                        {expires_at && (
-                            <span className={isExpired ? "text-red-500 font-medium" : ""}>
-                                {isExpired ? "Expired" : `Expires ${new Date(expires_at).toLocaleDateString("en-US")}`}
-                            </span>
-                        )}
-                    </div>
-                </div>
+                {message && (
+                    <p className="mt-0.5 line-clamp-1 text-[13.5px] text-gray-600">{message}</p>
+                )}
+                <p className="mt-1 text-[12px] text-gray-400">
+                    {prettyModule}{prettyModule ? " · " : ""}{when}
+                    {expires_at && (
+                        <span className={isExpired ? "text-red-600" : ""}>
+                            {" · "}{isExpired ? "Expired" : `Expires ${new Date(expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`}
+                        </span>
+                    )}
+                </p>
             </div>
 
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button className="bg-transparent p-0 w-[24px] h-[24px]">
+                    <Button
+                        aria-label="Notification options"
+                        className="grid h-9 w-9 place-items-center bg-transparent p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <VerticalDotsIcon />
                     </Button>
                 </DropdownMenuTrigger>

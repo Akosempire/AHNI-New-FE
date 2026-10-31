@@ -22,7 +22,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
   const [isPasswordVisible, setPasswordVisibility] = useState(false);
-  const { control } = useFormContext();
+  const { control, trigger } = useFormContext();
 
   const { type, required } = rest;
 
@@ -32,8 +32,13 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
     <FormField
       control={control}
       name={name}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         const { value, onChange } = field;
+        const money =
+          type === "number" &&
+          /amount|cost|price|budget|total|salary|fee|rate|value|balance/i.test(name) &&
+          typeof value === "number" &&
+          Math.abs(value) >= 1000;
         return (
           <FormItem className='flex flex-col gap-0'>
             <FormLabel className={`mb-1.5 ${required ? 'required' : ''}`}>
@@ -53,7 +58,19 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                   autoComplete={(rest as any).autoComplete}
                   name={field.name}
                   ref={field.ref}
-                  onBlur={field.onBlur}
+                  onBlur={(e) => {
+                    // Postel's law: accept messy input, store it tidy
+                    if (typeof value === "string" && type !== "password") {
+                      let tidy = value.trim();
+                      if (type === "email") tidy = tidy.toLowerCase();
+                      if (type === "tel") tidy = tidy.replace(/[\s().-]/g, "");
+                      if (tidy !== value) onChange(tidy);
+                    }
+                    field.onBlur();
+                    // Check filled-in fields as soon as the user leaves them
+                    if (value !== undefined && value !== "" && value !== null) trigger(name);
+                    rest.onBlur?.(e);
+                  }}
                   aria-required={required || undefined}
                   disabled={disabled}
                   onChange={(e) => {
@@ -70,8 +87,12 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                     } else {
                       onChange(e);
                     }
+                    // Once a field shows an error, re-check as the user types so it clears immediately
+                    if (fieldState.error) setTimeout(() => trigger(name), 0);
                   }}
-                  value={value || ""} // Ensure value is never undefined
+                  inputMode={type === "number" ? "decimal" : type === "tel" ? "tel" : rest.inputMode}
+                  aria-invalid={!!fieldState.error || undefined}
+                  value={value ?? ""} // Ensure value is never undefined (0 still shows)
                   className={cn(
                     "font-medium bg-gray-100 dark:bg-background placeholder:text-black/30 dark:placeholder:text-muted-foreground",
                     rest.className
@@ -100,6 +121,11 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                   </div>
                 )}
             </div>
+            {money && !fieldState.error && (
+              <p className='ux-hint' aria-live='polite'>
+                Reads as {Number(value).toLocaleString("en-NG", { maximumFractionDigits: 2 })}
+              </p>
+            )}
             <FormMessage className='mt-1' />
           </FormItem>
         );
