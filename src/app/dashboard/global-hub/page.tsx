@@ -84,172 +84,75 @@ export default function GlobalHubPage() {
   const totalAccessibleItems = getAccessibleItems().length;
   const categoryCount = Object.keys(groupedItems).length;
 
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const visible = Object.entries(groupedItems)
+    .map(([key, items]) => {
+      const category = globalHubCategories[key as keyof typeof globalHubCategories];
+      const list = (items as any[]).filter((it) => !q || it.label.toLowerCase().includes(q) || category?.label.toLowerCase().includes(q));
+      return { key, category, list };
+    })
+    .filter((g) => g.category && g.list.length);
+
   if (!isHydrated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <div className="py-10 text-[14px] text-[var(--muted)]">Loading services…</div>;
   }
 
   return (
-    <div className="container mx-auto py-8 px-6 space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-4">
-          <Building2 className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Global Hub</h1>
-            <p className="text-gray-600 mt-1">
-              Your centralized portal for all AHNI systems and services
-            </p>
-          </div>
+    <div className="space-y-6">
+      {/* One page, one job: find a service. Everything fits on one screen. */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="page-title">Global Hub</h1>
+          <p className="mt-1 text-[14px] text-[var(--muted)]">
+            {totalAccessibleItems} services across {categoryCount} areas. Start typing to find one.
+          </p>
         </div>
-
-        {/* Welcome message */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Welcome back, {user?.first_name || user?.username}!
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  Access all your tools and services from one place
-                </p>
-              </div>
-              <div className="text-right text-sm text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{currentTime}</span>
-                </div>
-                <div className="mt-1">
-                  <Badge variant="secondary" className="text-xs">
-                    {totalAccessibleItems} services available
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <label className="flex h-9 w-full items-center gap-2 rounded-[6px] border border-[var(--line-strong)] px-3 focus-within:border-[var(--ink-2)] sm:w-[320px]">
+          <span className="sr-only">Find a service</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="flex-none text-[var(--muted)]" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            type="search"
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Find a service, e.g. leave, vehicle"
+            className="h-full w-full min-w-0 border-none bg-transparent text-[14px] outline-none"
+          />
+        </label>
       </div>
 
-      {/* Quick Access */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Link href="/dashboard/global-hub/announcements">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <FileBarChart className="h-8 w-8 text-blue-500" />
-                <div>
-                  <h3 className="font-semibold">Latest Announcements</h3>
-                  <p className="text-sm text-gray-600">Stay updated</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/global-hub/calendar">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <Calendar className="h-8 w-8 text-green-500" />
-                <div>
-                  <h3 className="font-semibold">Calendar</h3>
-                  <p className="text-sm text-gray-600">Events & meetings</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/global-hub/directory">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <Users className="h-8 w-8 text-purple-500" />
-                <div>
-                  <h3 className="font-semibold">Directory</h3>
-                  <p className="text-sm text-gray-600">Find colleagues</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Services by Category */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">All Services</h2>
-
-        {Object.entries(groupedItems).map(([categoryKey, items]) => {
-          const category = globalHubCategories[categoryKey as keyof typeof globalHubCategories];
-
-          if (!category || items.length === 0) return null;
-
-          return (
-            <Card key={categoryKey}>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-3">
-                  {category.icon}
-                  <span>{category.label}</span>
-                  <Badge variant="outline">{items.length}</Badge>
-                </CardTitle>
-                <CardDescription>
-                  {categoryKey === 'communication' && "Stay connected with company-wide updates and announcements"}
-                  {categoryKey === 'organization' && "Access organizational information and directories"}
-                  {categoryKey === 'programs' && "Manage and track program activities"}
-                  {categoryKey === 'procurement' && "Handle purchasing and procurement processes"}
-                  {categoryKey === 'inventory' && "Manage inventory and asset tracking"}
-                  {categoryKey === 'fleet' && "Vehicle and transportation management"}
-                  {categoryKey === 'maintenance' && "Facility and asset maintenance requests"}
-                  {categoryKey === 'financial' && "Financial services and expense management"}
-                  {categoryKey === 'contracts' && "Contract management and reporting"}
-                  {categoryKey === 'hr' && "Human resources and self-service tools"}
-                  {categoryKey === 'support' && "Technical support and help desk services"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {items.map((item, index) => (
-                    <Link key={index} href={item.path}>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-between h-auto p-4 hover:bg-gray-50"
-                      >
-                        <div className="flex items-center space-x-3">
-                          {item.icon}
-                          <span className="font-medium">{item.label}</span>
-                        </div>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+      {visible.length === 0 ? (
+        <p className="py-10 text-[14px] text-[var(--muted)]">No services match “{query}”. Try a shorter word.</p>
+      ) : (
+        <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {visible.map(({ key, category, list }) => (
+            <section key={key} aria-labelledby={`hub-${key}`} className="min-w-0">
+              <h2 id={`hub-${key}`} className="mb-1.5 flex items-center gap-2 border-b border-[var(--line-strong)] pb-2 text-[13.5px] font-medium [&_svg]:h-4 [&_svg]:w-4 [&_svg]:text-[var(--muted)]">
+                {category!.icon}
+                {category!.label}
+                <span className="ml-auto text-[12px] font-normal tabular-nums text-[var(--faint)]">{list.length}</span>
+              </h2>
+              <ul>
+                {list.map((item: any) => (
+                  <li key={item.path + item.label}>
+                    <Link
+                      href={item.path}
+                      className="group -mx-2 flex h-8 items-center justify-between gap-2 rounded-[6px] px-2 text-[13.5px] text-[var(--ink-2)] transition-colors hover:bg-[var(--hover)] hover:text-[var(--ink)]"
+                    >
+                      <span className="truncate">{item.label}</span>
+                      <ChevronRight className="h-3.5 w-3.5 flex-none text-[var(--faint)] opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
                     </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* User Info */}
-      <div className="pt-6 border-t border-gray-200">
-        <div className="text-center text-sm text-gray-500 space-y-1">
-          <p>
-            You have access to <strong>{totalAccessibleItems} services</strong> across{" "}
-            <strong>{categoryCount} categories</strong>
-          </p>
-          <p>
-            Your role: <Badge variant="secondary">{user?.is_superuser ? 'Super Admin' : user?.is_staff ? 'Staff' : 'Employee'}</Badge>
-          </p>
-          {user?.employee?.department?.name && (
-            <p>
-              Department: <Badge variant="outline">{user.employee.department.name}</Badge>
-            </p>
-          )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }

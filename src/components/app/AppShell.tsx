@@ -41,6 +41,7 @@ import { useNavSections } from "./useNavSections";
 import { Tour, useTourControls } from "./Tour";
 import { DEMO_MODE } from "@/constants/demoMode";
 import PullToRefresh from "@/components/ux/PullToRefresh";
+import FitToScreen from "@/components/ux/FitToScreen";
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
 
@@ -215,6 +216,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <PullToRefresh />
+        <FitToScreen pathname={pathname} />
         <SearchPalette open={search} onClose={() => setSearch(false)} />
         <ShortcutSheet open={keys} onClose={() => setKeys(false)} />
         <TooltipLayer />
@@ -1254,7 +1256,7 @@ function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }
 
   const results = useMemo(() => {
     const t = q.trim().toLowerCase();
-    if (!t) return [...quickActions.map((a) => ({ label: a.label, href: a.href, trail: ["Quick action"] })), ...pages.slice(0, 6)];
+    if (!t) return [...quickActions.map((a) => ({ label: a.label, href: a.href, trail: ["Quick action"] })), ...pages.slice(0, 6)].slice(0, 8);
     return pages
       .map((p) => {
         const hay = (p.label + " " + p.trail.join(" ")).toLowerCase();
@@ -1263,7 +1265,7 @@ function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }
       })
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)
-      .slice(0, 12)
+      .slice(0, 8)
       .map((x) => x.p);
   }, [q, pages, quickActions]);
 
@@ -1288,7 +1290,7 @@ function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }
         role="dialog"
         aria-modal="true"
         aria-label="Search pages"
-        className="ux-pop flex max-h-[525px] w-full max-w-[760px] flex-col overflow-hidden rounded-[var(--r-sheet)] bg-[var(--surface)] shadow-[var(--shadow-dialog)]"
+        className="ux-pop flex max-h-[calc(100dvh-24vh)] w-full max-w-[680px] flex-col overflow-hidden rounded-[var(--r-sheet)] bg-[var(--surface)] shadow-[var(--shadow-dialog)]"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 border-b border-[var(--line)] px-4">
@@ -1314,7 +1316,7 @@ function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }
             aria-label="Search pages"
             aria-controls="search-results"
             aria-activedescendant={results[i] ? `sr-${i}` : undefined}
-            className="h-14 w-full bg-transparent text-[16px] outline-none placeholder:text-[var(--faint)]"
+            className="ux-no-ring h-14 w-full bg-transparent text-[16px] !shadow-none !outline-none !ring-0 placeholder:text-[var(--faint)]"
           />
           {q && (
             <button type="button" onClick={() => setQ("")} className="text-[13px] font-medium text-[var(--muted)] hover:text-[var(--ink)]">
@@ -1322,7 +1324,7 @@ function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }
             </button>
           )}
         </div>
-        <ul id="search-results" role="listbox" className="thin-scroll min-h-0 flex-1 overflow-y-auto p-2">
+        <ul id="search-results" role="listbox" className="min-h-0 flex-1 overflow-y-auto p-2 [scrollbar-width:none] lg:overflow-visible">
           {!q && <li className="px-3 pb-1 pt-2 text-[12px] font-medium text-[var(--faint)]">Suggested</li>}
           {results.map((r, k) => (
             <li key={r.href + r.label} id={`sr-${k}`} role="option" aria-selected={k === i}>

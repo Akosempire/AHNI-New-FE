@@ -115,7 +115,7 @@ export default function NotificationListGrouped({
   }, [notifications, groupBy]);
 
   return (
-    <div className="w-[35%] border-solid border-[1px] border-gray-200 rounded-sm shadow-md pb-4">
+    <div className="w-full lg:w-[35%] border-solid border-[1px] border-gray-200 rounded-sm shadow-md pb-4">
       <div className="flex items-center justify-between py-2 px-4">
         <h2 className="font-medium">Notifications</h2>
         

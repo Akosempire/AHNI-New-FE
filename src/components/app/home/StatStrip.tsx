@@ -9,7 +9,7 @@ export default function StatStrip({ stats }: { stats: Stat[] }) {
   if (!stats.length) return null;
   return (
     <section aria-label="Key figures" data-tour="kpis" className="border-y border-[var(--line-strong)]">
-      <ul className="grid grid-cols-2 lg:grid-cols-4">
+      <ul className="ux-keep-grid grid grid-cols-2 lg:grid-cols-4">
         {stats.map((s, i) => (
           <li
             key={s.label}

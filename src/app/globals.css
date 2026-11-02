@@ -228,7 +228,9 @@
   }
 }
 
-input {
+/* Custom radio / checkbox look (only these – text fields keep their own styles) */
+input[type="radio"],
+input[type="checkbox"] {
   appearance: none;
   border-radius: 15%;
   width: 16px;
@@ -239,7 +241,8 @@ input {
   position: relative;
 }
 
-input:checked {
+input[type="radio"]:checked,
+input[type="checkbox"]:checked {
   border: 6px solid hsl(var(--primary));
 }
 

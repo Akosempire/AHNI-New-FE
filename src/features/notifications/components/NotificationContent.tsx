@@ -28,7 +28,7 @@ export default function NotificationContent({ active }: PropsType) {
     };
 
     return (
-        <div className="w-[65%] space-y-4 pt-16 px-8">
+        <div className="w-full space-y-4 px-4 pt-6 lg:w-[65%] lg:px-8 lg:pt-16">
             <div className="flex items-center justify-between">
                 <h3 className="text-muted-foreground text-body-sm">Subject</h3>
                 <p className="font-medium">{title}</p>

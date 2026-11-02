@@ -166,7 +166,7 @@ export default function Notifications() {
                     {/* Filters and Actions – search and read state up front, the rest behind "More filters" (Hick's law) */}
                     <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
-                            <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border bg-white px-3 sm:max-w-[320px]">
+                            <label className="flex h-10 w-full min-w-0 items-center gap-2 rounded-[6px] border bg-white px-3 sm:w-auto sm:flex-1 sm:max-w-[320px]">
                                 <SearchIcon />
                                 <span className="sr-only">Search notifications</span>
                                 <input
@@ -267,9 +267,9 @@ export default function Notifications() {
                     </div>
 
                     {/* Notification Content */}
-                    <Card className="space-y-5 rounded-none">
+                    <Card className="space-y-5 rounded-none ux-flat-phone">
                         {useInfiniteScroll ? (
-                            <div className="flex">
+                            <div className="flex flex-col gap-4 lg:flex-row lg:gap-0">
                                 <NotificationListInfinite
                                     onSetActiveNotification={handleSetActiveNotification}
                                     activeNotification={activeNotification}
@@ -278,7 +278,7 @@ export default function Notifications() {
                                 {activeNotification ? (
                                     <NotificationContent active={activeNotification} />
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center w-[65%]">
+                                    <div className="hidden flex-col items-center justify-center lg:flex lg:w-[65%]">
                                         <EmptyTodoIcon />
                                         <h3 className="text-md font-bold mt-2">
                                             Kindly choose a notification to view its details.
@@ -289,7 +289,7 @@ export default function Notifications() {
                         ) : (
                             <>
                                 {isLoading ? (
-                                    <div className="flex">
+                                    <div className="flex flex-col gap-4 lg:flex-row lg:gap-0">
                                         <NotificationListSkeleton />
                                         <NotificationContentSkeleton />
                                     </div>
@@ -320,7 +320,7 @@ export default function Notifications() {
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="flex">
+                                    <div className="flex flex-col gap-4 lg:flex-row lg:gap-0">
                                         <NotificationList
                                             notifications={filteredNotifications}
                                             onSetActiveNotification={handleSetActiveNotification}
@@ -330,7 +330,7 @@ export default function Notifications() {
                                         {activeNotification ? (
                                             <NotificationContent active={activeNotification} />
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center w-[65%]">
+                                            <div className="hidden flex-col items-center justify-center lg:flex lg:w-[65%]">
                                                 <EmptyTodoIcon />
                                                 <h3 className="text-md font-bold mt-2">
                                                     Kindly choose a notification to view its details.

@@ -394,8 +394,8 @@ body:has(.ahni-app) [data-sonner-toast] {
 }
 
 /* ---------- Form controls ---------- */
-.ahni-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, select, button[role="combobox"]):focus-visible,
-body:has(.ahni-app) [role="dialog"] :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select, button[role="combobox"]):focus-visible {
+.ahni-app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.ux-no-ring), textarea, select, button[role="combobox"]):focus-visible,
+body:has(.ahni-app) [role="dialog"] :is(input:not([type="checkbox"]):not([type="radio"]):not(.ux-no-ring), textarea, select, button[role="combobox"]):focus-visible {
   outline: 2px solid var(--focus, #f2564d) !important;
   outline-offset: 1px;
   box-shadow: none !important;
@@ -459,7 +459,7 @@ body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
 .dark .ahni-app :is(.border-gray-100, .border-gray-200, .border-gray-300, .border-slate-200) {
   border-color: var(--line-strong) !important;
 }
-.dark .ahni-app :is(select, input, textarea):not([type="checkbox"]):not([type="radio"]) {
+.dark .ahni-app :is(select, input, textarea):not([type="checkbox"]):not([type="radio"]):not([type="search"]):not(.ux-no-ring):not(.bg-transparent):not([class*="border-none"]) {
   background-color: var(--surface-2);
   color: var(--ink);
 }
@@ -539,7 +539,7 @@ body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
 /* List pages fit the screen: the table scrolls inside its box, the pager stays in view */
 @media (min-width: 1024px) and (min-height: 700px) {
   .ahni-app main .ux-table-wrap {
-    max-height: max(320px, calc(100dvh - 360px));
+    max-height: max(260px, calc(100dvh - 300px));
   }
   .ahni-app main .ux-table-wrap thead :is(th, td) {
     position: sticky;
@@ -830,8 +830,16 @@ body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
  * ===================================================================== */
 @media (max-width: 1023px) {
   /* button / filter rows wrap instead of running off the edge */
-  .ahni-app main .flex:not(.flex-col):not(.flex-nowrap):not(.overflow-x-auto):not(.overflow-auto):not([role="tablist"]):not(nav *):not(td *):not(th *):not(.ux-sticky-mobile) {
+  .ahni-app main .flex:not(.flex-col):not(.flex-nowrap):not(.overflow-x-auto):not(.overflow-auto):not([role="tablist"]):not(nav *):not(td *):not(th *):not(.ux-sticky-mobile):not(label):not(button):not(a):not(:has(> input, > select, > textarea, > svg + input)) {
     flex-wrap: wrap;
+  }
+  /* a field next to its icon always shares the row */
+  .ahni-app main :is(label, div, span):has(> input:not([type="checkbox"]):not([type="radio"])) {
+    flex-wrap: nowrap !important;
+  }
+  .ahni-app main :is(label, div, span):has(> input:not([type="checkbox"]):not([type="radio"])) > input {
+    min-width: 0;
+    flex: 1 1 auto;
   }
   /* fixed-width boxes (search fields, filter selects, cards) never wider than the screen */
   .ahni-app main :is([class*=" w-["], [class^="w-["], .w-96, .w-80, .w-72, .w-64, [class*="min-w-["]):not(td *):not(th *):not(table) {
@@ -848,17 +856,92 @@ body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
   .ahni-app main :is(.grid-cols-3, .grid-cols-4, .grid-cols-5, .grid-cols-6):not(.ux-keep-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  /* page buttons a touch smaller so rows fit */
-  .ahni-app main :is(button, a).whitespace-nowrap {
-    white-space: normal;
-  }
 }
 @media (max-width: 639px) {
-  .ahni-app main :is(.grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5, .grid-cols-6):not(.ux-keep-grid) {
+  .ahni-app main :is(.grid-cols-3, .grid-cols-4, .grid-cols-5, .grid-cols-6):not(.ux-keep-grid),
+  .ahni-app main form .grid-cols-2:not(.ux-keep-grid) {
     grid-template-columns: minmax(0, 1fr);
   }
   /* any element wider than the screen scrolls inside itself rather than moving the page */
   .ahni-app main > * {
     max-width: 100%;
   }
+}
+
+/* Search fields inside a bordered box: the box shows focus, not the bare input */
+.ahni-app :is(label, div):has(> input[type="search"], > input.ux-no-ring) > input:focus-visible,
+.ahni-app input[type="search"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.ahni-app label:has(> input[type="search"]):focus-within {
+  border-color: var(--ink-2);
+}
+
+/* Plain text fields that never had their own styles get the standard field look */
+.ahni-app main :is(input:not([type]), input[type="text"], input[type="email"], input[type="number"], input[type="tel"], input[type="password"], input[type="date"], input[type="url"]):not([class*="border"]):not([class*="bg-transparent"]) {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+/* =====================================================================
+ * Density on large screens ("dense but breathable"): pages fit the window.
+ * ===================================================================== */
+@media (min-width: 1024px) {
+  .ahni-app main :is(.p-6, .p-8):not(.ux-keep) { padding: 16px; }
+  .ahni-app main :is(.px-6, .px-8) { padding-left: 16px; padding-right: 16px; }
+  .ahni-app main :is(.py-6, .py-8, .py-10, .py-12):not(button):not(a) { padding-top: 16px; padding-bottom: 16px; }
+  .ahni-app main .pt-6 { padding-top: 16px; }
+  .ahni-app main :is(.gap-6, .gap-8) { gap: 16px; }
+  .ahni-app main :is(.space-y-6, .space-y-8) > :not([hidden]) ~ :not([hidden]) { margin-top: 20px; }
+  .ahni-app main :is(.mb-8, .mb-10, .mb-12) { margin-bottom: 20px; }
+  .ahni-app main :is(.mt-8, .mt-10, .mt-12) { margin-top: 20px; }
+  .ahni-app main .container { padding-left: 0; padding-right: 0; padding-top: 0; }
+  .ahni-app main :is(.text-3xl, .text-4xl):not(h1) { font-size: 24px; line-height: 32px; }
+}
+.ahni-app main :is([class*="bg-blue-50/"], [class*="bg-blue-100/"], [class*="bg-sky-50/"], [class*="bg-sky-100/"], [class*="bg-indigo-50/"], [class*="bg-indigo-100/"], [class*="bg-violet-50/"], [class*="bg-violet-100/"], [class*="bg-purple-50/"], [class*="bg-purple-100/"], [class*="bg-fuchsia-50/"], [class*="bg-fuchsia-100/"], [class*="bg-pink-50/"], [class*="bg-pink-100/"], [class*="bg-cyan-50/"], [class*="bg-cyan-100/"], [class*="bg-green-50/"], [class*="bg-green-100/"], [class*="bg-emerald-50/"], [class*="bg-emerald-100/"], [class*="bg-lime-50/"], [class*="bg-lime-100/"], [class*="bg-teal-50/"], [class*="bg-teal-100/"], [class*="bg-amber-50/"], [class*="bg-amber-100/"], [class*="bg-yellow-50/"], [class*="bg-yellow-100/"], [class*="bg-orange-50/"], [class*="bg-orange-100/"]) {
+  background-color: var(--surface) !important;
+}
+.ahni-app main :is(.border-blue-100, .border-blue-200, .border-blue-300, .border-sky-100, .border-sky-200, .border-sky-300, .border-indigo-100, .border-indigo-200, .border-indigo-300, .border-violet-100, .border-violet-200, .border-violet-300, .border-purple-100, .border-purple-200, .border-purple-300, .border-fuchsia-100, .border-fuchsia-200, .border-fuchsia-300, .border-pink-100, .border-pink-200, .border-pink-300, .border-cyan-100, .border-cyan-200, .border-cyan-300, .border-green-100, .border-green-200, .border-green-300, .border-emerald-100, .border-emerald-200, .border-emerald-300, .border-lime-100, .border-lime-200, .border-lime-300, .border-teal-100, .border-teal-200, .border-teal-300, .border-amber-100, .border-amber-200, .border-amber-300, .border-yellow-100, .border-yellow-200, .border-yellow-300, .border-orange-100, .border-orange-200, .border-orange-300) {
+  border-color: var(--line-strong) !important;
+}
+
+/* Segmented switches (a padded box holding 2–4 buttons): quiet, not coral */
+.ahni-app main :is(.p-1, .p-0\.5):has(> .flex > button + button) {
+  padding: 3px !important;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  box-shadow: none !important;
+  background: var(--surface) !important;
+}
+.ahni-app main :is(.p-1, .p-0\.5) > .flex:has(> button + button) {
+  gap: 2px;
+  flex-wrap: nowrap !important;
+}
+.ahni-app main :is(.p-1, .p-0\.5) > .flex > button {
+  height: 32px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.ahni-app main :is(.p-1, .p-0\.5) > .flex > button.bg-primary {
+  background: var(--surface-2) !important;
+  color: var(--ink) !important;
+}
+.ahni-app main :is(.p-1, .p-0\.5) > .flex > button:not(.bg-primary) {
+  color: var(--muted) !important;
+}
+
+/* Phones: plain wrappers (no border, fill or radius) don't add side padding on top of the shell gutter */
+@media (max-width: 767px) {
+  .ahni-app main :is(.p-6, .p-8, .px-6, .px-8):not([class*="border"]):not([class*="bg-"]):not([class*="rounded"]):not([class*="shadow"]):not(:is([class*="border"], [class*="rounded"], [class*="shadow"], [data-slot="card"]) *) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+@media (max-width: 1023px) {
+  .ahni-app main .ux-flat-phone { border: 0 !important; padding: 0 !important; box-shadow: none !important; }
 }

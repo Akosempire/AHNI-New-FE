@@ -229,14 +229,12 @@ export default function AttentionTable({
                       {r.urgent && <span className="h-1.5 w-1.5 flex-none rounded-full bg-[var(--brand)]" aria-label="Urgent" />}
                       <span className="truncate text-[14.5px] font-medium">{r.title}</span>
                     </span>
-                    <span className="mt-0.5 block text-[12.5px] text-[var(--muted)]">
+                    <span className="mt-0.5 block truncate text-[12.5px] text-[var(--muted)]">
                       {r.type}, waiting {waitingFor(r.date)}
                     </span>
+                    <span className={`badge badge-${tone(r.status)} mt-1 !text-[12px]`}>{(r.status || "New").replace(/_/g, " ")}</span>
                   </span>
-                  <span className="flex flex-none flex-col items-end gap-1">
-                    {r.amount != null && <span className="text-[14px] font-medium tabular-nums">{formatMoney(r.amount, r.currency)}</span>}
-                    <span className={`badge badge-${tone(r.status)} !text-[12px]`}>{(r.status || "New").replace(/_/g, " ")}</span>
-                  </span>
+                  {r.amount != null && <span className="flex-none pr-1 text-[14px] font-medium tabular-nums">{formatMoney(r.amount, r.currency)}</span>}
                 </Link>
               </li>
             ))}

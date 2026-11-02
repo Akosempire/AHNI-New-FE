@@ -107,7 +107,7 @@ export default function NotificationListInfinite({
 
   if (error) {
     return (
-      <div className="w-[35%] border-solid border-[1px] border-red-200 rounded-sm shadow-md p-4">
+      <div className="w-full lg:w-[35%] border-solid border-[1px] border-red-200 rounded-sm shadow-md p-4">
         <div className="text-center py-8">
           <AlertCircle size={16} />
           <h3 className="font-medium text-red-700 mb-2">Failed to load notifications</h3>
@@ -125,7 +125,7 @@ export default function NotificationListInfinite({
   }
 
   return (
-    <div className="w-[35%] border-solid border-[1px] border-gray-200 rounded-sm shadow-md pb-4">
+    <div className="w-full lg:w-[35%] border-solid border-[1px] border-gray-200 rounded-sm shadow-md pb-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 py-3 px-4">
         <p className="min-w-0 text-sm text-gray-600">

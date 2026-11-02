@@ -60,9 +60,9 @@ export default function QuickStart({
     "flex h-8 flex-none items-center gap-2 whitespace-nowrap rounded-[6px] border border-[var(--line-strong)] bg-[var(--surface)] px-2.5 text-[13px] text-[var(--ink-2)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)] [&_svg]:h-[15px] [&_svg]:w-[15px] [&_svg]:stroke-[1.7]";
 
   return (
-    <nav aria-label="Start a request" className="flex min-w-0 items-center gap-2">
+    <nav aria-label="Start a request" className="flex min-w-0 flex-nowrap items-center gap-2">
       <span className="hidden flex-none text-[13px] text-[var(--muted)] xl:inline">Start</span>
-      <ul className="flex min-w-0 gap-1.5 overflow-x-auto [scrollbar-width:none]">
+      <ul className="flex min-w-0 flex-nowrap gap-1.5 overflow-x-auto [scrollbar-width:none]">
         {first.map((q) => (
           <li key={q.href}>
             <Link href={q.href} onClick={() => track(q.href)} className={item}>

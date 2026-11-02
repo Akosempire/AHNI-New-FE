@@ -18,7 +18,7 @@ export function NotificationItemSkeleton() {
 
 export function NotificationListSkeleton() {
   return (
-    <div className="w-[35%] border-solid border-[1px] border-gray-200 rounded-sm shadow-md pb-4">
+    <div className="w-full lg:w-[35%] border-solid border-[1px] border-gray-200 rounded-sm shadow-md pb-4">
       <div className="flex items-center justify-between py-2 px-4">
         <Skeleton className="h-6 w-24" />
         <Skeleton className="w-6 h-6" />
@@ -37,7 +37,7 @@ export function NotificationListSkeleton() {
 
 export function NotificationContentSkeleton() {
   return (
-    <div className="w-[65%] space-y-4 pt-16 px-8">
+    <div className="hidden w-full space-y-4 px-4 pt-6 lg:block lg:w-[65%] lg:px-8 lg:pt-16">
       <div className="flex items-center justify-between">
         <Skeleton className="h-4 w-16" />
         <Skeleton className="h-4 w-1/2" />
