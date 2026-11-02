@@ -554,9 +554,18 @@ function PageTitle({ pathname }: { pathname: string }) {
       const own =
         document.querySelector("#app-main h1:not([data-shell-title])") ||
         Array.from(document.querySelectorAll<HTMLElement>("#app-main :is(h2, h3, h4)")).find(
-          (h) => !h.closest("[role=dialog], table, aside") && h.getClientRects().length > 0 && h.getBoundingClientRect().top < top && (h.textContent || "").trim().length > 2
+          (h) =>
+            !h.closest("[role=dialog], table, aside") &&
+            // a heading inside a card is a section heading, not the page's title
+            !h.parentElement?.closest('.border, [class*="rounded-"], .bg-card, [class*="shadow"]') &&
+            h.getClientRects().length > 0 &&
+            h.getBoundingClientRect().top < top &&
+            parseFloat(getComputedStyle(h).fontSize) >= 16 &&
+            (h.textContent || "").trim().length > 2
         );
       setHidden(!!own);
+      // The page's own heading becomes the page title, so every page reads the same
+      if (own instanceof HTMLElement) own.classList.add("page-title");
       if (own || !window.matchMedia("(min-width: 768px)").matches) return;
       // One page, one job: the page's action row (right-aligned buttons right under the title)
       // moves up beside the title.
