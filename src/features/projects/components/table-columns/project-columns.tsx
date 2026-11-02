@@ -97,7 +97,7 @@ export const projectColumns: ColumnDef<IProjectSingleData>[] = [
         row: row.original.project_managers,
       });
 
-      return row.original.project_managers
+      return (row.original.project_managers ?? [])
         .map((el) => `${el.first_name} ${el.last_name}`)
         .join(", ");
     },
@@ -136,8 +136,8 @@ export const projectColumns: ColumnDef<IProjectSingleData>[] = [
 const ProjectBeneficiaries = ({ data }: any) => {
   return (
     <div className='flex gap-2 flex-wrap'>
-      {data?.map((el: any) => (
-        <Badge key={el.id} className='bg-[#EBE8E1] text-[#1a0000ad]'>
+      {data?.map((el: any, i: number) => (
+        <Badge key={el.id ?? i} className='bg-[#EBE8E1] text-[#1a0000ad]'>
           {el.name}
         </Badge>
       ))}
@@ -148,8 +148,8 @@ const ProjectBeneficiaries = ({ data }: any) => {
 const ProjectFundingSource = ({ data }: any) => {
   return (
     <div className='flex gap-2 flex-wrap'>
-      {data?.map((el: any) => (
-        <Badge key={el.id} className='bg-[#EBE8E1] text-[#1a0000ad]'>
+      {data?.map((el: any, i: number) => (
+        <Badge key={el.id ?? i} className='bg-[#EBE8E1] text-[#1a0000ad]'>
           {el.name}
         </Badge>
       ))}

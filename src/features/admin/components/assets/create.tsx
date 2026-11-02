@@ -105,7 +105,7 @@ export default function CreateAsset() {
   // Asset Type options removed - now auto-derived from category selection
   // const assetTypeOptions = useMemo(
   //   () =>
-  //     assetType?.data.results.map(({ name, id }) => ({
+  //     assetType?.data?.results?.map(({ name, id }) => ({
   //       label: name,
   //       value: id,
   //     })),
@@ -120,10 +120,10 @@ export default function CreateAsset() {
 
   const projectOptions = useMemo(
     () =>
-      project?.data.results.map(({ title, id }) => ({
+      project?.data?.results?.map(({ title, id }) => ({
         label: title,
         value: id,
-      })),
+      })) ?? [],
     [project]
   );
 
@@ -135,10 +135,10 @@ export default function CreateAsset() {
 
   const userOptions = useMemo(
     () =>
-      user?.data.results.map(({ first_name, last_name, id }) => ({
+      user?.data?.results?.map(({ first_name, last_name, id }) => ({
         label: `${first_name} ${last_name}`,
         value: id,
-      })),
+      })) ?? [],
     [user]
   );
 
@@ -150,10 +150,10 @@ export default function CreateAsset() {
 
   const partnerOptions = useMemo(
     () =>
-      partner?.data.results.map(({ name, id }) => ({
+      partner?.data?.results?.map(({ name, id }) => ({
         label: name,
         value: id,
-      })),
+      })) ?? [],
     [partner]
   );
 
@@ -174,10 +174,10 @@ export default function CreateAsset() {
 
   const assetConditionOptions = useMemo(
     () =>
-      assetCondition?.data.results.map(({ name, id }) => ({
+      assetCondition?.data?.results?.map(({ name, id }) => ({
         label: name,
         value: id,
-      })),
+      })) ?? [],
     [assetCondition]
   );
 
@@ -189,10 +189,10 @@ export default function CreateAsset() {
 
   const locationOptions = useMemo(
     () =>
-      location?.data.results.map(({ name, id }) => ({
+      location?.data?.results?.map(({ name, id }) => ({
         label: name,
         value: id,
-      })),
+      })) ?? [],
     [location]
   );
 
@@ -204,10 +204,10 @@ export default function CreateAsset() {
 
   const assetClassificationOptions = useMemo(
     () =>
-      assetClassification?.data.results.map(({ name, id }) => ({
+      assetClassification?.data?.results?.map(({ name, id }) => ({
         label: name,
         value: id,
-      })),
+      })) ?? [],
     [assetClassification]
   );
 
@@ -219,10 +219,10 @@ export default function CreateAsset() {
 
   const fundingSourceOptions = useMemo(
     () =>
-      fundingSource?.data.results.map(({ name, id }) => ({
+      fundingSource?.data?.results?.map(({ name, id }) => ({
         label: name,
         value: id,
-      })),
+      })) ?? [],
     [fundingSource]
   );
 

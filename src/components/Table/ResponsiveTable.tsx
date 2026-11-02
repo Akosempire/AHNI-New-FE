@@ -14,7 +14,7 @@
  */
 import { Cell, flexRender, Row, Table } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, Inbox } from "lucide-react";
-import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { Component, createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 /** Current search text from the surrounding TableFilters, so empty states can say "no results for …" */
 export const SearchTermContext = createContext("");
@@ -29,6 +29,21 @@ import {
 } from "@/components/ui/table";
 
 /* ---------- helpers ---------- */
+
+/** One bad cell (missing data) shows "—" instead of breaking the whole page */
+class CellBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(e: unknown) {
+    console.warn("Table cell could not render:", e);
+  }
+  render() {
+    return this.state.failed ? <span className="text-[var(--faint,#8d8d97)]">—</span> : this.props.children;
+  }
+}
+const cellOf = <T,>(cell: Cell<T, unknown>) => <CellBoundary>{flexRender(cell.column.columnDef.cell, cell.getContext())}</CellBoundary>;
 
 export function useIsPhone(query = "(max-width: 767px)") {
   const [match, setMatch] = useState(false);
@@ -216,7 +231,7 @@ function RowCard<T>({ row, onOpen: onOpenProp }: { row: Row<T>; onOpen?: () => v
         onTouchEnd={onTouchEnd}
       >
         <div className="flex items-start gap-3">
-          {select && <div className="pt-0.5">{flexRender(select.column.columnDef.cell, select.getContext())}</div>}
+          {select && <div className="pt-0.5">{cellOf(select)}</div>}
           <div className="min-w-0 flex-1">
             {title && (
               <button
@@ -226,7 +241,7 @@ function RowCard<T>({ row, onOpen: onOpenProp }: { row: Row<T>; onOpen?: () => v
                 className="block w-full text-left text-[15px] font-bold leading-snug text-[var(--ink,#17171c)] disabled:cursor-default [&_*]:!text-[15px]"
               >
                 <span className="sr-only">{labelOf(title)}: </span>
-                {flexRender(title.column.columnDef.cell, title.getContext())}
+                {cellOf(title)}
               </button>
             )}
             {urgent && (
@@ -238,7 +253,7 @@ function RowCard<T>({ row, onOpen: onOpenProp }: { row: Row<T>; onOpen?: () => v
           {actions.length > 0 && (
             <div ref={actionsRef} className="ux-actions -mr-1 -mt-1 flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
               {actions.map((c) => (
-                <div key={c.id}>{flexRender(c.column.columnDef.cell, c.getContext())}</div>
+                <div key={c.id}>{cellOf(c)}</div>
               ))}
             </div>
           )}
@@ -274,7 +289,7 @@ function Field<T>({ cell }: { cell: Cell<T, unknown> }) {
     <div className="min-w-0">
       <dt className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--faint,#9a9aa5)]">{labelOf(cell)}</dt>
       <dd className="mt-0.5 break-words text-[13.5px] text-[var(--ink-2,#3a3a44)]">
-        {flexRender(cell.column.columnDef.cell, cell.getContext()) ?? "—"}
+        {cellOf(cell)}
       </dd>
     </div>
   );
@@ -403,7 +418,7 @@ export default function ResponsiveTable<T>({
             >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id} className={numericCols.has(cell.column.id) ? "text-right tabular-nums" : undefined}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  {cellOf(cell)}
                 </TableCell>
               ))}
             </TableRow>

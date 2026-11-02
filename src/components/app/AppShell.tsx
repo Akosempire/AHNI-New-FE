@@ -526,7 +526,11 @@ function crumbsOf(pathname: string) {
   const out: { label: string; href: string }[] = [];
   parts.forEach((p, i) => {
     const href = "/" + parts.slice(0, i + 1).join("/");
-    out.push({ label: i === 0 ? "Dashboard" : isIdSeg(p) ? "Details" : prettify(p), href });
+    const prev = parts[i - 1] ? prettify(parts[i - 1]) : "";
+    const singular = prev.replace(/ies$/, "y").replace(/s$/, "");
+    const label =
+      i === 0 ? "Dashboard" : isIdSeg(p) ? "Details" : /^(create|new|add)$/i.test(p) && prev ? `New ${singular.toLowerCase()}` : /^edit$/i.test(p) && prev ? `Edit ${singular.toLowerCase()}` : prettify(p);
+    out.push({ label: label.charAt(0).toUpperCase() + label.slice(1), href });
   });
   return out;
 }
@@ -545,7 +549,13 @@ function PageTitle({ pathname }: { pathname: string }) {
     let lifted: HTMLElement | null = null;
     // Wait for the page to render, then hide ours if the page has its own main heading
     const check = () => {
-      const own = document.querySelector("#app-main h1:not([data-shell-title])");
+      const mainEl = document.getElementById("app-main");
+      const top = (mainEl?.getBoundingClientRect().top ?? 0) + 300;
+      const own =
+        document.querySelector("#app-main h1:not([data-shell-title])") ||
+        Array.from(document.querySelectorAll<HTMLElement>("#app-main :is(h2, h3, h4)")).find(
+          (h) => !h.closest("[role=dialog], table, aside") && h.getClientRects().length > 0 && h.getBoundingClientRect().top < top && (h.textContent || "").trim().length > 2
+        );
       setHidden(!!own);
       if (own || !window.matchMedia("(min-width: 768px)").matches) return;
       // One page, one job: the page's action row (right-aligned buttons right under the title)

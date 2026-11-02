@@ -1,16 +1,18 @@
 "use client";
 
-import LongArrowLeft from "@/components/icons/LongArrowLeft";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const GoBack = () => {
   const router = useRouter();
   return (
     <button
+      type="button"
       onClick={() => router.back()}
-      className="w-[3rem] h-[3rem] rounded-full drop-shadow-md bg-white flex items-center justify-center"
+      className="ux-back inline-flex h-8 items-center gap-1.5 rounded-[6px] px-2 -ml-2 text-[13.5px] text-[var(--muted,#64646e)] transition-colors hover:bg-[var(--hover,#f6f5f9)] hover:text-[var(--ink,#17171c)]"
     >
-      <LongArrowLeft />
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+      Back
     </button>
   );
 };

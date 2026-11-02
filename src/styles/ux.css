@@ -463,3 +463,89 @@ body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
   background-color: var(--surface-2);
   color: var(--ink);
 }
+
+/* =====================================================================
+ * Content area – one consistent look for every module page, applied from here
+ * so older pages pick it up without being rewritten one by one.
+ * ===================================================================== */
+
+/* Headings: weights 400/500, sizes from the type scale */
+.ahni-app main h1:not(.page-title) {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.ahni-app main :is(h2, h3, h4) {
+  font-weight: 500;
+}
+.ahni-app main :is(h2, h3).text-2xl,
+.ahni-app main :is(h2, h3).text-xl {
+  font-size: 18px;
+  line-height: 28px;
+}
+.ahni-app main .font-bold,
+.ahni-app main .font-extrabold {
+  font-weight: 600;
+}
+
+/* Borders, not shadows: panels inside pages are flat with a hairline */
+.ahni-app main :is(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl):not(.border):not([role="dialog"]):not(.ux-pop) {
+  box-shadow: 0 0 0 1px var(--line-strong) !important;
+}
+.ahni-app main :is(.shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl).border:not([role="dialog"]):not(.ux-pop) {
+  box-shadow: none !important;
+  border-color: var(--line-strong);
+}
+.ahni-app main :is(.rounded-xl, .rounded-2xl, .rounded-3xl):not(.rounded-full) {
+  border-radius: 8px;
+}
+
+/* The old yellow accent becomes AHNi coral */
+.ahni-app :is(.bg-yellow-darker, .bg-yellow-500, .bg-yellow-600) {
+  background-color: var(--brand) !important;
+  color: #17171c !important;
+}
+.ahni-app :is(.text-yellow-darker, .text-yellow-600) {
+  color: var(--brand-ink) !important;
+}
+.ahni-app :is(.border-yellow-darker, .border-yellow-500) {
+  border-color: var(--brand) !important;
+}
+.ahni-app .focus\:ring-yellow-darker:focus {
+  --tw-ring-color: var(--brand) !important;
+}
+
+/* Native selects look like the custom ones */
+.ahni-app main select:not([multiple]) {
+  height: 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background-color: var(--surface);
+  color: var(--ink);
+  padding: 0 32px 0 10px;
+  font-size: 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238d8d97' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+/* Labels sit close to their field (proximity) */
+.ahni-app main label {
+  color: var(--ink-2);
+}
+
+/* List pages fit the screen: the table scrolls inside its box, the pager stays in view */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .ahni-app main .ux-table-wrap {
+    max-height: max(320px, calc(100dvh - 360px));
+  }
+  .ahni-app main .ux-table-wrap thead :is(th, td) {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
+    box-shadow: inset 0 -1px 0 var(--line-strong);
+  }
+}

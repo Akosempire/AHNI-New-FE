@@ -5,27 +5,27 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center gap-x-2 justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:text-white",
+  "inline-flex items-center gap-x-2 justify-center whitespace-nowrap rounded-[6px] text-[13.5px] font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-[.45] [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground hover:bg-[var(--brand-hover,#e2443b)]",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-[var(--line-strong,#e2e1e8)] bg-[var(--surface,#fff)] text-[var(--ink,#17171c)] hover:border-[var(--faint,#8d8d97)] hover:bg-[var(--hover,#f6f5f9)]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "bg-[var(--surface-2,#f3f2f7)] text-[var(--ink,#17171c)] hover:bg-[var(--line-strong,#e2e1e8)]",
+        ghost: "text-[var(--ink-2,#3a3a44)] hover:bg-[var(--hover,#f6f5f9)] hover:text-[var(--ink,#17171c)]",
         link: "text-primary underline-offset-4 hover:underline",
-        custom: "bg-rose-50 text-primary hover:bg-rose-100",
-        shallow: "bg-primary/20 text-primary hover:bg-primary/30",
+        custom: "border border-[var(--line-strong,#e2e1e8)] bg-[var(--surface,#fff)] text-[var(--ink,#17171c)] hover:bg-[var(--hover,#f6f5f9)]",
+        shallow: "bg-[var(--brand-soft,#fff0ee)] text-[var(--brand-ink,#b8302a)] hover:bg-[var(--brand-soft,#fff0ee)]/70",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 px-3",
-        lg: "h-11 px-8",
-        icon: "h-10 w-10",
+        default: "h-9 px-3.5",
+        sm: "h-8 px-3 text-[13px]",
+        lg: "h-10 px-5",
+        icon: "h-9 w-9",
       },
     },
     defaultVariants: {

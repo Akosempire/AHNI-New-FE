@@ -94,7 +94,7 @@ const FormInput: FC<InputProps> = ({ name, label, disabled, ...rest }) => {
                   aria-invalid={!!fieldState.error || undefined}
                   value={value ?? ""} // Ensure value is never undefined (0 still shows)
                   className={cn(
-                    "font-medium bg-gray-100 dark:bg-background placeholder:text-black/30 dark:placeholder:text-muted-foreground",
+                    "",
                     rest.className
                   )}
                 />

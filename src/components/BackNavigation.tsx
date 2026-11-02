@@ -1,6 +1,6 @@
 "use client";
 
-import RoundBack from "assets/svgs/RoundBack";
+import { ArrowLeft } from "lucide-react";
 import { FC } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -24,7 +24,7 @@ const BackNavigation: FC<PagepProps> = ({ extraText, customBackPath }) => {
     const pathSegments = pathname.split('/').filter(Boolean);
 
     // Debug logging
-    console.log("🔍 BackNavigation Debug:", {
+    if (false) console.log("BackNavigation", {
       currentPath: pathname,
       pathSegments,
       hasSubmission: pathSegments.includes('submission'),
@@ -104,11 +104,16 @@ const BackNavigation: FC<PagepProps> = ({ extraText, customBackPath }) => {
   };
 
   return (
-    <div className="flex items-center gap-x-2">
-      <div onClick={handleBackClick} className="cursor-pointer">
-        <RoundBack />
-      </div>
-      {extraText && <h4 className="text-xl font-bold">{extraText}</h4>}
+    <div className="flex items-center gap-x-3">
+      <button
+        type="button"
+        onClick={handleBackClick}
+        className="ux-back inline-flex h-8 items-center gap-1.5 rounded-[6px] px-2 -ml-2 text-[13.5px] text-[var(--muted,#64646e)] transition-colors hover:bg-[var(--hover,#f6f5f9)] hover:text-[var(--ink,#17171c)]"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        Back
+      </button>
+      {extraText && <h2 className="text-[18px] font-medium">{extraText}</h2>}
     </div>
   );
 };
