@@ -1,6 +1,5 @@
 "use client";
 
-import Card from "@/components/Card";
 // import { Button } from "@/components/ui/button";
 // import SearchIcon from "@/components/icons/SearchIcon";
 // import FilterIcon from "@/components/icons/FilterIcon";
@@ -348,10 +347,9 @@ export default function Account() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <Card>
-        <h2 className='text-[28px] font-semibold text-[#101928]'>Settings</h2>
-        <div className='w-full grid grid-cols-1 lg:grid-cols-4 py-16 lg:py-36 gap-3'>
-          <div className='col-span-1 py-20   px-2 flex flex-col items-center gap-3'>
+      <div>
+        <div className='grid w-full grid-cols-1 gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12'>
+          <div className='flex flex-row items-center gap-4 lg:flex-col lg:items-start'>
             {/* <div
               className='w-[200px] h-[200px] flex-shrink-0 rounded-full bg-primary'
               style={{
@@ -363,7 +361,8 @@ export default function Account() {
               }}
             /> */}
             <div
-              className='w-[200px] h-[200px] flex-shrink-0 rounded-full bg-primary'
+              className='grid h-20 w-20 flex-shrink-0 place-items-center rounded-full bg-[var(--surface-2)] text-[24px] font-medium text-[var(--ink-2)] lg:h-28 lg:w-28'
+              aria-label='Profile photo'
               style={{
                 backgroundImage: file
                   ? `url(${URL.createObjectURL(file)})`
@@ -375,12 +374,19 @@ export default function Account() {
               }}
             />
 
-            <div
-              onClick={handlePaperclipClick}
-              className='rounded-[8px] cursor-pointer border-[1.5px] w-fit p-2 flex justify-center items-center gap-1 border-primary text-primary text-[14px] font-semibold'
-            >
-              <ImagePlus />
-              Change Photo
+            <div className='min-w-0 space-y-2'>
+              <p className='truncate text-[15px] font-medium'>
+                {[(profile as any)?.first_name, (profile as any)?.last_name].filter(Boolean).join(" ") || "Your profile"}
+              </p>
+              <p className='truncate text-[13px] text-[var(--muted)]'>{(profile as any)?.email}</p>
+              <button
+                type='button'
+                onClick={handlePaperclipClick}
+                className='btn btn-outline !h-8 text-[13px]'
+              >
+                <ImagePlus className='h-4 w-4' />
+                Change photo
+              </button>
             </div>
             <input
               ref={fileInputRef}
@@ -389,24 +395,18 @@ export default function Account() {
               className='hidden'
             />
           </div>
-          <div className='col-span-3'>
+          <div className='min-w-0'>
             <Tabs defaultValue='profile'>
-              <TabsList className='border-b !py-0 rounded-none border-[#E4E7EC] w-full justify-start '>
-                <TabsTrigger
-                  className='rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b data-[state=active]:border-primary'
-                  value='profile'
-                >
-                  Profile Settings
+              <TabsList>
+                <TabsTrigger value='profile'>
+                  Profile
                 </TabsTrigger>
-                <TabsTrigger
-                  className='rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b data-[state=active]:border-primary'
-                  value='security'
-                >
+                <TabsTrigger value='security'>
                   Security
                 </TabsTrigger>
               </TabsList>
               <TabsContent
-                className='w-full lg:w-[60%] py-16 lg:py-32'
+                className='w-full max-w-[720px] pt-6'
                 value='profile'
               >
                 <FormProvider {...Profileform}>
@@ -418,14 +418,14 @@ export default function Account() {
                       <FormInput
                         label='First Name'
                         name='first_name'
-                        className='bg-white h-[56px]'
+                        className=''
                         required
                         placeholder='Enter First name'
                       />
                       <FormInput
                         label='Last Name'
                         name='last_name'
-                        className='bg-white h-[56px]'
+                        className=''
                         required
                         placeholder='Enter Last name'
                       />
@@ -433,7 +433,7 @@ export default function Account() {
                     <FormInput
                       label='Email Address'
                       name='email'
-                      className='bg-white h-[56px]'
+                      className=''
                       required
                       placeholder='Enter Email address'
                       disabled={true}
@@ -462,7 +462,7 @@ export default function Account() {
                     <FormInput
                       label='Mobile Number'
                       name='mobile_number'
-                      className='bg-white h-[56px]'
+                      className=''
                       required
                       placeholder='Enter mobile number'
                       type='tel'
@@ -472,14 +472,14 @@ export default function Account() {
                       <FormInput
                         label='Department'
                         name='department'
-                        className='bg-white h-[56px]'
+                        className=''
                         placeholder='Department'
                         disabled={true}
                       />
                       <FormInput
                         label='Position'
                         name='position'
-                        className='bg-white h-[56px]'
+                        className=''
                         placeholder='Position'
                         disabled={true}
                       />
@@ -489,39 +489,40 @@ export default function Account() {
                       <FormInput
                         label='Location'
                         name='location'
-                        className='bg-white h-[56px]'
+                        className=''
                         placeholder='Location'
                         disabled={true}
                       />
                       <FormInput
                         label='User Type'
                         name='user_type'
-                        className='bg-white h-[56px]'
+                        className=''
                         placeholder='User Type'
                         disabled={true}
                       />
                     </div>
 
-                    <div className='flex justify-end gap-5 mt-16'>
+                    <div className='mt-2 flex justify-end gap-3 border-t border-[var(--line)] pt-4'>
                       <FormButton
                         loading={isUpdateLoading}
                         type='submit'
                         disabled={isUpdateLoading}
                       >
-                        Save
+                        Save changes
                       </FormButton>
                     </div>
                   </form>
                 </FormProvider>
               </TabsContent>
               <TabsContent
-                className='w-full lg:w-[60%] py-10 '
+                className='w-full max-w-[520px] pt-6'
                 value='security'
               >
-                <div className='flex flex-col gap-3 rounded-[10px] border border-[#F0F2F5] py-10 px-10'>
-                  <h2 className='text-[20px] text-[#101928] font-semibold'>
-                    Change Password
-                  </h2>
+                <div className='flex flex-col gap-4'>
+                  <div>
+                    <h2 className='text-[18px] font-medium'>Change password</h2>
+                    <p className='text-[13px] text-[var(--muted)]'>You&apos;ll stay signed in on this device.</p>
+                  </div>
                   <FormProvider {...Securityform}>
                     <form
                       onSubmit={Securityform.handleSubmit(onSubmitSecurity)}
@@ -531,7 +532,7 @@ export default function Account() {
                         label='Old Password'
                         type='password'
                         name='old_password'
-                        className='bg-white h-[56px]'
+                        className=''
                         required
                         placeholder='Enter old password'
                       />
@@ -539,7 +540,7 @@ export default function Account() {
                         label='New Password'
                         type='password'
                         name='new_password'
-                        className='bg-white h-[56px]'
+                        className=''
                         required
                         placeholder='Enter new password'
                       />
@@ -548,18 +549,18 @@ export default function Account() {
                         label='Confirm Password'
                         type='password'
                         name='confirm_password'
-                        className='bg-white h-[56px]'
+                        className=''
                         // disabled
                         placeholder='Confirm new password'
                       />
 
-                      <div className='flex justify-end gap-5 mt-16'>
+                      <div className='mt-2 flex justify-end gap-3 border-t border-[var(--line)] pt-4'>
                         <FormButton
                           loading={isPasswordChangeLoading}
                           type='submit'
                           disabled={isPasswordChangeLoading}
                         >
-                          Update Password
+                          Update password
                         </FormButton>
                       </div>
                     </form>
@@ -569,7 +570,7 @@ export default function Account() {
             </Tabs>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

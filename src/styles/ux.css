@@ -549,3 +549,14 @@ body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
     box-shadow: inset 0 -1px 0 var(--line-strong);
   }
 }
+
+/* Oversized page buttons (py-6 = 48px) come down to the standard 36px */
+.ahni-app main :is(button, a).py-6 {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  height: 36px;
+}
+.ahni-app .ux-title-actions,
+.ahni-app .ux-title-actions > div {
+  gap: 8px;
+}

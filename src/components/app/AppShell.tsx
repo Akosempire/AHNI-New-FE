@@ -564,17 +564,20 @@ function PageTitle({ pathname }: { pathname: string }) {
       const main = document.getElementById("app-main");
       if (!title || !main || lifted) return;
       const tb = title.getBoundingClientRect();
-      const row = Array.from(main.querySelectorAll<HTMLElement>(".justify-end")).find((el) => {
+      // The first block under the title that holds only 1–3 buttons (and nothing else) is the page's action row
+      const onlyActions = (el: HTMLElement) => {
+        const all = Array.from(el.querySelectorAll<HTMLElement>("button, a[href]"));
+        const btns = all.filter((b) => !all.some((o) => o !== b && o.contains(b)));
+        if (!btns.length || btns.length > 3 || el.querySelector("input, select, textarea, table, h1, h2, h3, [role=tab], [role=tablist]")) return false;
+        if (btns.every((b) => b.classList.contains("ux-back"))) return false;
+        // innerText ignores hidden parts (e.g. the in-page breadcrumb the shell hides)
+        const btnText = btns.map((b) => b.innerText || "").join("").replace(/\s+/g, "");
+        return (el.innerText || "").replace(/\s+/g, "") === btnText;
+      };
+      const row = Array.from(main.querySelectorAll<HTMLElement>("div, section, header")).find((el) => {
+        if (el.contains(title) || title.contains(el) || el.closest("table, [role=dialog], form, aside")) return false;
         const r = el.getBoundingClientRect();
-        const btns = el.querySelectorAll("button, a");
-        return (
-          r.top >= tb.bottom - 2 &&
-          r.top - tb.bottom < 40 &&
-          btns.length > 0 &&
-          btns.length <= 3 &&
-          r.height < 72 &&
-          !el.closest("table, [role=dialog], form")
-        );
+        return r.top >= tb.bottom - 2 && r.top - tb.bottom < 72 && r.height > 0 && r.height < 72 && onlyActions(el);
       });
       if (row) {
         lifted = row;
@@ -583,11 +586,10 @@ function PageTitle({ pathname }: { pathname: string }) {
         title.style.paddingRight = `${row.getBoundingClientRect().width + 24}px`;
       }
     };
-    const t1 = setTimeout(check, 60);
-    const t2 = setTimeout(check, 900);
+    // Pages render in stages (loading → data), so look again a few times
+    const timers = [60, 900, 2000, 4000].map((ms) => setTimeout(check, ms));
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
+      timers.forEach(clearTimeout);
       lifted?.classList.remove("ux-title-actions");
       if (lifted) lifted.style.top = "";
       if (ref.current) ref.current.style.paddingRight = "";

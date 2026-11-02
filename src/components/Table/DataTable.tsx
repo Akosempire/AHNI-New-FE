@@ -7,6 +7,7 @@ import {
 import Pagination from "@/components/Pagination";
 
 import ResponsiveTable from "@/components/Table/ResponsiveTable";
+import { formatCellValue } from "@/components/Table/formatCell";
 import { ReactNode } from "react";
 
 type TPagination = {
@@ -48,6 +49,8 @@ export default function DataTable<TData>({
     getPaginationRowModel: pagination ? undefined : getPaginationRowModel(), // Only use internal pagination if no custom pagination
     // debugTable: true,
     defaultColumn: {
+      // Plain columns get readable dates, grouped numbers and "—" for empty values
+      cell: (info) => formatCellValue(info.getValue(), info.column.id),
       // size: 150,
       // minSize: 100,
       // maxSize: 600,
