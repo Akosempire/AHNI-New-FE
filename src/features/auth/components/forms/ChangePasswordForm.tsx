@@ -67,7 +67,7 @@ const ChangePasswordForm = () => {
           <FormInput label="New password" type="password" name="new_password" placeholder="Enter a new password" autoComplete="new-password" />
           <FormInput label="Confirm new password" type="password" name="confirm_password" placeholder="Type it again" autoComplete="new-password" />
           <PasswordHint password={form.watch("new_password")} />
-          <FormButton loading={isLoading} className="h-12 w-full rounded-xl bg-[var(--ink)] text-[15px] font-bold text-[var(--surface)] hover:bg-black" size="lg" type="submit">
+          <FormButton loading={isLoading} className="h-10 w-full" size="lg" type="submit">
             Update password
           </FormButton>
         </form>

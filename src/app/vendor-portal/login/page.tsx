@@ -24,7 +24,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-import DemoLoginHint from "@/components/DemoLoginHint";
+import AuthLayout, { AuthLink } from "@/components/app/AuthLayout";
 
 export default function VendorLoginPage() {
   const router = useRouter();
@@ -88,174 +88,52 @@ export default function VendorLoginPage() {
   };
 
   return (
-    <div className="flex flex-1 h-screen">
-      <div className="flex bg-[#FEF2F2] w-full">
-        {/* Left Panel - Login Form */}
-        <div className="w-full flex flex-1 items-center justify-center px-8">
-          <div className="w-full max-w-md">
-            {/* Home Button */}
-            <div className="mb-6">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/')}
-                className="flex items-center gap-2 text-gray-600 hover:text-primary border-gray-300 hover:border-primary"
-              >
-                <Home className="h-4 w-4" />
-                Home
-              </Button>
-            </div>
-
-            <DemoLoginHint kind="vendor" />
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <img src="/imgs/logo.png" className="w-[130px] mx-auto" />
-                <div className="flex flex-col items-center gap-y-14 mt-10 py-10">
-                  {/* Header */}
-                  <div>
-                    <h1 className="text-2xl font-bold text-center">Vendor Portal Login</h1>
-                    <p className="text-center text-[#667185] mt-1">
-                      Enter your credentials to access your account
-                    </p>
-                  </div>
-
-                  {/* Auto-redirect Warning */}
-                  {isRedirecting && (
-                    <Alert className="w-full border-orange-200 bg-orange-50">
-                      <AlertCircle className="h-4 w-4 text-orange-600" />
-                      <AlertDescription className="text-orange-800">
-                        <div className="flex items-center justify-between">
-                          <span>Already logged in. Redirecting to dashboard...</span>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={handleClearSession}
-                            className="ml-2 border-orange-300 text-orange-700 hover:bg-orange-100"
-                          >
-                            Clear Session
-                          </Button>
-                        </div>
-                      </AlertDescription>
-                    </Alert>
-                  )}
-
-                  {/* Error Alert */}
-                  {loginError && (
-                    <Alert variant="destructive" className="w-full">
-                      <AlertDescription>{loginError}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  {/* Form Fields */}
-                  <div className="space-y-8 self-stretch">
-                    <FormInput
-                      label="Email Address"
-                      placeholder="Enter email"
-                      required
-                      type="email"
-                      name="email"
-                      className="border-primary"
-                    />
-
-                    <div>
-                      <div className="flex flex-col gap-1">
-                        <FormInput
-                          label="Password"
-                          placeholder="Enter password"
-                          required
-                          type="password"
-                          name="password"
-                          className="border-primary"
-                        />
-                      </div>
-
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            className="border-gray-500"
-                            checked={rememberMe}
-                            onCheckedChange={setRememberMe}
-                          />
-                          <label className="font-semibold">
-                            Remember me
-                          </label>
-                        </div>
-                        <button
-                          type="button"
-                          className="font-medium text-primary text-sm hover:underline"
-                          onClick={() => {/* Add forgot password logic */}}
-                        >
-                          Forgot Password?
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Login Button */}
-                  <div className="w-full self-stretch">
-                    <FormButton
-                      loading={isPending}
-                      className="w-full rounded-full"
-                      size="lg"
-                    >
-                      Login
-                    </FormButton>
-                  </div>
-
-                  {/* Test Credentials - Compact Developer Section */}
-                  <div className="w-full self-stretch pt-4">
-                    <details className="group">
-                      <summary className="flex cursor-pointer items-center justify-center gap-2 text-xs text-gray-400 hover:text-gray-600">
-                        <span>Test Accounts</span>
-                        <svg className="h-3 w-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </summary>
-                      <div className="mt-3 space-y-2">
-                        <div className="rounded bg-blue-50 p-2 text-xs">
-                          <div className="font-medium text-blue-900">Demo Account:</div>
-                          <div className="font-mono text-blue-700">test@vendor.com / test123</div>
-                          <div className="text-blue-600 mt-1">✓ Full mock data available</div>
-                        </div>
-                        <div className="rounded bg-amber-50 p-2 text-xs border border-amber-200">
-                          <div className="font-medium text-amber-900">Live Backend Access:</div>
-                          <div className="text-amber-700 mt-1">
-                            <div>• Backend API is fully operational</div>
-                            <div>• Test vendor accounts need to be created</div>
-                            <div>• Contact: procurement@ahni.org</div>
-                          </div>
-                        </div>
-                      </div>
-                    </details>
-                  </div>
-
-                  {/* Help Links */}
-                  <div className="text-center text-xs text-gray-400 mt-4">
-                    Don't have an account?{" "}
-                    <a
-                      href="/eoi"
-                      className="font-medium text-primary hover:underline"
-                    >
-                      Register through EOI
-                    </a>
-                  </div>
-                </div>
-              </form>
-            </Form>
-          </div>
+    <AuthLayout
+      title="Vendor sign in"
+      subtitle="Track your bids, purchase orders and payments."
+      audience="vendor"
+      showPortalSwitch
+      footer={
+        <div className="space-y-2">
+          <p>
+            New supplier? <AuthLink href="/eoi">Register through an expression of interest</AuthLink>
+          </p>
+          <p>
+            Need help? <AuthLink href="mailto:procurement@ahni.org">Contact procurement</AuthLink>
+          </p>
         </div>
-
-        {/* Right Panel - Background Image with Overlay */}
-        <div className="hidden md:flex md:flex-1 md:items-center md:justify-center bg-[url('/img/login.jpeg')] bg-[#161630B2] bg-blend-overlay bg-opacity-100">
-          <div className="font-bold text-xl text-white text-center">
-            Empowering vendors and suppliers to <br />
-            build stronger communities through <br />
-            innovative partnerships
-          </div>
+      }
+    >
+      {isRedirecting && (
+        <div role="status" className="mb-5 flex items-center justify-between gap-3 rounded-[8px] border border-[var(--line-strong)] p-3 text-[13.5px]">
+          <span>You&apos;re already signed in. Opening your dashboard…</span>
+          <button type="button" onClick={handleClearSession} className="btn btn-outline !h-8 text-[13px]">
+            Sign out
+          </button>
         </div>
-      </div>
-    </div>
+      )}
+      {loginError && (
+        <p role="alert" className="mb-5 rounded-[8px] border border-[color-mix(in_srgb,var(--danger)_25%,transparent)] bg-[var(--danger-soft)] p-3 text-[13.5px] text-[var(--danger)]">
+          {loginError}
+        </p>
+      )}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+          <FormInput label="Email address" placeholder="you@company.com" required type="email" name="email" autoComplete="username" />
+          <div className="relative">
+            <a
+              href="mailto:procurement@ahni.org?subject=Vendor%20portal%20password%20reset"
+              className="absolute right-0 top-0 text-[13px] text-[var(--muted)] underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--ink)]"
+            >
+              Forgot password?
+            </a>
+            <FormInput label="Password" placeholder="Enter your password" required type="password" name="password" autoComplete="current-password" />
+          </div>
+          <FormButton loading={isPending} className="h-10 w-full" size="lg">
+            Sign in
+          </FormButton>
+        </form>
+      </Form>
+    </AuthLayout>
   );
 }

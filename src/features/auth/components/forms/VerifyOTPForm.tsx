@@ -93,7 +93,7 @@ export default function VerifyOTPForm() {
             <form className="space-y-6" onSubmit={onSubmit} noValidate>
                 <fieldset>
                     <legend className="sr-only">6-digit code</legend>
-                    <div className="[&_input]:!h-12 [&_input]:!w-11 [&_input]:rounded-xl [&_input]:border [&_input]:border-[var(--line-strong)] [&_input]:bg-[var(--surface)] [&_input]:text-[20px] [&_input]:font-bold [&_input:focus]:border-[var(--ink)] [&_input:focus]:outline-none sm:[&_input]:!w-12">
+                    <div className="[&_input]:!h-11 [&_input]:!w-11 [&_input]:rounded-[6px] [&_input]:border [&_input]:border-[var(--line-strong)] [&_input]:bg-[var(--surface)] [&_input]:text-[20px] [&_input]:font-medium [&_input:focus]:border-[var(--brand)] [&_input:focus]:outline-none sm:[&_input]:!w-12">
                         <OtpInput numInputs={6} separator={<span className="w-2" />} onChange={handleChange} shouldAutoFocus value={otpValue} isInputNum />
                     </div>
                 </fieldset>
@@ -108,7 +108,7 @@ export default function VerifyOTPForm() {
                     )}
                 </p>
 
-                <FormButton type="submit" disabled={otpValue.length !== 6} className="h-12 w-full rounded-xl bg-[var(--ink)] text-[15px] font-bold text-[var(--surface)] hover:bg-black" size="lg">
+                <FormButton type="submit" disabled={otpValue.length !== 6} className="h-10 w-full" size="lg">
                     Continue
                 </FormButton>
             </form>

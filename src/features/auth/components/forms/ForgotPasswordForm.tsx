@@ -62,7 +62,7 @@ const ForgotPasswordForm = () => {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
                     <FormInput label="Email address" required type="email" name="email" placeholder="name@ahnigeria.org" autoComplete="email" />
-                    <FormButton loading={isLoading} className="h-12 w-full rounded-xl bg-[var(--ink)] text-[15px] font-bold text-[var(--surface)] hover:bg-black" size="lg">
+                    <FormButton loading={isLoading} className="h-10 w-full" size="lg">
                         Send code
                     </FormButton>
                 </form>

@@ -10,7 +10,7 @@ import Card from "@/components/Card";
 import { Home, AlertCircle } from "lucide-react";
 import { useConsultantLogin, ConsultantAuthUtils } from "@/features/consultant-portal/controllers/consultantAuthController";
 
-import DemoLoginHint from "@/components/DemoLoginHint";
+import AuthLayout, { AuthLink } from "@/components/app/AuthLayout";
 
 export default function ConsultantLoginPage() {
   const router = useRouter();
@@ -68,152 +68,77 @@ export default function ConsultantLoginPage() {
     });
   };
 
+  const field =
+    "flex h-9 w-full rounded-[6px] border border-[var(--line-strong)] bg-[var(--surface)] px-3 text-[14px] text-[var(--ink)] placeholder:text-[var(--faint)] hover:border-[var(--faint)] focus-visible:border-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/25";
+
   return (
-    <div className="flex flex-1 h-screen relative">
-      {/* Home Button - Top Left Corner */}
-      <div className="absolute top-6 left-6 z-50">
-        <Button
-          type="button"
-          variant="outline"
-          size="default"
-          onClick={() => router.push('/')}
-          className="flex items-center gap-2 text-gray-600 hover:text-primary border-gray-300 hover:border-primary px-6 py-2"
-        >
-          <Home className="h-5 w-5" />
-          Home
-        </Button>
-      </div>
-
-      <div className="flex bg-[#FEF2F2] w-full">
-        {/* Left Panel - Login Form */}
-        <div className="w-full flex flex-1 items-center justify-center">
-          <div>
-            <DemoLoginHint kind="consultant" />
-            <form onSubmit={handleSubmit}>
-              <img src="/imgs/logo.png" className="w-[130px] mx-auto" />
-              <Card className="max-w-[500px] flex flex-col items-center gap-y-14 mt-10 py-10">
-                {/* Header */}
-                <div>
-                  <h1 className="text-2xl font-bold text-center">Consultant Portal Login</h1>
-                  <p className="text-center text-[#667185] mt-1">
-                    Enter your credentials to access your account
-                  </p>
-                </div>
-
-                {/* Auto-redirect Warning */}
-                {isRedirecting && (
-                  <Alert className="w-full border-orange-200 bg-orange-50">
-                    <AlertCircle className="h-4 w-4 text-orange-600" />
-                    <AlertDescription className="text-orange-800">
-                      <div className="flex items-center justify-between">
-                        <span>Already logged in. Redirecting to dashboard...</span>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleClearSession}
-                          className="ml-2 border-orange-300 text-orange-700 hover:bg-orange-100"
-                        >
-                          Clear Session
-                        </Button>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Error Alert */}
-                {loginError && (
-                  <Alert variant="destructive" className="w-full">
-                    <AlertDescription>{loginError}</AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Form Fields */}
-                <div className="space-y-8 self-stretch">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Email Address *</label>
-                    <input
-                      type="email"
-                      placeholder="Enter email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
-                      className="w-full px-4 py-3.5 text-base border border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex flex-col gap-1">
-                      <label className="block text-sm font-medium mb-2">Password *</label>
-                      <input
-                        type="password"
-                        placeholder="Enter password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoComplete="current-password"
-                        className="w-full px-4 py-3.5 text-base border border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          className="border-gray-500"
-                          checked={rememberMe}
-                          onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                        />
-                        <label className="font-semibold text-sm">
-                          Remember me
-                        </label>
-                      </div>
-                      <button
-                        type="button"
-                        className="font-medium text-primary text-sm hover:underline"
-                        onClick={() => {/* Add forgot password logic */}}
-                      >
-                        Forgot Password?
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Login Button */}
-                <div className="w-full self-stretch">
-                  <FormButton
-                    loading={isPending}
-                    className="w-full rounded-full"
-                    size="lg"
-                  >
-                    Login
-                  </FormButton>
-                </div>
-
-                {/* Help Links */}
-                <div className="text-center text-xs text-gray-400">
-                  Need help accessing your account?{" "}
-                  <a
-                    href="mailto:hr@ahni.org"
-                    className="font-medium text-primary hover:underline"
-                  >
-                    Contact HR
-                  </a>
-                </div>
-              </Card>
-            </form>
-          </div>
+    <AuthLayout
+      title="Consultant sign in"
+      subtitle="Timesheets, deliverables and payment requests for your engagements."
+      audience="consultant"
+      showPortalSwitch
+      footer={
+        <p>
+          Need access? <AuthLink href="mailto:hr@ahni.org">Contact HR</AuthLink>
+        </p>
+      }
+    >
+      {isRedirecting && (
+        <div role="status" className="mb-5 flex items-center justify-between gap-3 rounded-[8px] border border-[var(--line-strong)] p-3 text-[13.5px]">
+          <span>You&apos;re already signed in. Opening your dashboard…</span>
+          <button type="button" onClick={handleClearSession} className="btn btn-outline !h-8 text-[13px]">
+            Sign out
+          </button>
         </div>
-
-        {/* Right Panel - Background Image with Overlay */}
-        <div className="hidden md:flex md:flex-1 md:items-center md:justify-center bg-[url('/img/login.jpeg')] bg-[#161630B2] bg-blend-overlay bg-opacity-100">
-          <div className="font-bold text-xl text-white text-center">
-            Empowering consultants to deliver <br />
-            exceptional services and drive <br />
-            meaningful impact in communities
-          </div>
+      )}
+      {loginError && (
+        <p role="alert" className="mb-5 rounded-[8px] border border-[color-mix(in_srgb,var(--danger)_25%,transparent)] bg-[var(--danger-soft)] p-3 text-[13.5px] text-[var(--danger)]">
+          {loginError}
+        </p>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        <div className="space-y-1.5">
+          <label htmlFor="c-email" className="text-[13.5px] font-medium">
+            Email address
+          </label>
+          <input
+            id="c-email"
+            type="email"
+            autoComplete="username"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={field}
+            required
+          />
         </div>
-      </div>
-    </div>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="c-password" className="text-[13.5px] font-medium">
+              Password
+            </label>
+            <a
+              href="mailto:hr@ahni.org?subject=Consultant%20portal%20password%20reset"
+              className="text-[13px] text-[var(--muted)] underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--ink)]"
+            >
+              Forgot password?
+            </a>
+          </div>
+          <input
+            id="c-password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={field}
+            required
+          />
+        </div>
+        <FormButton loading={isPending} type="submit" className="h-10 w-full" size="lg">
+          Sign in
+        </FormButton>
+      </form>
+    </AuthLayout>
   );
 }

@@ -38,32 +38,29 @@ export default function LoginForm() {
   }, [isSuccess, router]);
   return (
     <AuthLayout
-      title="Sign in to your workspace"
-      subtitle="Use your AHNi email address and password."
+      title="Welcome back"
+      subtitle="Sign in with your AHNi email address."
+      audience="staff"
+      showPortalSwitch
       footer={
-        <div className="space-y-3">
-          <p>
-            Not staff? Sign in to the <AuthLink href="/vendor-portal/login">Vendor portal</AuthLink> or the{" "}
-            <AuthLink href="/consultant-portal">Consultant portal</AuthLink>.
-          </p>
-          <p>
-            Trouble signing in? <AuthLink href="mailto:support@ahnigeria.org">Contact IT support</AuthLink>
-          </p>
-        </div>
+        <p>
+          Trouble signing in? <AuthLink href="mailto:support@ahnigeria.org">Contact IT support</AuthLink>
+        </p>
       }
     >
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
           <FormInput label="Email address" placeholder="name@ahnigeria.org" required type="email" name="email" autoComplete="username" />
-          <div>
+          <div className="relative">
+            <Link
+              href="/auth/forgot-password"
+              className="absolute right-0 top-0 text-[13px] text-[var(--muted)] underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--ink)]"
+            >
+              Forgot password?
+            </Link>
             <FormInput label="Password" placeholder="Enter your password" required type="password" name="password" autoComplete="current-password" />
-            <div className="mt-2 text-right">
-              <Link href="/auth/forgot-password" className="text-[14px] font-semibold text-[var(--brand-ink)] hover:underline">
-                Forgot password?
-              </Link>
-            </div>
           </div>
-          <FormButton loading={isLoading} className="h-12 w-full rounded-xl bg-[var(--ink)] text-[15px] font-bold text-[var(--surface)] hover:bg-black" size="lg">
+          <FormButton loading={isLoading} className="h-10 w-full" size="lg">
             Sign in
           </FormButton>
         </form>
