@@ -372,7 +372,7 @@ export default function ResponsiveTable<T>({
                 key={header.id}
                 colSpan={header.colSpan}
                 className={cn(
-                  "sticky top-0 z-[1] h-11 whitespace-nowrap bg-[var(--surface,#fff)] py-0 text-[12.5px] font-medium text-[var(--muted,#6b6b76)] shadow-[inset_0_-1px_0_var(--line-strong,#e3e2ea)]",
+                  "ux-label sticky top-0 z-[1] h-10 whitespace-nowrap bg-[var(--surface,#fff)] py-0 shadow-[inset_0_-1px_0_var(--line-strong,#e3e2ea)]",
                   numericCols.has(header.column.id) ? "text-right" : "text-left",
                   headClass
                 )}

@@ -1,27 +1,25 @@
 /*
- * AHNi staff app shell.
- * Structure, type, spacing and motion follow the Waya ERP playbook; colours are AHNi's own
- * (ink, coral, mint, mist). Coral is the one accent; ink is the main action colour.
- * Scoped to .ahni-app (and the body while the shell is mounted, so portalled dialogs match).
+ * AHNi staff app shell – "New Design System" layout (top bar, icon rail, product sidebar,
+ * wide canvas) on AHNi ERP colours. White everywhere; regions are split by 1px borders, not
+ * grey sheets. Dark mode is a soft charcoal, not black.
  */
 .ahni-app,
 body:has(.ahni-app) {
-  /* Surfaces: quiet canvas, grey panels without borders (Waya "content first") */
   --app-bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f3f2f7; /* AHNi mist – inputs, active nav, selected */
-  --panel: #f8f7fb; /* KPI / chart panels */
+  --surface-2: #f3f2f7; /* AHNi mist – only for hover / selected, never as a sheet */
+  --panel: #ffffff;
   --hover: #f6f5f9;
   --ink: #17171c;
   --ink-2: #3a3a44;
-  --muted: #6b6b76;
-  --faint: #9a9aa5;
-  --line: #efeef3; /* row dividers */
-  --line-strong: #e3e2ea; /* section rules, control borders */
-  --brand: #f2564d; /* AHNi coral – the one accent */
+  --muted: #64646e;
+  --faint: #8d8d97;
+  --line: #ededf1; /* row dividers */
+  --line-strong: #e2e1e8; /* regions, controls */
+  --brand: #f2564d; /* AHNi coral – primary actions, focus, selection */
   --brand-hover: #e2443b;
   --brand-soft: #fff0ee;
-  --brand-ink: #b8302a; /* coral text on light surfaces (AA) */
+  --brand-ink: #b8302a;
   --mint: #89f0ca;
   --mint-soft: #e7fbf3;
   --mint-ink: #0f7a55;
@@ -36,40 +34,42 @@ body:has(.ahni-app) {
   --focus: #f2564d;
   --overlay: rgba(23, 23, 28, 0.32);
 
-  /* Elevation – panels are flat, only floating layers cast shadows */
   --shadow-1: none;
-  --shadow-pop: 0 12px 35px rgba(23, 23, 28, 0.12);
-  --shadow-menu: 0 12px 28px rgba(23, 23, 28, 0.1);
-  --shadow-dialog: 0 20px 80px rgba(23, 23, 28, 0.2);
-  --shadow-toast: 0 10px 30px rgba(23, 23, 28, 0.18);
+  --shadow-pop: 0 8px 24px rgba(23, 23, 28, 0.1), 0 0 0 1px var(--line-strong);
+  --shadow-menu: var(--shadow-pop);
+  --shadow-dialog: 0 24px 64px rgba(23, 23, 28, 0.18);
+  --shadow-toast: 0 8px 24px rgba(23, 23, 28, 0.14);
   --shadow-2: var(--shadow-pop);
 
-  /* Radius */
   --r-control: 6px;
-  --r-card: 10px;
-  --r-dialog: 10px;
+  --r-card: 8px;
+  --r-dialog: 12px;
   --r-sheet: 12px;
 
-  /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-std: cubic-bezier(0.2, 0, 0, 1);
 
-  /* Layout */
-  --sidebar-w: 247px;
-  --sidebar-w-collapsed: 60px;
-  --header-h: 60px;
+  /* Shell sizes (New Design System) */
+  --topbar-h: 48px;
+  --header-h: 48px;
+  --rail-w: 48px;
+  --rail-w-open: 208px;
+  --sidebar-w: 240px;
+  --sidebar-w-collapsed: 48px;
 
-  /* shadcn tokens used by every module page */
-  --primary: 240 10% 10%; /* ink: buttons, submit */
-  --primary-foreground: 0 0% 100%;
-  --ring: 3 86% 63%; /* coral focus ring */
+  --primary: 3 86% 63%; /* coral buttons */
+  --primary-foreground: 240 10% 10%;
+  --ring: 3 86% 63%;
   --radius: 0.375rem;
   --card: 0 0% 100%;
-  --border: 250 17% 91%;
-  --input: 250 17% 91%;
+  --border: 250 12% 90%;
+  --input: 250 12% 90%;
 
-  --font-serif: "Playfair Display Variable", "Playfair Display", Georgia, serif;
-  font-family: "DM Sans Variable", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: var(--font-sans);
+  --font-sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 14px;
   color: var(--ink);
   background: var(--app-bg);
   min-height: 100vh;
@@ -78,38 +78,52 @@ body:has(.ahni-app) {
 
 .dark .ahni-app,
 .dark body:has(.ahni-app) {
-  --app-bg: #0b0b0d;
-  --surface: #0b0b0d;
-  --surface-2: #1c1c22;
-  --panel: #131317;
-  --hover: #18181d;
-  --ink: #f2f2f6;
-  --ink-2: #d4d4dc;
-  --muted: #a3a3ae;
-  --faint: #767682;
-  --line: #222228;
-  --line-strong: #32323a;
-  --brand-soft: rgba(242, 86, 77, 0.14);
-  --brand-ink: #ff8a82;
+  /* Soft charcoal, not black */
+  --app-bg: #2b2b2f;
+  --surface: #2b2b2f;
+  --surface-2: #38383e;
+  --panel: #2b2b2f;
+  --hover: #323237;
+  --ink: #ededf0;
+  --ink-2: #cacad0;
+  --muted: #a3a3ab;
+  --faint: #83838b;
+  --line: #36363c;
+  --line-strong: #44444b;
+  --brand-soft: rgba(242, 86, 77, 0.16);
+  --brand-ink: #ff8f87;
   --mint-soft: rgba(137, 240, 202, 0.12);
   --mint-ink: #89f0ca;
   --butter-soft: rgba(255, 231, 168, 0.12);
   --butter-ink: #ffd36b;
   --lilac-soft: rgba(201, 180, 255, 0.14);
   --lilac-ink: #c9b4ff;
-  --danger: #ff6b6b;
-  --danger-soft: rgba(255, 107, 107, 0.12);
-  --overlay: rgba(0, 0, 0, 0.68);
-  --shadow-pop: 0 12px 35px rgba(0, 0, 0, 0.5);
-  --shadow-menu: 0 12px 28px rgba(0, 0, 0, 0.45);
-  --shadow-dialog: 0 20px 80px rgba(0, 0, 0, 0.6);
-  --shadow-toast: 0 10px 30px rgba(0, 0, 0, 0.5);
-  --primary: 240 14% 95%;
-  --primary-foreground: 240 10% 6%;
-  --card: 240 7% 5%;
-  --border: 240 6% 15%;
-  --input: 240 6% 15%;
+  --danger: #ff7b7b;
+  --danger-soft: rgba(255, 107, 107, 0.14);
+  --overlay: rgba(10, 10, 12, 0.55);
+  --shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--line-strong);
+  --shadow-dialog: 0 24px 64px rgba(0, 0, 0, 0.45);
+  --shadow-toast: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --card: 240 4% 18%;
+  --background: 240 4% 18%;
+  --foreground: 240 8% 94%;
+  --muted-foreground: 240 4% 66%;
+  --border: 240 5% 25%;
+  --input: 240 5% 25%;
 }
+
+/* Mono uppercase labels (section labels, table headers, tile labels) */
+.ahni-app .ux-label,
+body:has(.ahni-app) .ux-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.ahni-app .font-mono { font-family: var(--font-mono); }
 
 .ahni-app *:focus-visible {
   outline: 2px solid var(--focus);
@@ -118,12 +132,10 @@ body:has(.ahni-app) {
 
 /* Surfaces */
 .ahni-app .app-card {
-  background: var(--panel);
-  border: 1px solid transparent;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
   border-radius: var(--r-card);
-  transition: border-color 0.15s ease;
 }
-.ahni-app .app-card:hover { border-color: var(--line-strong); }
 .ahni-app .app-panel-head {
   background: transparent;
   border-radius: 0;
@@ -132,10 +144,9 @@ body:has(.ahni-app) {
 
 /* Serif page title (Waya: one page, one job) */
 .ahni-app .page-title {
-  font-family: var(--font-serif);
   font-weight: 500;
-  font-size: clamp(34px, 3.6vw, 48px);
-  line-height: 1.08;
+  font-size: 24px;
+  line-height: 32px;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
@@ -146,24 +157,24 @@ body:has(.ahni-app) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 14px;
+  height: 32px;
+  padding: 0 12px;
   border-radius: var(--r-control);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .ahni-app .btn-primary { background: var(--ink); color: var(--surface); }
 .ahni-app .btn-primary:hover { background: #000; }
 .dark .ahni-app .btn-primary:hover { background: #fff; }
-.ahni-app .btn-brand { background: var(--brand); color: #fff; }
+.ahni-app .btn-brand { background: var(--brand); color: #17171c; }
 .ahni-app .btn-brand:hover { background: var(--brand-hover); }
 .ahni-app .btn-outline { background: var(--surface); border: 1px solid var(--line-strong); color: var(--ink); }
 .ahni-app .btn-outline:hover { background: var(--hover); }
 .ahni-app .btn-ghost { color: var(--ink-2); }
 .ahni-app .btn-ghost:hover { background: var(--hover); color: var(--ink); }
-.ahni-app .btn-icon { width: 36px; padding: 0; }
+.ahni-app .btn-icon { width: 32px; padding: 0; }
 
 /* Status labels: filled dot + coloured word, no pill (Waya) */
 .ahni-app .badge {

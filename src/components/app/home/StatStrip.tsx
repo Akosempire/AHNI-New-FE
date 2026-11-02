@@ -21,11 +21,11 @@ export default function StatStrip({ stats }: { stats: Stat[] }) {
             ].join(" ")}
           >
             <Link href={s.href} className="group block h-full px-4 py-5 transition-colors hover:bg-[var(--hover)] md:px-6">
-              <span className="block text-[13px] text-[var(--muted)] group-hover:text-[var(--ink-2)]">{s.label}</span>
+              <span className="ux-label block">{s.label}</span>
               {s.loading ? (
                 <span className="skeleton mt-3 block h-8 w-24" aria-label="Loading" />
               ) : (
-                <span className="mt-2 block truncate text-[26px] font-semibold leading-tight tracking-[-0.02em] tabular-nums md:text-[30px]">{s.value}</span>
+                <span className="mt-2 block truncate text-[26px] font-normal leading-tight tracking-[-0.02em] tabular-nums md:text-[28px]">{s.value}</span>
               )}
               <span className="mt-1 block truncate text-[12.5px] text-[var(--muted)]">{s.note}</span>
             </Link>

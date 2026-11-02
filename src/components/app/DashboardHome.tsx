@@ -182,7 +182,7 @@ export default function DashboardHome() {
             {role ? ` – ${role}` : ""}
             {dept ? ` in ${dept}` : ""}
           </p>
-          <h1 className="page-title mt-3 max-w-[22ch]">{summary}</h1>
+          <h1 className="page-title mt-2 max-w-[30ch] !text-[28px] !leading-[36px]">{summary}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-3 md:justify-end">
           <span className="text-[13px] text-[var(--muted)]">{today}</span>
@@ -226,7 +226,7 @@ export default function DashboardHome() {
           {canAccessProgramsFeatures ? (
             <section aria-labelledby="trend-title" className="min-w-0">
               <div className="flex items-end justify-between gap-3 border-b border-[var(--line-strong)] pb-3">
-                <h2 id="trend-title" className="text-[17px] font-semibold">Fund requests by month</h2>
+                <h2 id="trend-title" className="text-[18px] font-medium">Fund requests by month</h2>
                 <span className="text-[13px] text-[var(--muted)]">{series.useCount ? "Number submitted" : "Value requested"}, last 6 months</span>
               </div>
               <div
@@ -241,7 +241,7 @@ export default function DashboardHome() {
                   const current = k === series.months.length - 1;
                   return (
                     <div key={m.key} className="flex flex-1 flex-col items-center justify-end gap-2 bg-[var(--surface)] pt-1">
-                      <span className={cx("text-[12px] tabular-nums", current ? "font-semibold text-[var(--ink)]" : "text-[var(--muted)]")}>
+                      <span className={cx("text-[12px] tabular-nums", current ? "font-medium text-[var(--ink)]" : "text-[var(--muted)]")}>
                         {v ? (series.useCount ? v : money(v)) : ""}
                       </span>
                       <span className="w-full max-w-[40px] rounded-t-[4px]" style={{ height: h, background: current ? "var(--ink)" : "var(--line-strong)" }} />
@@ -258,7 +258,7 @@ export default function DashboardHome() {
           {byStatus.length > 0 && (
             <section aria-labelledby="ps-title" className="min-w-0">
               <div className="flex items-end justify-between gap-3 border-b border-[var(--line-strong)] pb-3">
-                <h2 id="ps-title" className="text-[17px] font-semibold">Projects by status</h2>
+                <h2 id="ps-title" className="text-[18px] font-medium">Projects by status</h2>
                 <Link href="/dashboard/projects" className="text-[13px] font-medium text-[var(--muted)] hover:text-[var(--ink)]">
                   View projects
                 </Link>

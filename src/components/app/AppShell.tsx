@@ -1,7 +1,7 @@
 "use client";
 
-import "@fontsource-variable/dm-sans";
-import "@fontsource-variable/playfair-display";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
 import "./app.css";
 import Image from "next/image";
 import Link from "next/link";
@@ -146,6 +146,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [router, toggleCollapsed]);
 
+  const navState = useNavState(nav.sections, pathname);
+  const showSidebar = !!navState.top?.children?.length && !collapsed;
+
   const ctx = useMemo<ShellCtx>(
     () => ({
       sections: nav.sections,
@@ -168,17 +171,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
           Skip to content
         </a>
 
-        {/* Desktop sidebar */}
-        <aside
-          data-tour="sidebar"
-          className={cx(
-            "fixed inset-y-0 left-0 z-30 hidden border-r border-[var(--line)] bg-[var(--surface)] transition-[width] duration-[180ms] ease-[cubic-bezier(.2,0,0,1)] md:block",
-            collapsed ? "w-[var(--sidebar-w-collapsed)]" : "w-[var(--sidebar-w)]"
-          )}
-          aria-label="Main navigation"
-        >
-          <SidebarContent collapsed={collapsed} onToggle={toggleCollapsed} pathname={pathname} ready={nav.ready} department={nav.userDepartment} />
-        </aside>
+        <TopBar pathname={pathname} onMenu={() => setDrawer(true)} />
+
+        {/* Icon rail: one icon per area; hover to see names */}
+        <IconRail navState={navState} ready={nav.ready} sidebarHidden={collapsed} onToggleSidebar={toggleCollapsed} />
+
+        {/* Product sidebar: the pages of the area you're in */}
+        {showSidebar && <ProductSidebar node={navState.top!} navState={navState} />}
 
         {/* Mobile drawer */}
         <div className={cx("fixed inset-0 z-[70] md:hidden", drawer ? "" : "pointer-events-none")} aria-hidden={!drawer}>
@@ -202,9 +201,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <div className={cx("transition-[padding] duration-[180ms] ease-[cubic-bezier(.2,0,0,1)]", collapsed ? "md:pl-[var(--sidebar-w-collapsed)]" : "md:pl-[var(--sidebar-w)]")}>
-          <AppHeader pathname={pathname} onMenu={() => setDrawer(true)} />
-          <main id="app-main" className="relative mx-auto w-full max-w-[1440px] px-4 pb-16 pt-6 md:px-8 md:pt-8">
+        <div
+          className={cx(
+            "pt-[var(--topbar-h)] transition-[padding] duration-150",
+            showSidebar ? "md:pl-[calc(var(--rail-w)+var(--sidebar-w))]" : "md:pl-[var(--rail-w)]"
+          )}
+        >
+          {navState.top?.children?.length ? <SectionTabs node={navState.top} navState={navState} /> : null}
+          <main id="app-main" className="relative mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-10 md:pt-10">
             <PageTitle pathname={pathname} />
             {children}
           </main>
@@ -590,112 +594,374 @@ function PageTitle({ pathname }: { pathname: string }) {
   );
 }
 
-function AppHeader({ pathname, onMenu }: { pathname: string; onMenu: () => void }) {
+/* ============================================================ */
+/** Where the user is in the nav: the active page, its ancestors and its top-level area */
+type NavState = { activeId: string | null; ancestors: Set<string>; top: NavNode | null; topSection: string | null };
+function useNavState(sections: NavSection[], pathname: string): NavState {
+  return useMemo(() => {
+    const hrefs = flatten(sections).map((x) => x.href);
+    const active = bestMatch(pathname, hrefs);
+    const activeId = activeIdOf(sections, active);
+    const ancestors = ancestorsOfId(sections, activeId);
+    let top: NavNode | null = null;
+    let topSection: string | null = null;
+    for (const sec of sections)
+      for (const n of sec.items)
+        if (n.id === activeId || ancestors.has(n.id)) {
+          top = n;
+          topSection = sec.id;
+        }
+    return { activeId, ancestors, top, topSection };
+  }, [sections, pathname]);
+}
+const firstHref = (n: NavNode): string | undefined => n.href ?? n.children?.map(firstHref).find(Boolean);
+const leavesOf = (n: NavNode): NavNode[] => (n.children?.length ? n.children.flatMap(leavesOf) : n.href ? [n] : []);
+
+/** 48px rail, icons only; hovering expands it over the content with names */
+function IconRail({
+  navState,
+  ready,
+  sidebarHidden,
+  onToggleSidebar,
+}: {
+  navState: NavState;
+  ready: boolean;
+  sidebarHidden: boolean;
+  onToggleSidebar: () => void;
+}) {
+  const { sections, startTour, openKeys } = useShell();
+  const [open, setOpen] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const enter = () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setOpen(true), 180);
+  };
+  const leave = () => {
+    clearTimeout(timer.current);
+    setOpen(false);
+  };
+  const hasSidebar = !!navState.top?.children?.length;
+
+  const Item = ({ n }: { n: NavNode }) => {
+    const href = firstHref(n);
+    const active = navState.top?.id === n.id;
+    if (!href) return null;
+    return (
+      <li>
+        <Link
+          href={href}
+          aria-current={active ? "page" : undefined}
+          aria-label={n.label}
+          onClick={leave}
+          className={cx(
+            "rail-item flex h-8 items-center gap-3 rounded-[8px] px-2 text-[13.5px] transition-colors",
+            active ? "bg-[var(--surface-2)] text-[var(--ink)]" : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]"
+          )}
+        >
+          <NavIcon>{n.icon}</NavIcon>
+          <span className={cx("truncate transition-opacity duration-150", open ? "opacity-100" : "opacity-0")}>{n.label}</span>
+          {open && keyFor(n.href) && <kbd className="ml-auto">{keyFor(n.href)}</kbd>}
+        </Link>
+      </li>
+    );
+  };
+
+  return (
+    <aside
+      aria-label="Main navigation"
+      data-tour="sidebar"
+      onMouseEnter={enter}
+      onMouseLeave={leave}
+      onFocus={enter}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && leave()}
+      className={cx(
+        "fixed bottom-0 left-0 top-[var(--topbar-h)] z-40 hidden flex-col border-r border-[var(--line-strong)] bg-[var(--surface)] transition-[width,box-shadow] duration-150 md:flex",
+        open ? "w-[var(--rail-w-open)] shadow-[var(--shadow-pop)]" : "w-[var(--rail-w)]"
+      )}
+    >
+      <nav className="thin-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-2" aria-label="Areas">
+        {!ready && (
+          <div className="space-y-2" aria-hidden="true">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="skeleton h-8" />
+            ))}
+          </div>
+        )}
+        {ready &&
+          sections.map((sec, i) => (
+            <div key={sec.id} data-tour={`nav-${sec.id}`}>
+              {i > 0 && <div className="-mx-2 my-2 h-px bg-[var(--line-strong)]" />}
+              {open && <p className="ux-label truncate px-2 pb-1 pt-1">{sec.label}</p>}
+              <ul className="space-y-0.5">
+                {sec.items.map((n) => (
+                  <Item key={n.id} n={n} />
+                ))}
+              </ul>
+            </div>
+          ))}
+      </nav>
+      <div className="flex-none space-y-0.5 border-t border-[var(--line-strong)] px-2 py-2" data-tour="help">
+        <button type="button" onClick={startTour} aria-label="Take the tour" className="rail-item flex h-8 w-full items-center gap-3 rounded-[8px] px-2 text-[13.5px] text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]">
+          <NavIcon><Sparkles /></NavIcon>
+          <span className={cx("truncate transition-opacity", open ? "opacity-100" : "opacity-0")}>Take the tour</span>
+        </button>
+        <button type="button" onClick={openKeys} aria-label="Keyboard shortcuts" className="rail-item flex h-8 w-full items-center gap-3 rounded-[8px] px-2 text-[13.5px] text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]">
+          <NavIcon><Keyboard /></NavIcon>
+          <span className={cx("truncate transition-opacity", open ? "opacity-100" : "opacity-0")}>Shortcuts</span>
+          {open && <kbd className="ml-auto">?</kbd>}
+        </button>
+        {hasSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            aria-label={sidebarHidden ? "Expand sidebar" : "Collapse sidebar"}
+            aria-pressed={!sidebarHidden}
+            className="rail-item flex h-8 w-full items-center gap-3 rounded-[8px] px-2 text-[13.5px] text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]"
+          >
+            <NavIcon>{sidebarHidden ? <PanelLeftOpen /> : <PanelLeftClose />}</NavIcon>
+            <span className={cx("truncate transition-opacity", open ? "opacity-100" : "opacity-0")}>{sidebarHidden ? "Show page menu" : "Hide page menu"}</span>
+            {open && <kbd className="ml-auto">Ctrl B</kbd>}
+          </button>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+/** 240px menu with the pages of the current area, grouped like the area itself */
+function ProductSidebar({ node, navState }: { node: NavNode; navState: NavState }) {
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setOpen((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  const kids = node.children ?? [];
+  const loose = kids.filter((k) => !k.children?.length);
+  const groups = kids.filter((k) => k.children?.length);
+  const showOverview = node.href && !kids.some((k) => k.href === node.href);
+
+  const Leaf = ({ n, label }: { n: NavNode; label?: string }) =>
+    n.href ? (
+      <li>
+        <Link
+          href={n.href}
+          aria-current={navState.activeId === n.id ? "page" : undefined}
+          className={cx(
+            "flex h-7 items-center rounded-[6px] px-2 text-[13.5px] transition-colors",
+            navState.activeId === n.id ? "bg-[var(--surface-2)] text-[var(--ink)]" : "text-[var(--ink-2)] hover:bg-[var(--hover)] hover:text-[var(--ink)]"
+          )}
+        >
+          <span className="truncate">{label ?? n.label}</span>
+        </Link>
+      </li>
+    ) : null;
+
+  const Branch = ({ n }: { n: NavNode }) => {
+    const isOpen = open.has(n.id) || navState.ancestors.has(n.id);
+    return (
+      <li>
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          onClick={() => toggle(n.id)}
+          className="flex h-7 w-full items-center gap-1 rounded-[6px] px-2 text-left text-[13.5px] text-[var(--ink-2)] hover:bg-[var(--hover)] hover:text-[var(--ink)]"
+        >
+          <span className="min-w-0 flex-1 truncate">{n.label}</span>
+          <ChevronDown className={cx("h-3.5 w-3.5 flex-none text-[var(--faint)] transition-transform", isOpen && "rotate-180")} />
+        </button>
+        <div className="nav-collapse" data-open={isOpen}>
+          <div>
+            <ul className="ml-3 mt-0.5 space-y-0.5 border-l border-[var(--line-strong)] pl-2">
+              {n.href && !n.children!.some((c) => c.href === n.href) && <Leaf n={n} label="Overview" />}
+              {n.children!.map((c) => (c.children?.length ? <Branch key={c.id} n={c} /> : <Leaf key={c.id} n={c} />))}
+            </ul>
+          </div>
+        </div>
+      </li>
+    );
+  };
+
+  return (
+    <aside
+      aria-label={`${node.label} pages`}
+      className="fixed bottom-0 top-[var(--topbar-h)] z-30 hidden w-[var(--sidebar-w)] flex-col border-r border-[var(--line-strong)] bg-[var(--surface)] md:flex"
+      style={{ left: "var(--rail-w)" }}
+    >
+      <div className="flex h-12 flex-none items-center gap-2 border-b border-[var(--line-strong)] px-4">
+        <span className="grid h-5 w-5 place-items-center text-[var(--muted)] [&_img]:h-4 [&_img]:w-4 [&_svg]:h-4 [&_svg]:w-4">{node.icon}</span>
+        <h2 className="truncate text-[14px] font-medium">{node.label}</h2>
+      </div>
+      <nav className="thin-scroll min-h-0 flex-1 overflow-y-auto px-2 pb-6 pt-3" aria-label={`${node.label} pages`}>
+        {(showOverview || loose.length > 0) && (
+          <ul className="mb-4 space-y-0.5">
+            {showOverview && <Leaf n={node} label="Overview" />}
+            {loose.map((k) => (
+              <Leaf key={k.id} n={k} />
+            ))}
+          </ul>
+        )}
+        {groups.map((g) => (
+          <div key={g.id} className="mb-4">
+            <p className="ux-label px-2 pb-1.5">{g.label}</p>
+            <ul className="space-y-0.5">
+              {g.href && !g.children!.some((c) => c.href === g.href) && <Leaf n={g} label="Overview" />}
+              {g.children!.map((c) => (c.children?.length ? <Branch key={c.id} n={c} /> : <Leaf key={c.id} n={c} />))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+/**
+ * On phones (no sidebar), the pages next to the current one sit as tabs above the page –
+ * e.g. Communication shows Announcements, Messages, Tasks.
+ */
+function SectionTabs({ node, navState }: { node: NavNode; navState: NavState }) {
+  const pages = useMemo(() => {
+    // the direct parent of the active page inside this area
+    const findParent = (n: NavNode): NavNode | null => {
+      if (n.children?.some((c) => c.id === navState.activeId)) return n;
+      for (const c of n.children ?? []) {
+        const f = findParent(c);
+        if (f) return f;
+      }
+      return null;
+    };
+    const parent = findParent(node) ?? node;
+    const own = parent.href && !parent.children?.some((c) => c.href === parent.href) ? [{ ...parent, label: "Overview", children: undefined }] : [];
+    const kids = parent.children ?? [];
+    const ordered = [...kids.filter((c) => !c.children?.length), ...kids.filter((c) => c.children?.length)];
+    const siblings = ordered.map((c) => (c.children?.length ? { ...c, href: firstHref(c), children: undefined } : c)).filter((c) => c.href);
+    return [...own, ...siblings];
+  }, [node, navState.activeId]);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [navState.activeId]);
+  if (pages.length < 2) return null;
+  return (
+    <div ref={ref} className="sticky top-[var(--topbar-h)] z-20 overflow-x-auto border-b border-[var(--line-strong)] bg-[var(--surface)] [scrollbar-width:none] md:hidden">
+      <nav aria-label={`${node.label} pages`} className="flex w-max gap-1 px-3">
+        {pages.map((p) => {
+          const active = p.label === "Overview" ? navState.activeId === p.id : navState.activeId === p.id || navState.ancestors.has(p.id);
+          return (
+            <Link
+              key={p.id + p.label}
+              href={p.href!}
+              aria-current={active ? "page" : undefined}
+              className={cx(
+                "flex h-11 flex-none items-center border-b-2 px-2.5 text-[13.5px]",
+                active ? "border-[var(--brand)] text-[var(--ink)]" : "border-transparent text-[var(--muted)]"
+              )}
+            >
+              {p.label}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
+/** 48px top bar: logo and where you are on the left; search, help, alerts and account on the right */
+function TopBar({ pathname, onMenu }: { pathname: string; onMenu: () => void }) {
   const { quickActions, user, startTour, openSearch, openKeys } = useShell();
   const { theme, setTheme } = useTheme() as { theme?: string; setTheme: (t: any) => void };
   const logout = useLogout();
-
   const crumbs = useMemo(() => crumbsOf(pathname), [pathname]);
-
   const isDark =
     theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--app-bg)_88%,transparent)] backdrop-blur-md">
-      <div className="mx-auto grid h-[var(--header-h)] max-w-[1440px] grid-cols-[1fr_auto] items-center gap-3 px-4 md:grid-cols-[1fr_minmax(260px,420px)_1fr] md:px-8">
-        <div className="flex min-w-0 items-center gap-3">
-          <button type="button" onClick={onMenu} className="btn btn-outline btn-icon md:hidden" aria-label="Open menu">
-            <Menu className="h-5 w-5" />
-          </button>
-          <nav aria-label="Breadcrumb" className="min-w-0">
-            <ol className="flex min-w-0 items-center gap-1 text-[13px] text-[var(--muted)]">
-              {crumbs.map((c, i) => {
-                const last = i === crumbs.length - 1;
-                return (
-                  <li key={c.href} className={cx("flex min-w-0 items-center gap-1", !last && "hidden md:flex")}>
-                    {last ? (
-                      <span aria-current="page" className="truncate font-medium text-[var(--ink)]">{c.label}</span>
-                    ) : (
-                      <>
-                        <Link href={c.href} className="truncate hover:text-[var(--ink)]">{c.label}</Link>
-                        <ChevronRight className="h-3 w-3 flex-none" />
-                      </>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </nav>
+    <header className="fixed inset-x-0 top-0 z-50 flex h-[var(--topbar-h)] items-center gap-2 border-b border-[var(--line-strong)] bg-[var(--surface)] px-2 md:px-3">
+      <button type="button" onClick={onMenu} className="btn btn-ghost btn-icon md:hidden" aria-label="Open menu">
+        <Menu className="h-[18px] w-[18px]" />
+      </button>
+      <Link href="/dashboard" className="flex flex-none items-center gap-2 rounded-[6px] px-1.5" aria-label="AHNi ERP home">
+        <Image src="/imgs/logo.png" alt="" width={192} height={76} className="h-auto w-7" />
+        <span className="hidden text-[14px] font-medium sm:inline">AHNi ERP</span>
+      </Link>
+      <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
+        <ol className="flex min-w-0 items-center text-[13.5px]">
+          {crumbs.slice(1).map((c, i, arr) => {
+            const last = i === arr.length - 1;
+            return (
+              <li key={c.href} className={cx("flex min-w-0 items-center", !last && "hidden lg:flex")}>
+                <span className="mx-2 text-[var(--line-strong)]" aria-hidden="true">/</span>
+                {last ? (
+                  <span aria-current="page" className="truncate text-[var(--ink)]">{c.label}</span>
+                ) : (
+                  <Link href={c.href} className="truncate text-[var(--muted)] hover:text-[var(--ink)]">{c.label}</Link>
+                )}
+              </li>
+            );
+          })}
           {DEMO_MODE && (
-            <span className="hidden flex-none rounded-[4px] bg-[var(--butter-soft)] px-1.5 py-0.5 text-[11px] font-semibold text-[var(--butter-ink)] lg:inline" title="Sample data – not connected to AHNi's servers">
-              Preview data
-            </span>
+            <li className="ml-2 hidden flex-none sm:block">
+              <span className="ux-label rounded-[4px] border border-[color-mix(in_srgb,var(--butter-ink)_30%,transparent)] bg-[var(--butter-soft)] px-1.5 py-0.5 !text-[10px] !text-[var(--butter-ink)]" title="Sample data – not connected to AHNi's servers">
+                Preview
+              </span>
+            </li>
           )}
-        </div>
+        </ol>
+      </nav>
 
-        {/* Centred search (Ctrl K) */}
-        <button
-          type="button"
-          onClick={openSearch}
-          data-tour="search"
-          className="hidden h-9 w-full items-center gap-2 rounded-[var(--r-control)] bg-[var(--surface-2)] px-3 text-[14px] text-[var(--muted)] transition-colors hover:bg-[var(--line-strong)] md:flex"
-          aria-label="Search (Ctrl K)"
-        >
-          <Search className="h-4 w-4 flex-none" />
-          <span className="flex-1 truncate text-left">Search pages and actions</span>
-          <kbd>Ctrl K</kbd>
-        </button>
-
-        <div className="flex items-center justify-end gap-1.5">
-          <button type="button" onClick={openSearch} className="btn btn-ghost btn-icon md:hidden" aria-label="Search">
-            <Search className="h-[18px] w-[18px]" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="btn btn-ghost btn-icon hidden sm:inline-flex"
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            data-tip={isDark ? "Light mode" : "Dark mode"}
-            data-tip-below
-          >
-            {isDark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
-          </button>
-
-          <div data-tour="notifications" className="grid h-9 w-9 place-items-center rounded-[var(--r-control)] hover:bg-[var(--hover)] [&_button]:h-9 [&_button]:w-9">
-            <NotificationDropdown />
-          </div>
-
-          {quickActions.length > 0 && (
-            <Menu_ label="New request" icon={<Plus className="h-4 w-4" />} tour="new" className="btn btn-brand ml-1 hidden sm:inline-flex">
-              {quickActions.map((q) => (
-                <MenuLink key={q.href} href={q.href}>{q.label}</MenuLink>
-              ))}
-            </Menu_>
-          )}
-
-          <Menu_
-            label={<UserButtonLabel user={user} />}
-            className="ml-1 flex items-center rounded-full"
-            ariaLabel="Account menu"
-            align="right"
-          >
-            <div className="border-b border-[var(--line)] px-3 pb-3 pt-2">
-              <p className="truncate text-[14px] font-semibold">{[user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Your account"}</p>
-              <p className="truncate text-[12px] text-[var(--muted)]">{user?.email}</p>
-            </div>
-            <MenuLink href="/dashboard/account" icon={<User className="h-4 w-4" />} kbdKey="S">Profile & settings</MenuLink>
-            <MenuButton onClick={() => setTheme(isDark ? "light" : "dark")} icon={isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}>
-              {isDark ? "Light mode" : "Dark mode"}
-            </MenuButton>
-            <DensityToggle />
-            <MenuButton onClick={openKeys} icon={<Keyboard className="h-4 w-4" />} kbdKey="?">Keyboard shortcuts</MenuButton>
-            <MenuButton onClick={startTour} icon={<HelpCircle className="h-4 w-4" />}>Take the tour</MenuButton>
-            <div className="my-1 h-px bg-[var(--line)]" />
-            <MenuButton onClick={logout} icon={<LogOut className="h-4 w-4" />} danger>Log out</MenuButton>
-          </Menu_>
-        </div>
+      <button
+        type="button"
+        onClick={openSearch}
+        data-tour="search"
+        className="hidden h-8 w-[220px] items-center gap-2 rounded-full border border-[var(--line-strong)] px-3 text-[13px] text-[var(--muted)] transition-colors hover:border-[var(--faint)] hover:text-[var(--ink)] md:flex"
+        aria-label="Search (Ctrl K)"
+      >
+        <Search className="h-3.5 w-3.5 flex-none" />
+        <span className="flex-1 text-left">Search…</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+      <button type="button" onClick={openSearch} className="btn btn-ghost btn-icon md:hidden" aria-label="Search">
+        <Search className="h-[18px] w-[18px]" />
+      </button>
+      <button type="button" onClick={openKeys} className="hidden h-8 w-8 place-items-center rounded-full border border-[var(--line-strong)] text-[var(--muted)] hover:text-[var(--ink)] sm:grid" aria-label="Keyboard shortcuts" data-tip="Shortcuts  ?" data-tip-below>
+        <HelpCircle className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+        className="hidden h-8 w-8 place-items-center rounded-full border border-[var(--line-strong)] text-[var(--muted)] hover:text-[var(--ink)] sm:grid"
+        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        data-tip={isDark ? "Light mode" : "Dark mode"}
+        data-tip-below
+      >
+        {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </button>
+      <div data-tour="notifications" className="grid h-8 w-8 place-items-center rounded-full border border-[var(--line-strong)] [&_button]:h-8 [&_button]:w-8 [&_svg]:h-4 [&_svg]:w-4">
+        <NotificationDropdown />
       </div>
+      {quickActions.length > 0 && (
+        <Menu_ label="New request" icon={<Plus className="h-3.5 w-3.5" />} tour="new" className="btn btn-brand ml-1 hidden !h-8 sm:inline-flex">
+          {quickActions.map((q) => (
+            <MenuLink key={q.href} href={q.href}>{q.label}</MenuLink>
+          ))}
+        </Menu_>
+      )}
+      <Menu_ label={<UserButtonLabel user={user} />} className="ml-1 flex items-center rounded-full" ariaLabel="Account menu" align="right">
+        <div className="border-b border-[var(--line)] px-3 pb-3 pt-2">
+          <p className="truncate text-[14px] font-medium">{[user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Your account"}</p>
+          <p className="truncate text-[12px] text-[var(--muted)]">{user?.email}</p>
+        </div>
+        <MenuLink href="/dashboard/account" icon={<User className="h-4 w-4" />} kbdKey="S">Profile & settings</MenuLink>
+        <MenuButton onClick={() => setTheme(isDark ? "light" : "dark")} icon={isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}>
+          {isDark ? "Light mode" : "Dark mode"}
+        </MenuButton>
+        <DensityToggle />
+        <MenuButton onClick={openKeys} icon={<Keyboard className="h-4 w-4" />} kbdKey="?">Keyboard shortcuts</MenuButton>
+        <MenuButton onClick={startTour} icon={<HelpCircle className="h-4 w-4" />}>Take the tour</MenuButton>
+        <div className="my-1 h-px bg-[var(--line)]" />
+        <MenuButton onClick={logout} icon={<LogOut className="h-4 w-4" />} danger>Log out</MenuButton>
+      </Menu_>
     </header>
   );
 }
@@ -827,7 +1093,7 @@ function ShortcutSheet({ open, onClose }: { open: boolean; onClose: () => void }
 
 function UserButtonLabel({ user }: { user: any }) {
   const initials = (user?.first_name?.[0] || "") + (user?.last_name?.[0] || "") || "A";
-  return <Avatar src={user?.profile_picture} initials={initials} size={38} />;
+  return <Avatar src={user?.profile_picture} initials={initials} size={30} />;
 }
 
 /* Small accessible dropdown (button + menu, Esc / outside click to close, arrow keys) */

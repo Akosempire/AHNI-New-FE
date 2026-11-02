@@ -438,8 +438,28 @@ body:has(.ahni-app) button[role="checkbox"][data-state="checked"] {
 @media (min-width: 768px) {
   .ahni-app .ux-title-actions {
     position: absolute !important;
-    right: 32px;
+    right: 40px;
     margin: 0 !important;
     z-index: 2;
   }
+}
+
+/* ---------- Dark mode for older pages with hard-coded light colours ---------- */
+.dark .ahni-app :is(.bg-white, .bg-gray-50, .bg-gray-100, .bg-slate-50, .bg-background),
+.dark body:has(.ahni-app) [role="dialog"] :is(.bg-white, .bg-gray-50, .bg-gray-100) {
+  background-color: var(--surface) !important;
+}
+.dark .ahni-app :is(.text-black, .text-gray-900, .text-gray-800, .text-gray-700, .text-slate-900, .text-slate-800),
+.dark body:has(.ahni-app) [role="dialog"] :is(.text-black, .text-gray-900, .text-gray-800, .text-gray-700) {
+  color: var(--ink) !important;
+}
+.dark .ahni-app :is(.text-gray-600, .text-gray-500, .text-gray-400, .text-slate-600, .text-slate-500, .text-gray-text) {
+  color: var(--muted) !important;
+}
+.dark .ahni-app :is(.border-gray-100, .border-gray-200, .border-gray-300, .border-slate-200) {
+  border-color: var(--line-strong) !important;
+}
+.dark .ahni-app :is(select, input, textarea):not([type="checkbox"]):not([type="radio"]) {
+  background-color: var(--surface-2);
+  color: var(--ink);
 }

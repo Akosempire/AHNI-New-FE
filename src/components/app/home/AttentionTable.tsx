@@ -92,12 +92,12 @@ export default function AttentionTable({
     <th
       scope="col"
       aria-sort={sort.key === k ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}
-      className={cx("h-10 px-4 text-[12.5px] font-medium text-[var(--muted)]", right && "text-right")}
+      className={cx("ux-label h-10 px-4", right && "text-right")}
     >
       <button
         type="button"
         onClick={() => toggleSort(k)}
-        className={cx("inline-flex items-center gap-1 rounded-[4px] hover:text-[var(--ink)]", right && "flex-row-reverse")}
+        className={cx("inline-flex items-center gap-1 rounded-[4px] uppercase hover:text-[var(--ink)]", right && "flex-row-reverse")}
       >
         {children}
         {sort.key === k ? (
@@ -112,7 +112,7 @@ export default function AttentionTable({
   return (
     <section aria-labelledby="queue-title" id="queue" className="min-w-0" data-tour="attention">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--line-strong)]">
-        <h2 id="queue-title" className="pb-3 text-[17px] font-semibold">
+        <h2 id="queue-title" className="pb-3 text-[18px] font-medium">
           Waiting on you
         </h2>
         {types.length > 1 && (
@@ -126,7 +126,7 @@ export default function AttentionTable({
                 onClick={() => setType(t)}
                 className={cx(
                   "flex h-10 flex-none items-center gap-1.5 border-b-2 px-2.5 text-[13.5px] transition-colors",
-                  type === t ? "border-[var(--ink)] font-semibold text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"
+                  type === t ? "border-[var(--ink)] font-medium text-[var(--ink)]" : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"
                 )}
               >
                 {t}
@@ -166,10 +166,10 @@ export default function AttentionTable({
             <caption className="sr-only">Requests and approvals waiting on you</caption>
             <thead>
               <tr className="border-b border-[var(--line)]">
-                <th scope="col" className="h-10 px-4 pl-0 text-left text-[12.5px] font-medium text-[var(--muted)]">Request</th>
+                <th scope="col" className="ux-label h-10 px-4 pl-0 text-left">Request</th>
                 <SortHead k="age">Waiting</SortHead>
                 <SortHead k="amount" right>Amount</SortHead>
-                <th scope="col" className="h-10 px-4 text-left text-[12.5px] font-medium text-[var(--muted)]">Status</th>
+                <th scope="col" className="ux-label h-10 px-4 text-left">Status</th>
                 <th scope="col" className="h-10 w-[1%] pr-0"><span className="sr-only">Action</span></th>
               </tr>
             </thead>

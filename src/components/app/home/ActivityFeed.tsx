@@ -91,7 +91,7 @@ export default function ActivityFeed({ items, loading, limit = 8 }: { items: Not
   return (
     <section aria-labelledby="act-title" className="min-w-0">
       <div className="flex items-end justify-between gap-3 border-b border-[var(--line-strong)] pb-3">
-        <h2 id="act-title" className="text-[17px] font-semibold">
+        <h2 id="act-title" className="text-[18px] font-medium">
           Activity
           {unreadIds.length > 0 && <span className="ml-2 text-[13px] font-medium text-[var(--muted)]">{unreadIds.length} new</span>}
         </h2>
@@ -126,7 +126,7 @@ export default function ActivityFeed({ items, loading, limit = 8 }: { items: Not
       ) : (
         groups.map((g) => (
           <div key={g.label} className="pt-4">
-            <h3 className="mb-1 text-[12.5px] font-medium text-[var(--faint)]">{g.label}</h3>
+            <h3 className="ux-label mb-1">{g.label}</h3>
             <ol>
               {g.items.map((n) => {
                 const unread = !n.is_read || n.status === "Pending";
@@ -148,7 +148,7 @@ export default function ActivityFeed({ items, loading, limit = 8 }: { items: Not
                         {unread && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--surface)] bg-[var(--brand)]" />}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className={cx("block text-[14px] leading-snug", unread ? "font-semibold text-[var(--ink)]" : "text-[var(--ink-2)]")}>
+                        <span className={cx("block text-[14px] leading-snug", unread ? "font-medium text-[var(--ink)]" : "text-[var(--ink-2)]")}>
                           {unread && <span className="sr-only">New: </span>}
                           {n.title}
                         </span>
