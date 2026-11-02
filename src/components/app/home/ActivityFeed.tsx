@@ -66,7 +66,7 @@ function groupLabel(d: Date) {
 }
 const timeOf = (d: Date) => d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", " ");
 
-export default function ActivityFeed({ items, loading, limit = 8 }: { items: Note[]; loading?: boolean; limit?: number }) {
+export default function ActivityFeed({ items, loading, limit = 8, className }: { items: Note[]; loading?: boolean; limit?: number; className?: string }) {
   const router = useRouter();
   const markOne = useMarkNotificationAsRead();
   const markAll = useBulkMarkAsRead();
@@ -89,8 +89,8 @@ export default function ActivityFeed({ items, loading, limit = 8 }: { items: Not
   };
 
   return (
-    <section aria-labelledby="act-title" className="min-w-0">
-      <div className="flex items-end justify-between gap-3 border-b border-[var(--line-strong)] pb-3">
+    <section aria-labelledby="act-title" className={cx("flex min-h-0 min-w-0 flex-col", className)}>
+      <div className="flex flex-none items-end justify-between gap-3 border-b border-[var(--line-strong)] pb-3">
         <h2 id="act-title" className="text-[18px] font-medium">
           Activity
           {unreadIds.length > 0 && <span className="ml-2 text-[13px] font-medium text-[var(--muted)]">{unreadIds.length} new</span>}
@@ -107,6 +107,7 @@ export default function ActivityFeed({ items, loading, limit = 8 }: { items: Not
         )}
       </div>
 
+      <div className="thin-scroll min-h-0 flex-1 overflow-y-auto">
       {loading ? (
         <div className="space-y-4 pt-4" aria-hidden="true">
           {[0, 1, 2, 3].map((k) => (
@@ -168,7 +169,9 @@ export default function ActivityFeed({ items, loading, limit = 8 }: { items: Not
         ))
       )}
 
-      <div className="mt-2 border-t border-[var(--line)] pt-3 text-[13px]">
+      </div>
+
+      <div className="flex-none border-t border-[var(--line)] pt-3 text-[13px]">
         <Link href="/dashboard/notifications" className="font-medium text-[var(--ink)] underline decoration-[var(--line-strong)] underline-offset-4 hover:decoration-[var(--ink)]">
           See all notifications
         </Link>

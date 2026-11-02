@@ -208,7 +208,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           )}
         >
           {navState.top?.children?.length ? <SectionTabs node={navState.top} navState={navState} /> : null}
-          <main id="app-main" className="relative mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-10 md:pt-10">
+          <main id="app-main" className="relative mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-10 md:pb-10 md:pt-10">
             <PageTitle pathname={pathname} />
             {children}
           </main>

@@ -49,10 +49,12 @@ export default function AttentionTable({
   items,
   loading,
   viewAllHref = "/dashboard/notifications",
+  className,
 }: {
   items: AttentionItem[];
   loading?: boolean;
   viewAllHref?: string;
+  className?: string;
 }) {
   const router = useRouter();
   const [type, setType] = useState<string>("All");
@@ -110,8 +112,8 @@ export default function AttentionTable({
   );
 
   return (
-    <section aria-labelledby="queue-title" id="queue" className="min-w-0" data-tour="attention">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--line-strong)]">
+    <section aria-labelledby="queue-title" id="queue" className={cx("flex min-h-0 min-w-0 flex-col", className)} data-tour="attention">
+      <div className="flex flex-none flex-wrap items-end justify-between gap-3 border-b border-[var(--line-strong)]">
         <h2 id="queue-title" className="pb-3 text-[18px] font-medium">
           Waiting on you
         </h2>
@@ -137,6 +139,7 @@ export default function AttentionTable({
         )}
       </div>
 
+      <div className="thin-scroll min-h-0 flex-1 overflow-y-auto">
       {loading ? (
         <div className="divide-y divide-[var(--line)]" aria-hidden="true">
           {[0, 1, 2, 3].map((k) => (
@@ -164,8 +167,8 @@ export default function AttentionTable({
               <col className="w-[84px]" />
             </colgroup>
             <caption className="sr-only">Requests and approvals waiting on you</caption>
-            <thead>
-              <tr className="border-b border-[var(--line)]">
+            <thead className="sticky top-0 z-[1] bg-[var(--surface)]">
+              <tr className="shadow-[inset_0_-1px_0_var(--line)]">
                 <th scope="col" className="ux-label h-10 px-4 pl-0 text-left">Request</th>
                 <SortHead k="age">Waiting</SortHead>
                 <SortHead k="amount" right>Amount</SortHead>
@@ -241,7 +244,9 @@ export default function AttentionTable({
         </>
       )}
 
-      <div className="mt-1 flex items-center justify-between border-t border-[var(--line)] pt-3 text-[13px] text-[var(--muted)]">
+      </div>
+
+      <div className="flex flex-none items-center justify-between border-t border-[var(--line)] pt-3 text-[13px] text-[var(--muted)]">
         <span className="tabular-nums">
           {rows.length} of {items.length} shown
         </span>

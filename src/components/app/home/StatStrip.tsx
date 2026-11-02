@@ -20,12 +20,12 @@ export default function StatStrip({ stats }: { stats: Stat[] }) {
               i === 2 ? "lg:border-l" : "",
             ].join(" ")}
           >
-            <Link href={s.href} className="group block h-full px-4 py-5 transition-colors hover:bg-[var(--hover)] md:px-6">
+            <Link href={s.href} className="group block h-full px-4 py-3.5 transition-colors hover:bg-[var(--hover)] md:px-5">
               <span className="ux-label block">{s.label}</span>
               {s.loading ? (
                 <span className="skeleton mt-3 block h-8 w-24" aria-label="Loading" />
               ) : (
-                <span className="mt-2 block truncate text-[26px] font-normal leading-tight tracking-[-0.02em] tabular-nums md:text-[28px]">{s.value}</span>
+                <span className="mt-1 block truncate text-[24px] font-normal leading-tight tracking-[-0.02em] tabular-nums">{s.value}</span>
               )}
               <span className="mt-1 block truncate text-[12.5px] text-[var(--muted)]">{s.note}</span>
             </Link>

@@ -24,9 +24,10 @@ import { useGetWorkforces } from "@/features/hr/controllers/workforceController"
 import { useGetAllFundRequests } from "@/features/programs/controllers/fundRequestController";
 import { useGetNotifications, useGetUnreadCount } from "@/features/notifications/controllers/notificationController";
 import { useShell } from "./AppShell";
-import AttentionTable, { AttentionItem } from "./home/AttentionTable";
+import AttentionTable, { AttentionItem, waitingFor } from "./home/AttentionTable";
 import ActivityFeed from "./home/ActivityFeed";
 import StatStrip, { Stat } from "./home/StatStrip";
+import QuickStart from "./home/QuickStart";
 import { moduleLabel, moduleRoute } from "@/features/notifications/moduleRoutes";
 import { prettify } from "./nav";
 
@@ -129,7 +130,7 @@ export default function DashboardHome() {
   const stats: Stat[] = [];
   if (canAccessProgramsFeatures || canAccessFinanceFeatures)
     stats.push(
-      { label: "Projects", value: String(projects.length), note: `${stats_.active} active`, href: "/dashboard/projects", loading: projectsQ.isLoading },
+      { label: "Projects", value: String(projects.length), note: byStatus.length ? byStatus.slice(0, 2).map(([st, n]) => `${n} ${st.toLowerCase()}`).join(", ") : `${stats_.active} active`, href: "/dashboard/projects", loading: projectsQ.isLoading },
       { label: "Project budget", value: money(stats_.budget), note: `Across ${projects.length} projects`, href: "/dashboard/projects", loading: projectsQ.isLoading }
     );
   if (canAccessProgramsFeatures)
@@ -166,121 +167,75 @@ export default function DashboardHome() {
   ];
   const queueTotal = queue.reduce((t, q) => t + (q.amount ?? 0), 0);
 
+  // Say what matters first: how many things need you, and how long the oldest has waited
+  const oldest = queue.reduce<string | undefined>((o, q) => (q.date && (!o || q.date < o) ? q.date : o), undefined);
+  const urgentCount = queue.filter((q) => q.urgent).length;
   const summary = queue.length
-    ? `${queue.length} ${queue.length === 1 ? "item is" : "items are"} waiting on you${queueTotal ? `, worth ${money(queueTotal)} in total` : ""}.`
-    : "Nothing is waiting on you right now.";
+    ? `${queue.length} ${queue.length === 1 ? "item needs" : "items need"} your attention${queueTotal ? `, ${money(queueTotal)} in total` : ""}.`
+    : "You're all caught up.";
+  const subline = queue.length
+    ? [urgentCount ? `${urgentCount} marked urgent` : null, oldest ? `the oldest has waited ${waitingFor(oldest)}` : null].filter(Boolean).join(", ")
+    : "New approvals and updates will appear here as they arrive.";
 
   const today = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
   return (
-    <div className="space-y-10">
-      {/* Desk summary – the one bold moment on the page */}
-      <header className="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
-        <div className="min-w-0">
-          <p className="text-[14px] text-[var(--muted)]">
-            {greet}, {first}
-            {role ? ` – ${role}` : ""}
-            {dept ? ` in ${dept}` : ""}
+    <div className="flex flex-col gap-6 lg:h-[calc(100dvh-var(--topbar-h)-80px)] lg:min-h-[600px]">
+      {/* 1. What needs you – one sentence, then the quickest way to start something */}
+      <header className="flex flex-none flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div className="min-w-0 xl:flex-1">
+          <p className="text-[13px] text-[var(--muted)]">
+            {greet}, {first} <span aria-hidden="true">–</span> {today}
           </p>
-          <h1 className="page-title mt-2 max-w-[30ch] !text-[28px] !leading-[36px]">{summary}</h1>
+          <h1 className="mt-1.5 text-[26px] font-medium leading-[34px] tracking-[-0.015em]">{summary}</h1>
+          <p className="mt-0.5 text-[14px] text-[var(--muted)]">{subline.charAt(0).toUpperCase() + subline.slice(1)}{queue.length ? "." : ""}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 md:justify-end">
-          <span className="text-[13px] text-[var(--muted)]">{today}</span>
-          {queue.length > 0 && (
-            <a href="#queue" className="btn btn-primary">
-              Review the queue
-            </a>
-          )}
-        </div>
+        <QuickStart actions={quickActions} icons={QUICK_ICONS} />
       </header>
 
-      <StatStrip stats={shownStats} />
-
-      {/* Start a request */}
-      {quickActions.length > 0 && (
-        <nav aria-label="Start a request" className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
-          <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
-            <li className="flex items-center pr-2 text-[13px] text-[var(--muted)]">Start a request</li>
-            {quickActions.map((q) => (
-              <li key={q.href}>
-                <Link
-                  href={q.href}
-                  className="flex h-9 items-center gap-2 rounded-[6px] border border-[var(--line-strong)] bg-[var(--surface)] px-3 text-[13.5px] font-medium text-[var(--ink-2)] transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)] [&_svg]:h-4 [&_svg]:w-4 [&_svg]:stroke-[1.7]"
-                >
-                  {QUICK_ICONS[q.label] ?? <ArrowRight />}
-                  {q.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)] xl:gap-12">
-        <AttentionTable items={queue} loading={(notifQ.isLoading && fundQ.isLoading) || (!client)} />
-        <ActivityFeed items={notifications} loading={notifQ.isLoading} />
+      {/* 2. Key figures */}
+      <div className="flex-none">
+        <StatStrip stats={shownStats} />
       </div>
 
-      {(canAccessProgramsFeatures || byStatus.length > 0) && (
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)] xl:gap-12">
-          {canAccessProgramsFeatures ? (
-            <section aria-labelledby="trend-title" className="min-w-0">
-              <div className="flex items-end justify-between gap-3 border-b border-[var(--line-strong)] pb-3">
-                <h2 id="trend-title" className="text-[18px] font-medium">Fund requests by month</h2>
-                <span className="text-[13px] text-[var(--muted)]">{series.useCount ? "Number submitted" : "Value requested"}, last 6 months</span>
+      {/* 3. The work: queue on the left, what changed + trend on the right. Fills the rest of the screen. */}
+      <div className="grid gap-8 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-10">
+        <AttentionTable items={queue} loading={(notifQ.isLoading && fundQ.isLoading) || !client} className="lg:min-h-0" />
+        <div className="flex min-h-0 flex-col gap-6">
+          <ActivityFeed items={notifications} loading={notifQ.isLoading} className="lg:min-h-0 lg:flex-1" />
+          {canAccessProgramsFeatures && (
+            <section aria-labelledby="trend-title" className="flex-none">
+              <div className="flex items-baseline justify-between gap-3">
+                <h2 id="trend-title" className="text-[14px] font-medium">Fund requests</h2>
+                <span className="text-[12.5px] text-[var(--muted)]">{series.useCount ? "Submitted" : "Value"}, last 6 months</span>
               </div>
               <div
-                className="relative mt-4 flex h-[200px] items-end gap-3 sm:gap-6"
+                className="mt-3 flex h-[96px] items-end gap-2"
                 role="img"
                 aria-label={`Fund requests per month: ${series.months.map((m) => `${m.label} ${series.useCount ? m.count : money(m.value)}`).join(", ")}`}
-                style={{ backgroundImage: "radial-gradient(var(--line-strong) 1px, transparent 1px)", backgroundSize: "12px 12px" }}
               >
                 {series.months.map((m, k) => {
                   const v = series.useCount ? m.count : m.value;
-                  const h = Math.max(3, (v / series.max) * 150);
+                  const h = Math.max(3, (v / series.max) * 58);
                   const current = k === series.months.length - 1;
                   return (
-                    <div key={m.key} className="flex flex-1 flex-col items-center justify-end gap-2 bg-[var(--surface)] pt-1">
-                      <span className={cx("text-[12px] tabular-nums", current ? "font-medium text-[var(--ink)]" : "text-[var(--muted)]")}>
+                    <div key={m.key} className="group flex flex-1 flex-col items-center justify-end gap-1.5" title={`${m.label}: ${series.useCount ? v : money(v)}`}>
+                      <span className={cx("text-[11px] tabular-nums", current ? "text-[var(--ink)]" : "text-transparent group-hover:text-[var(--muted)]")}>
                         {v ? (series.useCount ? v : money(v)) : ""}
                       </span>
-                      <span className="w-full max-w-[40px] rounded-t-[4px]" style={{ height: h, background: current ? "var(--ink)" : "var(--line-strong)" }} />
-                      <span className="text-[12px] text-[var(--muted)]">{m.label}</span>
+                      <span className="w-full max-w-[34px] rounded-t-[3px]" style={{ height: h, background: current ? "var(--ink)" : "var(--line-strong)" }} />
+                      <span className="text-[11px] text-[var(--muted)]">{m.label}</span>
                     </div>
                   );
                 })}
               </div>
             </section>
-          ) : (
-            <div />
-          )}
-
-          {byStatus.length > 0 && (
-            <section aria-labelledby="ps-title" className="min-w-0">
-              <div className="flex items-end justify-between gap-3 border-b border-[var(--line-strong)] pb-3">
-                <h2 id="ps-title" className="text-[18px] font-medium">Projects by status</h2>
-                <Link href="/dashboard/projects" className="text-[13px] font-medium text-[var(--muted)] hover:text-[var(--ink)]">
-                  View projects
-                </Link>
-              </div>
-              <ul className="mt-2">
-                {byStatus.map(([s, n]) => (
-                  <li key={s} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5 border-b border-[var(--line)] py-3 last:border-0">
-                    <span className="text-[14px]">{s}</span>
-                    <span className="text-[14px] font-medium tabular-nums">{n}</span>
-                    <span className="col-span-2 h-1.5 rounded-full bg-[var(--surface-2)]">
-                      <span className="block h-1.5 rounded-full bg-[var(--mint-ink)]" style={{ width: `${(n / projects.length) * 100}%` }} />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
           )}
         </div>
-      )}
+      </div>
 
       {!canAccessProgramsFeatures && !canAccessFinanceFeatures && !canAccessHRFeatures && (
-        <p className="flex items-start gap-3 text-[14px] text-[var(--muted)]">
+        <p className="flex flex-none items-start gap-3 text-[14px] text-[var(--muted)]">
           <BriefcaseBusiness className="mt-0.5 h-5 w-5 flex-none" />
           Department figures appear here once your profile is linked to a department. Contact HR if something looks missing.
         </p>
