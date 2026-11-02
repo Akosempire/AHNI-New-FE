@@ -204,10 +204,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div
           className={cx(
             "pt-[var(--topbar-h)] transition-[padding] duration-150",
-            showSidebar ? "md:pl-[calc(var(--rail-w)+var(--sidebar-w))]" : "md:pl-[var(--rail-w)]"
+            showSidebar ? "md:pl-[var(--rail-w)] lg:pl-[calc(var(--rail-w)+var(--sidebar-w))]" : "md:pl-[var(--rail-w)]"
           )}
         >
-          {navState.top?.children?.length ? <SectionTabs node={navState.top} navState={navState} /> : null}
+          {navState.top?.children?.length ? <SectionTabs node={navState.top} navState={navState} sidebarHidden={collapsed} /> : null}
           <main id="app-main" className="relative mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-10 md:pb-10 md:pt-10">
             <PageTitle pathname={pathname} />
             {children}
@@ -566,7 +566,7 @@ function PageTitle({ pathname }: { pathname: string }) {
       setHidden(!!own);
       // The page's own heading becomes the page title, so every page reads the same
       if (own instanceof HTMLElement) own.classList.add("page-title");
-      if (own || !window.matchMedia("(min-width: 768px)").matches) return;
+      if (own || !window.matchMedia("(min-width: 1024px)").matches) return;
       // One page, one job: the page's action row (right-aligned buttons right under the title)
       // moves up beside the title.
       const title = ref.current;
@@ -592,7 +592,16 @@ function PageTitle({ pathname }: { pathname: string }) {
         lifted = row;
         row.classList.add("ux-title-actions");
         row.style.top = `${title.offsetTop + Math.max(0, (tb.height - row.getBoundingClientRect().height) / 2)}px`;
-        title.style.paddingRight = `${row.getBoundingClientRect().width + 24}px`;
+        // measure only what the buttons actually take once the row is lifted
+        const used = Array.from(row.querySelectorAll<HTMLElement>("button, a[href]")).reduce(
+          (acc, b) => {
+            const r = b.getBoundingClientRect();
+            return { l: Math.min(acc.l, r.left), r: Math.max(acc.r, r.right) };
+          },
+          { l: Infinity, r: -Infinity }
+        );
+        const width = Number.isFinite(used.l) ? used.r - used.l : row.getBoundingClientRect().width;
+        title.style.paddingRight = `${Math.min(width + 24, (title.parentElement?.clientWidth ?? 800) / 2)}px`;
       }
     };
     // Pages render in stages (loading → data), so look again a few times
@@ -807,7 +816,7 @@ function ProductSidebar({ node, navState }: { node: NavNode; navState: NavState 
   return (
     <aside
       aria-label={`${node.label} pages`}
-      className="fixed bottom-0 top-[var(--topbar-h)] z-30 hidden w-[var(--sidebar-w)] flex-col border-r border-[var(--line-strong)] bg-[var(--surface)] md:flex"
+      className="fixed bottom-0 top-[var(--topbar-h)] z-30 hidden w-[var(--sidebar-w)] flex-col border-r border-[var(--line-strong)] bg-[var(--surface)] lg:flex"
       style={{ left: "var(--rail-w)" }}
     >
       <div className="flex h-12 flex-none items-center gap-2 border-b border-[var(--line-strong)] px-4">
@@ -841,7 +850,7 @@ function ProductSidebar({ node, navState }: { node: NavNode; navState: NavState 
  * On phones (no sidebar), the pages next to the current one sit as tabs above the page –
  * e.g. Communication shows Announcements, Messages, Tasks.
  */
-function SectionTabs({ node, navState }: { node: NavNode; navState: NavState }) {
+function SectionTabs({ node, navState, sidebarHidden }: { node: NavNode; navState: NavState; sidebarHidden?: boolean }) {
   const pages = useMemo(() => {
     // the direct parent of the active page inside this area
     const findParent = (n: NavNode): NavNode | null => {
@@ -865,7 +874,7 @@ function SectionTabs({ node, navState }: { node: NavNode; navState: NavState }) 
   }, [navState.activeId]);
   if (pages.length < 2) return null;
   return (
-    <div ref={ref} className="sticky top-[var(--topbar-h)] z-20 overflow-x-auto border-b border-[var(--line-strong)] bg-[var(--surface)] [scrollbar-width:none] md:hidden">
+    <div ref={ref} className={cx("sticky top-[var(--topbar-h)] z-20 overflow-x-auto border-b border-[var(--line-strong)] bg-[var(--surface)] [scrollbar-width:none]", sidebarHidden ? "" : "lg:hidden")}>
       <nav aria-label={`${node.label} pages`} className="flex w-max gap-1 px-3">
         {pages.map((p) => {
           const active = p.label === "Overview" ? navState.activeId === p.id : navState.activeId === p.id || navState.ancestors.has(p.id);
